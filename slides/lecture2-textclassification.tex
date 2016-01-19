@@ -1,0 +1,281 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+
+
+\title{Text Classifiers}
+
+\author{Alexander Rush}
+\begin{document}
+
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Text Classification}
+
+\begin{frame}{Application: Spam Detection}
+
+\end{frame}
+
+\begin{frame}{Application: Topic Detection}
+
+\end{frame}
+
+\begin{frame}{Application: Sentiment Analysis}
+  
+\end{frame}
+
+\begin{frame}{Why?}
+  \begin{itemize}
+  \item Easy problem.
+  \end{itemize}
+  \begin{itemize}
+  \item Surface-level
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Task: Text Classification}
+
+  Given a sentence determine its class, 
+
+  Bad Sentences
+
+  Unfortunately the story and the actors are served with a hack script. 
+  A sentimental mess that never rings true.
+  This 100-minute movie only has about 25 minutes of decent material.  
+  Here, common sense flies out the window, along with the hail of bullets, none of which ever seem to hit Sascha. 
+
+  Good Sentences
+  
+  A thoughtful, provocative, insistently humanizing film. 
+  Occasionally melodramatic, it's also extremely effective.
+  Guaranteed to move anyone who ever shook, rattled, or rolled.   
+\end{frame}
+
+
+\begin{frame}{Text Classification}
+  How do we do this? 
+
+  \begin{enumerate}
+  \item First extract information from the sentence. 
+  \item Use this to construct a \texit{representation}
+  \item Classify this vector $f: \mcX \mapsto \mcY$ where $\mcY$ 
+    is the set of possible outputs.
+  \end{enumerate}
+
+  % Throughout this class, 
+  % \begin{itemize}
+  % \item $\mcX = \reals^{\din}$
+  % \item $\mcY \subset \{0, 1\}^{\dout}$
+  % \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Features}
+  \[f_1, \]
+\end{frame}
+
+\begin{frame}{Step 1: Feature Extraction}
+  \begin{itemize}
+  \item Let $\mcV$ be the vocabulary of our language.  
+  \item  Let $w_1, \ldots, w_m$ be a sentence, where 
+    $w_i \in \{1,\ldots, |\mcV|\}$.
+  \item 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Example: Bag-of-Words}
+  
+\end{frame}
+
+\begin{frame}{Example: Binary Classification}
+  \begin{itemize}
+  \item $x \in \mcX$; set of sentences
+  \item $\mcY = \{-1, 1\}$; set of output classes
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Notation: General}
+  \begin{itemize}
+  \item $\boldb, \boldm$;  bold letters for vectors.
+  \item $\boldB, \boldM$;  bold capital letters for matrices.
+  \item $\mcB, \mcM$;  script-case for sets.
+  \item $B, M$; capital letters for constants and random variables.
+  \item $b_i, x_i$; lower case for scalars or indexing into vectors.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Notation: Machine Learning}
+  \begin{itemize}
+  \item $\boldx \in \reals^{\din}$; set of input classes  
+  \item $\boldy \in \mcY \subset \{0, 1\}^{\dout}$; set of output classes
+  \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; supervised data
+  \end{itemize}
+
+
+\end{frame}
+
+
+
+\begin{frame}{Benchmarks}
+  
+\end{frame}
+
+\begin{frame}{Multiclass Classification}
+  
+\end{frame}
+
+\begin{frame}{Datasets}
+  
+\end{frame}
+
+\section{Linear Classifiers}
+
+\begin{frame}{Linear Model}
+  
+\end{frame}
+
+
+\begin{frame}{Bag-of-Words Classifiers}
+  
+\end{frame}
+
+
+\begin{frame}{Feature-Based Classifier}
+  
+\end{frame}
+
+
+\begin{frame}{Example: Text-Class Features}
+
+\note{Show an example}  
+\end{frame}
+
+
+\begin{frame}{Linear Model For Multiclass}  
+  \[ \]
+\end{frame}
+
+
+\begin{frame}{Example: Multiclass Text}
+  
+\end{frame}
+
+\section{Probabilistic Linear Models}
+
+
+\begin{frame}{Probabilistic Linear Models} 
+  % Estimate 
+  \[ p(y | x) = w x \] 
+\end{frame}
+
+
+\begin{frame}{Probabilistic Linear Models} 
+  % Estimate 
+  \[ \ell = \sum \] 
+\end{frame}
+
+\begin{frame}
+  $(x, y)$
+\end{frame}
+
+\begin{frame}{Parameter Estimation/ Optimization} 
+  % Estimate 
+  \[ \ell = \sum \] 
+
+\end{frame}
+
+
+\section{Naive Bayes}
+
+\begin{frame}{Bayes Rule} 
+  % Estimate 
+  \[ p(y | x) = p(x | y) p(y) / p(x) \] 
+
+  \[ p(y | x) = \alpha p(x | y) p(y) / p(x) \] 
+
+  % Name for each term.
+\end{frame}
+
+
+\begin{frame}{Bernoulli Naive Bayes Assumption} 
+  \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
+  
+  Closed-form: Maximum likelihood estimation
+  
+  \[p() = c() / c() \] 
+
+  \[p(x_i | y) = c() / c() \] 
+\end{frame}
+
+\begin{frame}{Laplacian Smoothing}
+  \[p(x_i | y) = (c() + \alpha) / (c() + |\mcX| \alpha) \] 
+\end{frame}
+
+\begin{frame}{Variant: Multinomial Naive Bayes Assumption} 
+  \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
+  
+  Maximum likelihood estimation
+  
+  \[p() = c() / c() \] 
+
+  \[p(x_i | y) = c() / c() \] 
+\end{frame}
+
+
+\begin{frame}{Conversion to Linear Classifier}
+  \[ W = \log \] 
+  \[ b =  \log \] 
+\end{frame}
+
+\section{Logistic Regression}
+
+\begin{frame}
+  \[ p(y | x) =  \] 
+
+  Logistic 
+
+  $\sigma(W x + b)$
+
+  Image of the logistic.  
+\end{frame}
+
+\begin{frame}{Fitting Parameters}
+  \[ 1 / \]  
+  $\sigma(W x + b)$
+\end{frame}
+
+
+
+\begin{frame}{Fitting Parameters}
+  $\sigma(W x + b)$
+\end{frame}
+
+
+\begin{frame}{Multiclass}
+
+Multiclass Logistic regression
+
+\[ p(y | x) =  \] 
+
+\[ softmax(W x+ b) \] 
+\end{frame}
+
+\begin{frame}{}
+
+  
+  \[ p(y | x) = \sum \log p(y| x) = \sum W x + \log \sum \exp()   \] 
+
+  First term is linear
+  Second term is log (log-linear)
+\end{frame}
+
+
+\begin{frame}{}
+  
+\end{frame}
+
+\end{document}
+
