@@ -5,6 +5,9 @@
 % \usepackage{beamerthemeshadow}
 \usepackage{ulem}
     % \usepackage{movie15}
+% \usepackage{mathpazo}
+% \usepackage{palatino}
+
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage{natbib}
@@ -29,7 +32,7 @@
 \renewcommand{\insertnavigation}[1]{}
 \setbeamertemplate{headline}{}
 \setbeamertemplate{footline}{}
-\usefonttheme{professionalfonts}
+% \usefonttheme{professionalfonts}
 % make itemize things larger
 %\setbeamerfont*{itemize/enumerate body}{size=\Large}
 %\setbeamerfont*{itemize/enumerate subbody}{size=\large}
@@ -68,16 +71,23 @@
 \definecolor{redpurple}{RGB}{204,121,167}
 \definecolor{lightgrey}{RGB}{234,234,234}
 
-\AtBeginSection[]{
+\AtBeginSection[]
+{
   \begin{frame}
-  \vfill
-  \centering
-  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
-    \usebeamerfont{title}\insertsectionhead\par%
-  \end{beamercolorbox}
-  \vfill
+  \frametitle{Contents}
+  \tableofcontents[currentsection]
   \end{frame}
 }
+% \AtBeginSection[]{
+%   \begin{frame}
+%   \vfill
+%   \centering
+%   \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+%     \usebeamerfont{title}\insertsectionhead\par%
+%   \end{beamercolorbox}
+%   \vfill
+%   \end{frame}
+% }
 
 \newcommand{\boldA}{\boldsymbol{A}}
 \newcommand{\boldB}{\boldsymbol{B}}

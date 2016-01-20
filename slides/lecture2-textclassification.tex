@@ -54,14 +54,15 @@
 \end{frame}
 
 
+\section{Machine Learning Preliminaries}
+
 \begin{frame}{Text Classification}
   How do we do this? 
 
   \begin{enumerate}
   \item First extract information from the sentence. 
-  \item Use this to construct a \texit{representation}
-  \item Classify this vector $f: \mcX \mapsto \mcY$ where $\mcY$ 
-    is the set of possible outputs.
+  \item Use this to construct a \textit{representation}
+  \item Classify this vector is the set of possible outputs.
   \end{enumerate}
 
   % Throughout this class, 
@@ -72,9 +73,102 @@
 \end{frame}
 
 
-\begin{frame}{Features}
-  \[f_1, \]
+
+
+\subsection{Features and Preprocessing}
+
+\begin{frame}{Preliminaries Notation: General}
+  \begin{itemize}
+  \item $\boldb, \boldm$;  bold letters for vectors.
+  \item $\boldB, \boldM$;  bold capital letters for matrices.
+  \item $\mcB, \mcM$;  script-case for sets.
+  \item $B, M$; capital letters for constants and random variables.
+  \item $b_i, x_i$; lower case for scalars or indexing into vectors.
+  \end{itemize}
 \end{frame}
+
+
+\begin{frame}{Features}
+  \begin{itemize}
+  \item   Define $\mcF$ to be a set of features. 
+  \item   For a given input let \[f_1, \ldots , f_k\]
+  be the relevant features. 
+  \item   Define $v: \mcF \mapsto \reals^{\din}$ to be a function mapping 
+  from features to our representation. 
+  \item The representation $\boldx = \sum_{i=1}^k f_i $ 
+  \end{itemize}
+
+  In this section we consider \textbf{sparse} features. Informally this means
+  $\din$ is large, and $\boldx$ is sparse.   
+\end{frame}
+
+
+
+\begin{frame}{Example: Bag-of-Words}
+  Representation is counts of the input text, 
+  \begin{itemize}
+  \item $\mcF$; the vocabulary of the language.
+  \item $v(f) = \delta(f)$; mapping features to indicators
+  \item $\din = |\mcF|$
+  \item $\boldx = \sum_{i} \delta(f_i)$ 
+  \end{itemize}
+
+  A sentimental mess 
+  \[  \boldx = v(\texttt{word:A}) + v(\texttt{word:sentimental}) + v(\texttt{word:mess})
+
+  \boldx = 
+  \left[ \begin{matrix} 1 \\ \vdots \\ 0\\  0 \\  \end{matrix} \right] + 
+  \left[ \begin{matrix} 0 \\ \vdots \\ 0\\ 1 \\  \end{matrix} \right] +
+  \left[ \begin{matrix} 0 \\ \vdots \\ 1\\  0 \\  \end{matrix} \right] = 
+  \left[ \begin{matrix} 1 \\ \vdots \\ 1 \\ 1 \\  \end{matrix} \right]
+  \]
+\end{frame}
+
+
+\begin{frame}{Example: Bag-of-Words}
+  Representation is counts of the input text, 
+  \begin{itemize}
+  \item $\mcF$; the vocabulary of the language.
+  \item $v(f) = \delta(f)$; mapping features to indicators
+  \item $\din = |\mcF|$
+  \item $\boldx = \sum_{i} \delta(f_i)$ 
+  \end{itemize}
+
+  A sentimental mess 
+  \[  \boldx = v(\texttt{word:A}) + v(\texttt{word:sentimental}) + v(\texttt{word:mess})
+
+  \boldx = 
+  \left[ \begin{matrix} 1 \\ \vdots \\ 0\\  0 \\  \end{matrix} \right] + 
+  \left[ \begin{matrix} 0 \\ \vdots \\ 0\\ 1 \\  \end{matrix} \right] +
+  \left[ \begin{matrix} 0 \\ \vdots \\ 1\\  0 \\  \end{matrix} \right] = 
+  \left[ \begin{matrix} 1 \\ \vdots \\ 1 \\ 1 \\  \end{matrix} \right]
+  \]
+\end{frame}
+
+
+\begin{frame}{Example: Features}
+  Representation picks up other aspects of text.
+  \begin{itemize}
+  \item $\mcF$; the number of feature types.
+  \item $v(f) = \delta(f)$; mapping features to indicators
+  \item $\din = |\mcF|$
+  \item $\boldx = \sum_{i} \delta(f_i)$ 
+  \end{itemize}
+
+  Features: capitalized words, misspelling, important words. 
+
+  Your diploma puts a UUniversity Job Placement Counselor at your disposal.
+
+  \[  \boldx = v(\texttt{misspelling}) + v(\texttt{capital}) + v(\texttt{word:diploma}) + \ldots
+
+  \boldx = 
+  \left[ \begin{matrix} 0 \\ \vdots \\ 0\\  0 \\  \end{matrix} \right] + 
+  \left[ \begin{matrix} 0 \\ \vdots \\ 1\\ 0 \\  \end{matrix} \right] +
+  \left[ \begin{matrix} 0 \\ \vdots \\ 0\\  1 \\  \end{matrix} \right] = 
+  \left[ \begin{matrix} 1 \\ \vdots \\ 1 \\ 1 \\  \end{matrix} \right]
+  \]
+\end{frame}
+
 
 \begin{frame}{Step 1: Feature Extraction}
   \begin{itemize}
@@ -85,196 +179,362 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Example: Bag-of-Words}
+\subsection{Classification}
+
+\begin{frame}{Step 2: Learn a Classifier}
+  Next we map a representation $\boldx$ to a output $\boldy$.
   
-\end{frame}
+  The output $\boldy \in \reals^\dout$ where $\dout$ is the number of 
+  \textit{classes}. 
 
-\begin{frame}{Example: Binary Classification}
+  Generally $\boldy$ will be a one-hot vector. 
+
   \begin{itemize}
-  \item $x \in \mcX$; set of sentences
-  \item $\mcY = \{-1, 1\}$; set of output classes
+  \item $\dout = 2$; two possible classes
+    \[ \left[ \begin{matrix} 1 \\ 0  \end{matrix} \right]  \mathrm {\ vs. \ } 
+    \left[ \begin{matrix} 0 \\ 1  \end{matrix} \right] \]
   \end{itemize}
-  
+
+  For instance spam/not-spam, good review/bad review, relevant/irrelevant
+
 \end{frame}
 
-\begin{frame}{Notation: General}
+
+\begin{frame}{Example: Multiclass Classification}
+  More interestingly we will also consider multiclass where $\dout > 2$
+
   \begin{itemize}
-  \item $\boldb, \boldm$;  bold letters for vectors.
-  \item $\boldB, \boldM$;  bold capital letters for matrices.
-  \item $\mcB, \mcM$;  script-case for sets.
-  \item $B, M$; capital letters for constants and random variables.
-  \item $b_i, x_i$; lower case for scalars or indexing into vectors.
+  \item $\dout = 5$; yelp review.
+    \[ \left[ \begin{matrix} 1 \\ 0 \\0 \\0 \\0  \end{matrix} \right]  \mathrm {\ vs. \ } 
+    \left[ \begin{matrix} 0 \\ 1 \\0 \\0 \\0  \end{matrix} \right]  \mathrm {\ vs. \ } \ldots \] 
   \end{itemize}
+  For instance five star review, etc. 
 \end{frame}
 
-\begin{frame}{Notation: Machine Learning}
+
+\begin{frame}{Supervised Machine Learning Setup}
+  Let, 
   \begin{itemize}
-  \item $\boldx \in \reals^{\din}$; set of input classes  
-  \item $\boldy \in \mcY \subset \{0, 1\}^{\dout}$; set of output classes
   \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; supervised data
+  \item $\boldx_i \in \reals^{\din}$;  input representations  
+  \item $\boldy_i \in \reals^{\dout}$; gold output representations 
   \end{itemize}
 
-
+  Goal is to learn a classifier $g: \reals^\din \mapsto \{1,\ldots \dout\}$ to map from input representation to output.  
 \end{frame}
 
 
+\begin{frame}{Review: Experimental Setup}
+  
+  \begin{itemize}
+  \item Data is split into three parts training, validation, and test.
+  \item Experiments are all run on training and validation, test is final output.
+  \item Results are measured in terms of prediction accuracy on test:
 
-\begin{frame}{Benchmarks}
+    \[ \sum_{i=1}^n 1(g(\boldx_i) = \boldy_i)  / n \] 
+
+  \item (For assignments we will distribute training and validation, and only give $\boldx$ for test.)
+  \end{itemize}
+  
+  For small text classification data sets,
+  \begin{itemize}
+  \item Even more careful. Results are reported with K-fold cross-validation. 
+    \begin{enumerate}
+    \item Split into K folds (equal splits).
+    \item For each fold, train on other K-1 folds, test on current fold. 
+    \end{enumerate}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Current State of the Art} 
   
 \end{frame}
 
-\begin{frame}{Multiclass Classification}
-  
+\section{Classification}
+
+
+\begin{frame}{Classification}
+  We now turn to the classification problem.
+
+  \begin{itemize}
+  \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; supervised data
+  \item $\boldx_i \in \reals^{\din}$;  input representations  
+  \item $\boldy_i \in \reals^{\dout}$; gold output representations 
+  \end{itemize}
+
+  Goal is to learn $g: \reals^\din \mapsto \{1,\ldots \dout\}$.
+
 \end{frame}
 
-\begin{frame}{Datasets}
-  
-\end{frame}
 
 \section{Linear Classifiers}
 
 \begin{frame}{Linear Model}
-  
+  Define a linear model as,
+  \begin{enumerate}
+  \item   \[\boldy = \boldx \boldW + \boldb\]   
+  \item $\boldW \in \reals^{\din \times \dout}, \boldb \in \reals^{\dout}$; are parameters
+  \end{enumerate}
+
+  The decision rule is then 
+  \[ \hat{c} = \argmax_{c \in \{ 1,\ldots, \dout\}} y_c \]
 \end{frame}
 
 
-\begin{frame}{Bag-of-Words Classifiers}
-  
-\end{frame}
+\begin{frame}{Interpreting Linear Models}
+  Parameters give scores to possible outputs,
+  \begin{itemize}
+  \item $W_{f, c}$ is the score for feature $f$ under class $c$
+  \item $b_c$ is a prior score for class $c$  
+  \item $y_c$ is the total score for class $c$
+  \item $\hat{c}$ is highest scoring class under the linear model.
+  \end{itemize}
 
-
-\begin{frame}{Feature-Based Classifier}
-  
-\end{frame}
-
-
-\begin{frame}{Example: Text-Class Features}
-
-\note{Show an example}  
-\end{frame}
-
-
-\begin{frame}{Linear Model For Multiclass}  
-  \[ \]
-\end{frame}
-
-
-\begin{frame}{Example: Multiclass Text}
-  
+  Examples:
+  \begin{itemize}
+  \item $W_{f,\texttt{bad}} > W_{f, \texttt{good}}$ for features \texttt{word:dreadful}
+  \end{itemize}
 \end{frame}
 
 \section{Probabilistic Linear Models}
 
+\begin{frame}{Probabilistic Linear Models} 
+  % Estimate
+  We can begin by interpreting prediction probabilistically,
+
+  \begin{itemize}
+  \item Let output be a random variable $Y$
+  \item Representation be a random vector $X$. 
+  \item Interested in estimating
+    \[ p(Y | X) \] 
+  \end{itemize}
+  For example 
+  $p(Y = \texttt{bad} | X)$ 
+\end{frame}
+
+
 
 \begin{frame}{Probabilistic Linear Models} 
   % Estimate 
-  \[ p(y | x) = w x \] 
+  \begin{itemize}
+  \item Select parameters to maximize likelihood of training data.
+    \[ \ell(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
+  For linear models $\theta = (\boldW, \boldb)$ 
+
+  \item Do this by minimizing negative log-likelihood.
+    \[ \argmin_\theta \ell(\theta)\] 
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Properties: Probabilistic Model}
+  \begin{itemize}
+  \item Gives more than 
+  \item Allows variant decision rules (for instance minimum bayes' risk)
+  \end{itemize}
+  
+  \begin{itemize}
+  \item May be less efficient to train. 
+  \item 
+  \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Probabilistic Linear Models} 
+
+\subsection{Linear Model 1: Naive Bayes}
+
+\begin{frame}{Probabilistic Factorization} 
   % Estimate 
-  \[ \ell = \sum \] 
-\end{frame}
+  Reminder, Bayes Rule
 
-\begin{frame}
-  $(x, y)$
-\end{frame}
+  \[ p(Y | X) = \frac{p(X | Y) p(Y)}{p(X)}{p(Y)} \] 
 
-\begin{frame}{Parameter Estimation/ Optimization} 
-  % Estimate 
-  \[ \ell = \sum \] 
+  Can be instead written (with $\alpha$ as normalizing factor) 
 
-\end{frame}
+  \[ p(Y | X) \propto p(X | Y) p(Y) \] 
 
+  Read as \textbf{posterior} is proportional to \textbf{likelihood} times 
+  the \textbf{prior}.
 
-\section{Naive Bayes}
-
-\begin{frame}{Bayes Rule} 
-  % Estimate 
-  \[ p(y | x) = p(x | y) p(y) / p(x) \] 
-
-  \[ p(y | x) = \alpha p(x | y) p(y) / p(x) \] 
-
-  % Name for each term.
-\end{frame}
-
-
-\begin{frame}{Bernoulli Naive Bayes Assumption} 
-  \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
+  For NLL, $p(X)$ doesn't matter, estimate likelihood $p(X | Y)$ and
+  prior $p(Y)$.
   
-  Closed-form: Maximum likelihood estimation
-  
-  \[p() = c() / c() \] 
+  \[p(x_{f_1}=1, \ldots, x_{f_k}=1 | \boldy=c ) p(\boldy=c)\]
 
-  \[p(x_i | y) = c() / c() \] 
 \end{frame}
 
-\begin{frame}{Laplacian Smoothing}
-  \[p(x_i | y) = (c() + \alpha) / (c() + |\mcX| \alpha) \] 
+
+\begin{frame}{Naive Bayes Assumption} 
+
+  \[ p(x_{f_1}=1, \ldots, x_{f_k}=1 | \boldy=c ) p(\boldy=c) = \prod_{i=1}^k p(x_{f_i}=1 | x_{f_1}=1, \ldots, x_{f_{i-1}}=1, \boldy=c) p(\boldy=c)  
+
+  \approx \prod_{i=1}^k p(x_{f_i} | \boldy = c;\theta) p(\boldy=c; \theta)  
+  \] 
+  
+  First is by chain-rule, second is by assumption (Naive bayes). 
+
 \end{frame}
 
-\begin{frame}{Variant: Multinomial Naive Bayes Assumption} 
-  \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
+\begin{frame}{Multinomial} 
   
-  Maximum likelihood estimation
-  
-  \[p() = c() / c() \] 
+  Both the prior $p(\boldy = c)$ and the likelihood $p(\boldx | \boldy)$ are
+  parameterized as multinomial (multinoulli) distributions.
 
-  \[p(x_i | y) = c() / c() \] 
+  Fitting multinomial has a closed-form
+
+  \[ p(\boldy=c) = \sum_{i = 1}^n \frac{1(\boldy_i = c)}{n} \] 
+  
+  It is a bit more complicated for.
+
+  \[p(x_f = 1 | \boldy=c) = \frac{\sum_{i = 1}^n 1(\boldy_i = c) 1{x_{i,f} = 1}}{\sum_{i = 1}^n 1(\boldy_i = c) ||\boldx_i ||_1}  \] 
 \end{frame}
 
 
 \begin{frame}{Conversion to Linear Classifier}
-  \[ W = \log \] 
-  \[ b =  \log \] 
-\end{frame}
+  How does this become a linear classifier? 
+  \[ W_{f, c} =  \log p(x_f = 1 | \boldy=c)  \] 
+  \[ b_c = \log p(\boldy=c)  \mathrm{ for all  }c\in \mcY \] 
 
-\section{Logistic Regression}
-
-\begin{frame}
-  \[ p(y | x) =  \] 
-
-  Logistic 
-
-  $\sigma(W x + b)$
-
-  Image of the logistic.  
-\end{frame}
-
-\begin{frame}{Fitting Parameters}
-  \[ 1 / \]  
-  $\sigma(W x + b)$
+  So 
+  \[\log p(\boldx | \boldy) p(\boldy) =  \boldx \boldW + \boldb  \]
 \end{frame}
 
 
-
-\begin{frame}{Fitting Parameters}
-  $\sigma(W x + b)$
+\begin{frame}{Digression: Zipf's Law}
+  Word features ... 
 \end{frame}
 
+\begin{frame}{Laplacian Smoothing}
+  In order to handle the long tail of words. 
+  
+  Add a value of $\alpha$ to each element in the sample space before normalization.
+  
+  Where $\alpha$ is a smoothing hyperparameter 
 
-\begin{frame}{Multiclass}
-
-Multiclass Logistic regression
-
-\[ p(y | x) =  \] 
-
-\[ softmax(W x+ b) \] 
-\end{frame}
-
-\begin{frame}{}
+  \[p(S=x)= \frac{\alpha + \sum_{i} 1(s_i =s))}{\alpha |\mcS| + n}  \]
 
   
+  For naive bayes:
+
+  \[p(x_f=1 | y=c) = \frac{\alpha + \sum_{i = 1}^n 1(\boldy_i = c) 1{x_{i,f} = 1}}{\alpha * \mcF + \sum_{i = 1}^n 1(\boldy_i = c) ||\boldx_i ||_1}  \]
+\end{frame}
+
+% \begin{frame}{Variant: Multinomial Naive Bayes Assumption} 
+%   \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
+  
+%   Maximum likelihood estimation
+  
+%   \[p() = c() / c() \] 
+
+%   \[p(x_i | y) = c() / c() \] 
+% \end{frame}
+
+\begin{frame}{Naive Bayes In Practice}
+  
+  % Results from paper.
+  \begin{itemize}
+  \item Incredibly fast
+  \end{itemize}
+\end{frame}
+
+\section{(Multiclass) Logistic Regression}
+
+\begin{frame}{The Soft-max}
+
+  Instead of factoring into multinomial, use a soft-max to force a distribution
+  
+  \[softmax(\boldp) = \frac{\exp(\boldp)}{||\exp(\bold)||_1}  \]
+
+  Valid Distribution 
+
+  \begin{itemize}
+  \item $\frac{\exp(\boldp)}{||\exp(\bold)||_1} \geq 0$ 
+  \item $||\frac{\exp(\boldp)}{||\exp(\bold)||_1}||_1 = 1$ 
+  \end{itemize}
+  % Logistic 
+
+  % $\sigma(W x + b)$
+
+  % Image of the logistic.  
+\end{frame}
+
+\begin{frame}{Multiclass logistic regression}
+    \[ p(\boldy =c | \boldx; \theta) = \frac{\exp(\boldy_c)}{\sum_{\hat{c}} \exp(\boldy_{\hat{c}})}   \] 
+\end{frame}
+
+\begin{frame}{Special Case: Binary Classification}
+  For binary classification this is often 
+  \begin{enumerate}
+  \item   \[y = \boldx \boldW + b\]   
+  \end{enumerate}
+
+  \[ softmax() = \frac{\exp(y_1)}{(\exp(y_1) + \exp(y_2))} = \frac{1}{1 + \exp{-(y_1-y_2)}} = \sigma(y_1 -y_2)\]
+
+  
+  Logistic sigmoid function
+
+  \[\sigma(t) = \frac{1}{1 + \exp{-t}} \]
+  
+  Which is standard for logistic regression.
+\end{frame}
+
+\begin{frame}{Benefits of Logistic Regression}
+  \begin{itemize}
+  \item 
+  \end{itemize}
+  \begin{itemize}
+  \item Fitting parameters is much more difficult.
+  \end{itemize}
+  Models similar to LR will be the main focus of this class.
+\end{frame}
+
+\begin{frame}{A Model with Many Names}
+  multinomial logistic regression
+  log-linear
+  softmax regression
+  max-entropy
+\end{frame}
+
+
+\begin{frame}{Fitting Parameters}
+  Recall probabilistic objective is:
+
+  \[ \ell(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
   \[ p(y | x) = \sum \log p(y| x) = \sum W x + \log \sum \exp()   \] 
 
-  First term is linear
-  Second term is log (log-linear)
+  However, this is much harder to solve, no closed-form.
+  \[ \ell(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) + ||\theta||^2_2\] 
+
+  Instead use numerical optimization methods.
+  
+  \[\frac{\delta \ell}{\delta \theta_i} = \sum_i \boldy_i - \sum_{c} \boldy_c p(\boldy =c | \boldx_i ;\theta) \]
+  % \[ 1 / \]  
+  % $\sigma(W x + b)$
 \end{frame}
 
 
+
+\begin{frame}{Gradient-Based optimization}
+  \[ \ell(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
+  Will return.
+\end{frame}
+
+\subsection{Margin-Based classification}
 \begin{frame}{}
-  
+  What if we just try to directly find 
+     \[\boldy = \boldx \boldW + \boldb\]   
+    
+\end{frame}
+
+
+\begin{frame}{Margin}
+    \[ \ell(\theta) = \sum_{i=1}^n \max\{0, 1 - \boldy_{i,c} + \boldy_{i, \hat{c}} + ||\theta||^2_2\} \]
+\end{frame}
+
+
+\begin{frame}{Margin}
+  \[\frac{\delta \ell}{\delta \theta_i} = \sum_i \boldy_i - \boldy_{\hat{c}}  \]
 \end{frame}
 
 \end{document}
