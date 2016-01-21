@@ -2,7 +2,7 @@
 \usepackage{../common_slides}
 
 
-\title{Text Classifiers}
+\title{Text Classification\\ + \\ Machine Learning Review }
 
 \author{Alexander Rush}
 \begin{document}
@@ -12,7 +12,7 @@
   \titlepage
 \end{frame}
 
-\section{Text Classification}
+\section{Text Classification }
 
 \begin{frame}{Application: Spam Detection}
 
@@ -102,8 +102,8 @@
 \begin{frame}{Input Representation}
   \begin{itemize}
   \item How do we convert an input sentence into a usable mathematical representation?
-  \item Main focuses of this class, representation of language
-  \item Major Theme: \textit{sparse} vs. \textit{dense} representations
+  \item Main focus of this class, representation of language
+  \item Point in coming lectures: \textit{sparse} vs. \textit{dense} representations
   \end{itemize}
 \end{frame}
 
@@ -176,7 +176,7 @@
   \begin{itemize}
   \item How do we handle the output representation?
   \item We will use a one-hot output encoding (may be slightly different).
-  \item Major Theme: Efficiency of output encoding.
+  \item In future lectures, efficiency of output encoding.
   \end{itemize}
 \end{frame}
 
@@ -305,6 +305,26 @@
 
   (Practically, store design matrix $\boldX \in \reals^{n
     \times \din}$ and output classes.)
+\end{frame}
+
+
+\begin{frame}{Review: Experimental Setup}
+  
+  \begin{itemize}
+  \item Data is split into three parts training, validation, and test.
+  \item Experiments are all run on training and validation, test is final output.
+
+  \item (For assignments we will distribute training and validation, and only give $\boldx$ for test.)
+  \end{itemize}
+  
+  For small text classification data sets,
+  \begin{itemize}
+  \item Even more careful. Results are reported with K-fold cross-validation. 
+    \begin{enumerate}
+    \item Split into K folds (equal splits).
+    \item For each fold, train on other K-1 folds, test on current fold. 
+    \end{enumerate}
+  \end{itemize}
 \end{frame}
 
 
@@ -437,7 +457,7 @@
 
   \item Minimizing NLL for multinomial for data has a closed-form.
 
-    \[ \theta_s = \sum_{i=1}^n \frac{\indicator{s_i = s}}{n} \]
+    \[ \theta_s = \sum_{i=1}^n \frac{\indicator(s_i = s)}{n} \]
 
     \[ P(S=s; \theta) = \theta_s \]
 
@@ -449,22 +469,23 @@
 
 
 \begin{frame}{Multinomial Naive Bayes}
-
   \begin{itemize}
   \item  Both the prior $p(\boldy = c)$ and the likelihood $p(\boldx | \boldy)$ are
-  parameterized as multinomial (multinoulli) distributions.
-
-\item Fit prior as,
-  \[p(\boldy = c) = \sum_{i = 1}^n \frac{1(\boldy_i = c)}{n}\]
-
-\item Fit likelihood as,
-  \begin{itemize}
-    \itemize Let \[F_{f,c} = \sum_{i = 1}^n \indicator(\boldy_i = c) \indicator(x_{i, f} = 1)$ for all $c\in \mcC, f\in \mcF\] 
-    \item Then, 
-    \[p(x_f | \boldy=c) = \frac{F_{f, c}}{\sum_{f' \in \mcF} F_{f',c}}  \]     
+    parameterized as multinomial (multinoulli) distributions.
+    
+  \item Fit prior as,
+    \[p(\boldy = c) = \sum_{i = 1}^n \frac{1(\boldy_i = c)}{n}\]
+    
+  \item Fit likelihood as,
+    \begin{itemize}
+      \item Let \[F_{f,c} = \sum_{i = 1}^n \indicator(\boldy_i = c) \indicator(x_{i, f} = 1) \mathrm{\ for all\ } c\in \mcC, f\in \mcF\] 
+      \item Then,
+      
+      \[p(x_f | \boldy=c) = \frac{F_{f, c}}{\displaystyle \sum_{f' \in \mcF} F_{f',c}}  \]     
+    \end{itemize}
   \end{itemize}
 
-  How does this become a linear classifier? 
+    How does this become a linear classifier? 
   \[ W_{f, c} =  \log p(x_f = 1 | \boldy=c)  \] 
   \[ b_c = \log p(\boldy=c)  \mathrm{ for all  }c\in \mcY \] 
 
@@ -494,16 +515,6 @@
   \end{itemize}
 \end{frame}
 
-% \begin{frame}{Variant: Multinomial Naive Bayes Assumption} 
-%   \[ p(x_1, \ldots, x_n | y) p(y) = \prod p(x_i | y) p(y)  \] 
-  
-%   Maximum likelihood estimation
-  
-%   \[p() = c() / c() \] 
-
-%   \[p(x_i | y) = c() / c() \] 
-% \end{frame}
-
 \begin{frame}{Naive Bayes In Practice}
   
   % Results from paper.
@@ -512,29 +523,36 @@
   \end{itemize}
 \end{frame}
 
-\section{(Multiclass) Logistic Regression}
+\subsection{Linear Model 2: Multiclass Logistic Regression}
 
-\begin{frame}{The Soft-max}
+\begin{frame}{The Softmax}
 
   Instead of factoring into multinomial, use a soft-max to force a distribution
   
-  \[softmax(\boldp) = \frac{\exp(\boldp)}{||\exp(\bold)||_1}  \]
-
-  Valid Distribution 
+  \[\softmax(\hat{\boldy}) = \frac{\exp(\hat{\boldy})}{\displaystyle \sum_{c \in \mcC} \exp(\hat{y})}  \]
 
   \begin{itemize}
-  \item $\frac{\exp(\boldp)}{||\exp(\bold)||_1} \geq 0$ 
-  \item $||\frac{\exp(\boldp)}{||\exp(\bold)||_1}||_1 = 1$ 
+  \item Exercise: Confirm always gives a distribution.
+
+  \item Note denominator is known as the \textit{partition function}.
   \end{itemize}
-  % Logistic 
 
-  % $\sigma(W x + b)$
+\end{frame}
 
-  % Image of the logistic.  
+
+\begin{frame}{Why is it called softmax?}
+  \[\softmax(\hat{\boldy}) = \frac{\exp(x)}{\displaystyle  \exp(x) + \exp(y)}  \]
+  \includegraphics[width=5cm]{softmax}
+  \[\argmax(\hat{\boldy}) = \indicator(x > y) \]
+  \includegraphics[width=5cm]{argmax}
 \end{frame}
 
 \begin{frame}{Multiclass logistic regression}
-    \[ p(\boldy =c | \boldx; \theta) = \frac{\exp(\boldy_c)}{\sum_{\hat{c}} \exp(\boldy_{\hat{c}})}   \] 
+  
+  \[ \hat{\boldy} = \boldx \boldW + \boldb\] 
+
+    \[ p(\boldy =c | \boldx; \theta) = 
+      \frac{\exp(\hat{\boldy_c})}{\displaystyle \sum_{\displaystyle c' \in \mcC} \exp(\hat{\boldy_{c'}})}   \] 
 \end{frame}
 
 \begin{frame}{Special Case: Binary Classification}
@@ -543,7 +561,7 @@
   \item   \[y = \boldx \boldW + b\]   
   \end{enumerate}
 
-  \[ softmax() = \frac{\exp(y_1)}{(\exp(y_1) + \exp(y_2))} = \frac{1}{1 + \exp{-(y_1-y_2)}} = \sigma(y_1 -y_2)\]
+  \[ \softmax() = \frac{\exp(y_1)}{(\exp(y_1) + \exp(y_2))} = \frac{1}{1 + \exp{-(y_1-y_2)}} = \sigma(y_1 -y_2)\]
 
   
   Logistic sigmoid function
@@ -552,6 +570,19 @@
   
   Which is standard for logistic regression.
 \end{frame}
+
+\begin{frame}{A Model with Many Names}
+  \begin{itemize}
+  \item   Multinomial logistic regression
+
+  \item Log-Linear (particularly in NLP)
+
+  \item  Softmax Regression
+
+  \item Max-Entropy ()
+  \end{itemize}
+\end{frame}
+
 
 \begin{frame}{Benefits of Logistic Regression}
   \begin{itemize}
@@ -563,72 +594,145 @@
   Models similar to LR will be the main focus of this class.
 \end{frame}
 
-\begin{frame}{A Model with Many Names}
-  multinomial logistic regression
-  log-linear
-  softmax regression
-  max-entropy
-\end{frame}
 
 
 \begin{frame}{Fitting Parameters}
   Recall probabilistic objective is:
 
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
-  \[ p(y | x) = \sum \log p(y| x) = \sum W x + \log \sum \exp()   \] 
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) \] 
+
+  And the distribution is parameterized as a softmax,
+  \begin{eqnarray*}
+   \log p(\boldy=c | \boldx; \theta) &=& \log \softmax(\boldx \boldW  + \boldb)_c \\
+    &=&\hat{y}_c - \log \sum_{c' \in \mcC} \exp(\hat{y}_{c'}) 
+  \end{eqnarray*}
 
   However, this is much harder to solve, no closed-form.
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) + ||\theta||^2_2\] 
 
-  Instead use numerical optimization methods.
   
-  \[\frac{\bolddelta \mathcal{L}}{\bolddelta \theta_i} = \sum_i \boldy_i - \sum_{c} \boldy_c p(\boldy =c | \boldx_i ;\theta) \]
-  % \[ 1 / \]  
-  % $\sigma(W x + b)$
+\end{frame}
+
+
+\begin{frame}{Computing Parameter Gradients}
+  Consider one example $(\boldx, \boldy)$ maximizing $\log p(\boldy | \boldx; \theta)$, 
+
+  \begin{enumerate}
+  \item Compute scores $\hat{\boldy} =  \boldx \boldW + \boldb$  
+  \item Compute log softmax of scores, $\log \softmax(\hat{\boldy})$  
+  \item Compute gradient of $\mathcal{L}$ with respect to scores $\hat{\boldy}$ for all $c \in \mcC$ 
+
+  \[\frac{\partial \mathcal{L} }{\partial y_{c}} = -\indicator(\boldy = \delta(c)) - \frac{\exp(\hat{y}_c)}{\sum_{c'} \exp(\hat{y}_{c'}) }  \]
+    
+  \item Compute gradient of $\boldb$ for all $c\in \mcC$ (Chain rule), 
+
+  \[\frac{\partial \mathcal{L}}{\partial b_c} = 
+    \frac{\partial \mathcal{L}}{\partial y_c}\]
+
+  \item Compute gradient of $\boldW$ for all $c\in \mcC, f \in \mcF$, 
+
+  \[\frac{\partial \mathcal{L}}{\partial W_{f, c}} = 
+     \frac{\partial \mathcal{L}}{\partial y_c}\]
+
+  \end{enumerate}
+  % Compute gradients:
+  
+  
+  % \[\frac{\bolddelta \mathcal{L}}{\bolddelta \theta_i} = -\sum_i
+  %   \boldy_i - \sum_{c' \in \mcC} \boldy_c p(\boldy =c | \boldx_i ;\theta) \]
+\end{frame}
+
+\begin{frame}{Gradient-Based Optimization: SGD}
+  \begin{figure}
+    \begin{algorithmic}
+      \Procedure{SGD}{}
+      \While{training criterion is not met}
+      \State{Sample a training example $\boldx_i, \boldy_i$}
+      \State{Compute the loss $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\hat{\boldg}$ of $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\theta \gets \theta + \eta_k \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+      \EndProcedure{}
+    \end{algorithmic}
+  \end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Gradient-Based Optimization: Minibatch SGD}
+  \begin{figure}
+    \begin{algorithmic}
+      \While{training criterion is not met}
+      \State{Sample a minibatch of $m$ examples $(\boldx_1, \boldy_1), \ldots, (\boldx_m, \boldy_m) $}
+      \State{$\hat{\boldg} \gets 0$}
+      \For{$i = 1 \mathrm{\ to\ } m$}
+      \State{Compute the loss $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\boldg'$ of $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\hat{\boldg} \gets \hat{\boldg} +  \frac{1}{m} \boldg'$}
+      \EndFor{}
+      \State{$\theta \gets \theta + \eta_k \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+    \end{algorithmic}
+  \end{figure}
+
+    % \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
+    % Will return.
+\end{frame}
+
+
+\begin{frame}{Softmax Notes: Calculating Log-Sum-Exp}
+  \begin{itemize}
+  \item Calculating $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'}$ directly numerical issues.
+  \item Instead $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'} - M) + M$ where $M = \max_{c'\in\mcC} \hat{y}_c'$ 
+  \end{itemize}
 \end{frame}
 
 
 
-\begin{frame}{Gradient-Based optimization}
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(Y = \boldy_i | X = \boldx_i; \theta) \] 
-  Will return.
+\begin{frame}{Softmax Notes: Regularization}
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) + ||\theta||^2_2\] 
+
+
 \end{frame}
 
 \subsection{Margin-Based classification}
-\begin{frame}{}
-  What if we just try to directly find 
+
+
+\begin{frame}{Non-Probabilistic Classification}
+  What if we just try to directly find $\boldW$ and $\boldb$? 
      \[\boldy = \boldx \boldW + \boldb\]   
-    
+
+  Need to find a suitable training objective.
 \end{frame}
 
 
-\begin{frame}{Margin}
-    \[ \mathcal{L}(\theta) = \sum_{i=1}^n \max\{0, 1 - \boldy_{i,c} + \boldy_{i, \hat{c}} + ||\theta||^2_2\} \]
+\begin{frame}{Hinge/SVM Objective}
+  For a given example $\boldy_i$,
+
+  \begin{itemize}
+  \item   Let $c$ be defined as gold class $y_{i, c} = 1$  
+  \item   Let $\bar{c}$ be defined as the highest scoring non-gold class 
+    \[\bar{c} = \argmax_{c \in \mcC \setminus\{c\}} \hat{y}_c \] 
+  % \item   Define \[\hat{\boldy}_i = \boldx_i \boldW + \boldb \] 
+
+  %     \item  
+  \end{itemize}
+
+
+    \[ \mathcal{L}_{margin}(\theta) = \sum_{i=1}^n \max\{0, 1 - \hat{y}_{i, c} + \hat{y}_{i, \bar{c}}\}  + ||\theta||^2_2 \]
 \end{frame}
 
+
+\begin{frame}
+  \[hinge(\hat{\boldy}) = \indicate(\max\{0, 1 - (y - x)\}) \]
+  \includegraphics[width=5cm]{hinge}                                  
+\end{frame}  
 
 \begin{frame}{Margin}
   \[\frac{\bolddelta \mathcal{L}}{\bolddelta \theta_i} = \sum_i \boldy_i - \boldy_{\hat{c}}  \]
 \end{frame}
 
-\begin{frame}{Review: Experimental Setup}
-  
-  \begin{itemize}
-  \item Data is split into three parts training, validation, and test.
-  \item Experiments are all run on training and validation, test is final output.
-
-  \item (For assignments we will distribute training and validation, and only give $\boldx$ for test.)
-  \end{itemize}
-  
-  For small text classification data sets,
-  \begin{itemize}
-  \item Even more careful. Results are reported with K-fold cross-validation. 
-    \begin{enumerate}
-    \item Split into K folds (equal splits).
-    \item For each fold, train on other K-1 folds, test on current fold. 
-    \end{enumerate}
-  \end{itemize}
-\end{frame}
 
 
 \begin{frame}{Current State of the Art} 

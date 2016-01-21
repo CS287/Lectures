@@ -5,7 +5,7 @@
 % \usepackage{beamerthemeshadow}
 \usepackage{ulem}
     % \usepackage{movie15}
-% \usepackage{mathpazo}
+\usepackage{mathpazo}
 % \usepackage{palatino}
 
 \usepackage{tikz}
@@ -26,6 +26,9 @@
 \usepackage{amsmath}
 \usepackage{tabularx}
 \usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \usetikzlibrary{arrows,positioning,automata,positioning,spy,matrix,scopes,chains}
 
 \setbeamersize{text margin left=6mm}
@@ -90,61 +93,61 @@
 %   \end{frame}
 % }
 
-\newcommand{\boldA}{\boldsymbol{A}}
-\newcommand{\boldB}{\boldsymbol{B}}
-\newcommand{\boldC}{\boldsymbol{C}}
-\newcommand{\boldD}{\boldsymbol{D}}
-\newcommand{\boldE}{\boldsymbol{E}}
-\newcommand{\boldF}{\boldsymbol{F}}
-\newcommand{\boldG}{\boldsymbol{G}}
-\newcommand{\boldH}{\boldsymbol{H}}
-\newcommand{\boldI}{\boldsymbol{I}}
-\newcommand{\boldJ}{\boldsymbol{J}}
-\newcommand{\boldK}{\boldsymbol{K}}
-\newcommand{\boldL}{\boldsymbol{L}}
-\newcommand{\boldM}{\boldsymbol{M}}
-\newcommand{\boldN}{\boldsymbol{N}}
-\newcommand{\boldO}{\boldsymbol{O}}
-\newcommand{\boldP}{\boldsymbol{P}}
-\newcommand{\boldQ}{\boldsymbol{Q}}
-\newcommand{\boldR}{\boldsymbol{R}}
-\newcommand{\boldS}{\boldsymbol{S}}
-\newcommand{\boldT}{\boldsymbol{T}}
-\newcommand{\boldU}{\boldsymbol{U}}
-\newcommand{\boldV}{\boldsymbol{V}}
-\newcommand{\boldW}{\boldsymbol{W}}
-\newcommand{\boldX}{\boldsymbol{X}}
-\newcommand{\boldY}{\boldsymbol{Y}}
-\newcommand{\boldZ}{\boldsymbol{Z}}
-\newcommand{\bolda}{\boldsymbol{a}}
-\newcommand{\boldb}{\boldsymbol{b}}
-\newcommand{\boldc}{\boldsymbol{c}}
-\newcommand{\boldd}{\boldsymbol{d}}
-\newcommand{\bolde}{\boldsymbol{e}}
-\newcommand{\boldf}{\boldsymbol{f}}
-\newcommand{\boldg}{\boldsymbol{g}}
-\newcommand{\boldh}{\boldsymbol{h}}
-\newcommand{\boldi}{\boldsymbol{i}}
-\newcommand{\boldj}{\boldsymbol{j}}
-\newcommand{\boldk}{\boldsymbol{k}}
-\newcommand{\boldl}{\boldsymbol{l}}
-\newcommand{\boldm}{\boldsymbol{m}}
-\newcommand{\boldn}{\boldsymbol{n}}
-\newcommand{\boldo}{\boldsymbol{o}}
-\newcommand{\boldp}{\boldsymbol{p}}
-\newcommand{\boldq}{\boldsymbol{q}}
-\newcommand{\boldr}{\boldsymbol{r}}
-\newcommand{\bolds}{\boldsymbol{s}}
-\newcommand{\boldt}{\boldsymbol{t}}
-\newcommand{\boldu}{\boldsymbol{u}}
-\newcommand{\boldv}{\boldsymbol{v}}
-\newcommand{\boldw}{\boldsymbol{w}}
-\newcommand{\boldx}{\boldsymbol{x}}
-\newcommand{\boldy}{\boldsymbol{y}}
-\newcommand{\boldz}{\boldsymbol{z}}
+\newcommand{\boldA}{\mathbf{A}}
+\newcommand{\boldB}{\mathbf{B}}
+\newcommand{\boldC}{\mathbf{C}}
+\newcommand{\boldD}{\mathbf{D}}
+\newcommand{\boldE}{\mathbf{E}}
+\newcommand{\boldF}{\mathbf{F}}
+\newcommand{\boldG}{\mathbf{G}}
+\newcommand{\boldH}{\mathbf{H}}
+\newcommand{\boldI}{\mathbf{I}}
+\newcommand{\boldJ}{\mathbf{J}}
+\newcommand{\boldK}{\mathbf{K}}
+\newcommand{\boldL}{\mathbf{L}}
+\newcommand{\boldM}{\mathbf{M}}
+\newcommand{\boldN}{\mathbf{N}}
+\newcommand{\boldO}{\mathbf{O}}
+\newcommand{\boldP}{\mathbf{P}}
+\newcommand{\boldQ}{\mathbf{Q}}
+\newcommand{\boldR}{\mathbf{R}}
+\newcommand{\boldS}{\mathbf{S}}
+\newcommand{\boldT}{\mathbf{T}}
+\newcommand{\boldU}{\mathbf{U}}
+\newcommand{\boldV}{\mathbf{V}}
+\newcommand{\boldW}{\mathbf{W}}
+\newcommand{\boldX}{\mathbf{X}}
+\newcommand{\boldY}{\mathbf{Y}}
+\newcommand{\boldZ}{\mathbf{Z}}
+\newcommand{\bolda}{\mathbf{a}}
+\newcommand{\boldb}{\mathbf{b}}
+\newcommand{\boldc}{\mathbf{c}}
+\newcommand{\boldd}{\mathbf{d}}
+\newcommand{\bolde}{\mathbf{e}}
+\newcommand{\boldf}{\mathbf{f}}
+\newcommand{\boldg}{\mathbf{g}}
+\newcommand{\boldh}{\mathbf{h}}
+\newcommand{\boldi}{\mathbf{i}}
+\newcommand{\boldj}{\mathbf{j}}
+\newcommand{\boldk}{\mathbf{k}}
+\newcommand{\boldl}{\mathbf{l}}
+\newcommand{\boldm}{\mathbf{m}}
+\newcommand{\boldn}{\mathbf{n}}
+\newcommand{\boldo}{\mathbf{o}}
+\newcommand{\boldp}{\mathbf{p}}
+\newcommand{\boldq}{\mathbf{q}}
+\newcommand{\boldr}{\mathbf{r}}
+\newcommand{\bolds}{\mathbf{s}}
+\newcommand{\boldt}{\mathbf{t}}
+\newcommand{\boldu}{\mathbf{u}}
+\newcommand{\boldv}{\mathbf{v}}
+\newcommand{\boldw}{\mathbf{w}}
+\newcommand{\boldx}{\mathbf{x}}
+\newcommand{\boldy}{\mathbf{y}}
+\newcommand{\boldz}{\mathbf{z}}
 
 \newcommand{\bolddelta}{\boldsymbol{\delta}}
-\newcommand{\indicator}{\boldsymbol{1}}
+\newcommand{\indicator}{\mathbf{1}}
 \newcommand{\mcA}{\mathcal{A}}
 \newcommand{\mcB}{\mathcal{B}}
 \newcommand{\mcC}{\mathcal{C}}
@@ -177,8 +180,8 @@
 \newcommand{\rationals}{\ensuremath{\mathbb{Q}}}
 \newcommand{\naturals}{\ensuremath{\mathbb{N}}}
 \newcommand{\trans}{\ensuremath{\mathsf{T}}}
-\newcommand{\ident}{\boldsymbol{I}}
-\newcommand{\bzero}{\boldsymbol{0}}
+\newcommand{\ident}{\mathbf{I}}
+\newcommand{\bzero}{\mathbf{0}}
 
 \newcommand{\balpha}{\boldsymbol{\alpha}}
 \newcommand{\bbeta}{\boldsymbol{\beta}}
@@ -206,6 +209,7 @@
 
 \def\argmin{\operatornamewithlimits{arg\,min}}
 \def\argmax{\operatornamewithlimits{arg\,max}}
+\def\softmax{\operatornamewithlimits{softmax}}
 
 \newcommand{\given}{\,|\,}
 \newcommand{\distNorm}{\mathcal{N}}
