@@ -3,8 +3,8 @@
 
 
 \title{Text Classification\\ + \\ Machine Learning Review }
-
-\author{Alexander Rush}
+\date{}
+\author{CS 287}
 \begin{document}
 
 
@@ -14,47 +14,94 @@
 
 \section{Text Classification }
 
-\begin{frame}{Application: Spam Detection}
+\begin{frame}
+\begin{quote}
+   Earn a Degree based on your Life Experience
 
+  Obtain a Bachelor's, Master's, MBA, or PhD based on your present
+    knowledge and life experience.
+
+    No required tests, classes, or books. Confidentiality assured.
+
+    Join our fully recognized Degree Program.
+
+    Are you a truly qualified professional in your field but lack the
+    appropriate, recognized documentation to achieve your goals?
+
+    Or are you venturing into a new field and need a boost to get your
+    foot in the door so you can prove your capabilities?
+
+    Call us for information that can change your life and help you to
+    achieve your goals!!!
+
+    CALL NOW TO RECEIVE YOUR DIPLOMA WITHIN 30 DAYS
+\end{quote}
 \end{frame}
 
-\begin{frame}{Application: Topic Detection}
 
-\end{frame}
-
-\begin{frame}{Application: Sentiment Analysis}
-  
-\end{frame}
-
-\begin{frame}{Why?}
+\begin{frame}{Sentiment}
+  \structure{Good Sentences}
   \begin{itemize}
-  \item Easy problem.
+  \item   A thoughtful, provocative, insistently humanizing film. 
+  \item   Occasionally melodramatic, it's also extremely effective.
+    \item   Guaranteed to move anyone who ever shook, rattled, or rolled.   
   \end{itemize}
+
+  \alert{Bad Sentences}
   \begin{itemize}
-  \item Surface-level
+  \item A sentimental mess that never rings true.  
+  \item This 100-minute movie only has about 25 minutes of decent material.
+  \item Here, common sense flies out the window, along with the hail of
+    bullets, none of which ever seem to hit Sascha.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Task: Text Classification}
+\begin{frame}{Multiclass Sentiment}
+    \begin{itemize}
+    \item 
+      $\star \star \star \star$
 
-  Given a sentence determine its class, 
+      I visited The Abbey on several occasions on a visit to Cambridge and found it to be a solid, reliable and friendly place for a meal.
+      
+    \item $\star \star$ 
 
-  Bad Sentences
+      However, the food leaves something to be desired. A very obvious menu and average execution
 
-  Unfortunately the story and the actors are served with a hack script. 
-  A sentimental mess that never rings true.
-  This 100-minute movie only has about 25 minutes of decent material.  
-  Here, common sense flies out the window, along with the hail of bullets, none of which ever seem to hit Sascha. 
+    \item $\star \star \star \star \star$
 
-  Good Sentences
-  
-  A thoughtful, provocative, insistently humanizing film. 
-  Occasionally melodramatic, it's also extremely effective.
-  Guaranteed to move anyone who ever shook, rattled, or rolled.   
+      Fun, friendly neighborhood bar. Good drinks, good food, not too pricey. Great atmosphere!
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Practical: Document Categorization}
+% \end{frame}
+
+
+
+
+\begin{frame}{Text Categorization}
+  \begin{itemize}
+  \item Straightforward setup. 
+  \item Lots of practical applications:
+    \begin{itemize}
+    \item Spam Filtering
+    \item Sentiment
+    \item Text Categorization
+    \item e-discovery
+    \item Twitter Mining 
+    \item Author Identification
+    \item $\ldots$
+    \end{itemize}
+  \item Introduces machine learning notation.
+  \end{itemize}
+
+  \vspace{0.24cm}
+
+  However, a relatively solved problem these days.
 \end{frame}
 
 
-\section{Machine Learning Preliminaries}
+\section{Preliminaries: Machine Learning for NLP}
 
 \subsection{Features and Preprocessing}
 
@@ -63,7 +110,7 @@
   \item $\boldb, \boldm$;  bold letters for vectors.
   \item $\boldB, \boldM$;  bold capital letters for matrices.
   \item $\mcB, \mcM$;  script-case for sets.
-  \item $B, M$; capital letters for constants and random variables.
+  \item $B, M$; capital letters for random variables.
   \item $b_i, x_i$; lower case for scalars or indexing into vectors.
   \end{itemize}
 
@@ -80,13 +127,27 @@
 
 
 \begin{frame}{Text Classification}
-  How do we do this? 
 
   \begin{enumerate}
-  \item First extract information from the sentence. 
-  \item Use this to construct a \textit{representation}
-  \item Classify this vector is the set of possible outputs.
+  \item Extract pertinent information from the sentence. 
+    \air 
+
+  \item Use this to construct an input representation.
+    \air
+
+  \item Classify this vector into an output class.
   \end{enumerate}
+
+  \pause
+  \air
+
+
+  \textbf{Input Representation:}
+  \begin{itemize}
+  \item Conversion from  text into a mathematical representation?
+  \item Main focus of this class, representation of language
+  \item Point in coming lectures: \textit{sparse} vs. \textit{dense} representations
+  \end{itemize}
 
   % Throughout this class, 
   % \begin{itemize}
@@ -99,21 +160,18 @@
 
 
 
-\begin{frame}{Input Representation}
-  \begin{itemize}
-  \item How do we convert an input sentence into a usable mathematical representation?
-  \item Main focus of this class, representation of language
-  \item Point in coming lectures: \textit{sparse} vs. \textit{dense} representations
-  \end{itemize}
-\end{frame}
-
-
 \begin{frame}{Sparse Features}
   \begin{itemize}
-  \item   Define $\mcF$ to be a discrete set of predefined features. 
-  \item   For a given sentence, let $f_1\in\mcF, \ldots , f_k\in\mcF$ be the relevant features. 
-    Typically $k << |\mcF|$.
-  \item Define the sparse representation of the input
+  \item   $\mcF$; a discrete set of features types. 
+  \item   $f_1\in\mcF, \ldots , f_k\in\mcF$; active features for input. 
+    
+    \air 
+    
+    For a given sentence, let $f_1, \ldots f_k$  be the relevant features.  Typically $k << |\mcF|$.
+
+\air
+
+  \item Sparse representation of the input defined as,
     \[\boldx = \sum_{i=1}^k \bolddelta(f_i) \]
   \item $\boldx \in \reals^{1\times \din}$; input representation 
   \end{itemize}
@@ -125,13 +183,13 @@
 
 
 \begin{frame}{Features 1: Sparse Bag-of-Words Features}
-  Representation is indicators of input words, 
+  Representation is counts of input words, 
   \begin{itemize}
   \item $\mcF$; the vocabulary of the language.
   \item $\boldx = \sum_{i} \bolddelta(f_i)$ 
   \end{itemize}
 
-  Example: Movie Sentiment
+  Example: Movie review input, 
   \begin{center}
     \texttt{A sentimental mess}
     \[ \boldx = v(\texttt{word:A}) + v(\texttt{word:sentimental}) +
@@ -150,17 +208,17 @@
 \begin{frame}{Features 2: Sparse Word Properties}
   Representation can use specific aspects of text.
   \begin{itemize}
-  \item $\mcF$; Spelling, inner-word capitals, trigger words, etc. 
+  \item $\mcF$; Spelling, all-capitals, trigger words, etc. 
   \item $\boldx = \sum_{i} \bolddelta(f_i)$ 
   \end{itemize}
 
-  Example: Spam Classification
+  Example: Spam Email
 
   \begin{center}
-    \texttt{Your diploma puts a UUniversity Job Placement Counselor at
+    \texttt{Your diploma puts a UUNIVERSITY JOB PLACEMENT COUNSELOR at
       your disposal.}
   \end{center}
-  \[  \boldx = v(\texttt{misspelling}) + v(\texttt{capital}) + v(\texttt{word:diploma}) + \ldots\]
+  \[  \boldx = v(\texttt{misspelling}) + v(\texttt{allcapital}) + v(\texttt{trigger:diploma}) + \ldots\]
   \[
   \boldx^\top = 
  \begin{bmatrix} 0 \\ \vdots \\ 0\\  0 \\  \end{bmatrix} + 
@@ -172,10 +230,25 @@
 
 \subsection{Output}
 
-\begin{frame}{Output Representation}
+\begin{frame}{Text Classification: Output Representation}
+  \begin{enumerate}
+  \item Extract pertinent information from the sentence. 
+    \air 
+
+  \item Use this to construct an input representation.
+    \air
+
+  \item Classify this vector into an output class.
+  \end{enumerate}
+
+  \air
+
+
+  \textbf{Output Representation:}
+
   \begin{itemize}
-  \item How do we handle the output representation?
-  \item We will use a one-hot output encoding (may be slightly different).
+  \item How do encode the output classes?
+  \item We will use a one-hot output encoding.
   \item In future lectures, efficiency of output encoding.
   \end{itemize}
 \end{frame}
@@ -183,13 +256,13 @@
 
 
 
-\begin{frame}{Output Classes}
+\begin{frame}{Output Class Notation}
   \begin{itemize}
   \item $\mcC = \{1, \ldots, \dout\}$; possible output classes
-  \item $c \in \mcC$; the true output class 
-  \item $\boldy = \bolddelta(c) \in \reals^{1\times \din}$; one-hot output representation
+  \item $c \in \mcC$; always one true output class 
+  \item $\boldy = \bolddelta(c) \in \reals^{1\times \din}$; true one-hot output representation
 
-  \item Note: when classes are words, we call them \textit{word types}. 
+  % \item Note: when classes are words, we call them \textit{word types}. 
   \end{itemize}
 \end{frame}
 
@@ -200,8 +273,8 @@
   \item $\dout = 2$; two possible classes
   \item In our notation,
     \begin{eqnarray*} 
-    c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
-    c = 2 & \boldy &= \begin{bmatrix} 0  & 1  \end{bmatrix} 
+    bad \ \ c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
+    good \ c = 2 & \boldy &= \begin{bmatrix} 0  & 1  \end{bmatrix} 
    \end{eqnarray*} 
    \item Can also use a single output \textit{sign} representation with $\dout = 1$ 
   \end{itemize}
@@ -244,8 +317,8 @@
   \item $\dout = 5$; for examples
   \item In our notation, one star, two star...
     \begin{eqnarray*} 
-    c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0 & 0 & 0 & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
-    c = 2 & \boldy &=    \begin{bmatrix} 0 & 1 & 0 & 0 & 0 \end{bmatrix} \ldots
+      \star \ c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0 & 0 & 0 & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
+    \star \star \ c = 2 & \boldy &=    \begin{bmatrix} 0 & 1 & 0 & 0 & 0 \end{bmatrix} \ldots
    \end{eqnarray*} 
   \end{itemize}
   Examples: Word Prediction (Unit 3)
@@ -253,8 +326,8 @@
   \item $\dout > 100,000$; 
   \item In our notation, $\mcC$ is vocabulary and each $c$ is a word.   
     \begin{eqnarray*} 
-    c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0 & 0 & 0 & \ldots & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
-    c = 2 & \boldy &=    \begin{bmatrix} 0 & 1 & 0 & 0 & \ldots & 0 \end{bmatrix} \ldots
+      the \ c = 1 & \  \boldy &= \begin{bmatrix} 1 & 0 & 0 & 0 & \ldots & 0  \end{bmatrix}  \mathrm {\ vs. \ } \\
+      dog \ c = 2 & \boldy &=    \begin{bmatrix} 0 & 1 & 0 & 0 & \ldots & 0 \end{bmatrix} \ldots
    \end{eqnarray*} 
   \end{itemize}
 \end{frame}
@@ -293,33 +366,38 @@
 \begin{frame}{Supervised Machine Learning}
   Let, 
   \begin{itemize}
-  \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; supervised data
+  \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; training data
   \item $\boldx_i \in \reals^{1 \times \din}$;  input representations  
   \item $\boldy_i \in \reals^{1 \times \dout}$; gold output representations (one-hot vectors)
   \end{itemize}
 
-  Goal: Learn a classifier from input to output classes $\mcC$.  
+  Goal: Learn a classifier from input to output classes.  
 
   \air
   \air
 
-  (Practically, store design matrix $\boldX \in \reals^{n
-    \times \din}$ and output classes.)
+  Note:
+  \begin{itemize}
+  \item $\boldx_i$ is an input vector $x_{i, j}$ is element of the vector, or just $x_j$ when there is a clear single input .
+  \item Practically, store design matrix $\boldX \in \reals^{n    \times \din}$ and output classes.
+  \end{itemize}
+
+
 \end{frame}
 
 
-\begin{frame}{Review: Experimental Setup}
+\begin{frame}{Experimental Setup}
   
   \begin{itemize}
   \item Data is split into three parts training, validation, and test.
   \item Experiments are all run on training and validation, test is final output.
 
-  \item (For assignments we will distribute training and validation, and only give $\boldx$ for test.)
+  \item For assignments, full training and validation data, and only inputs for test.
   \end{itemize}
   
-  For small text classification data sets,
+  For very small text classification data sets,
   \begin{itemize}
-  \item Even more careful. Results are reported with K-fold cross-validation. 
+  \item Use K-fold cross-validation. 
     \begin{enumerate}
     \item Split into K folds (equal splits).
     \item For each fold, train on other K-1 folds, test on current fold. 
@@ -327,16 +405,19 @@
   \end{itemize}
 \end{frame}
 
+\subsection{Linear Models}
 
 \begin{frame}{Linear Models for Classification}
-  Define a linear model as,
+  Linear model,
+  \[\hat{\boldy} = \boldx \boldW + \boldb\]    
   \begin{itemize}
-  \item Model, \[\hat{\boldy} = \boldx \boldW + \boldb\]   
   \item $\boldW \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
   \item Note $\hat{\boldy}$ is \textbf{not} one-hot, informally ``score'' vector. 
   \end{itemize}
 
-  The decision rule is then,
+  \air 
+
+  Class decision,
   \[ \hat{c} = \argmax_{i \in \mcC} \hat{y_i} \]
 \end{frame}
 
@@ -344,25 +425,25 @@
 \begin{frame}{Interpreting Linear Models}
   Parameters give scores to possible outputs,
   \begin{itemize}
-  \item $W_{f, i}$ is the score for feature $f$ under class $i$
-  \item $b_c$ is a prior score for class $i$  
-  \item $y_i$ is the total score for class $i$
+  \item $W_{f, i}$ is the score for sparse feature $f$ under class $i$
+  \item $b_i$ is a prior score for class $i$  
+  \item $\hat{y}_i$ is the total score for class $i$
   \item $\hat{c}$ is highest scoring class under the linear model.
   \end{itemize}
 
-  Examples:
+  Example:
   \begin{itemize}
-  \item For feature score, \[[\beta_1, \beta_2 ] = \bolddelta(\texttt{word:dreadful}) \boldW,\]
-    You would expect $\beta_2 > \beta_1$ (assuming $c=2$ is ``positive''). 
+  \item For single feature score, \[[\beta_1, \beta_2 ] = \bolddelta(\texttt{word:dreadful}) \boldW,\]
+    Expect $\beta_2 > \beta_1$ (assuming $2$ is class \textit{good}). 
     
   \end{itemize}
 \end{frame}
 
-\subsection{Probabilistic Linear Models}
+
 
 \begin{frame}{Probabilistic Linear Models} 
   % Estimate
-  We can begin by interpreting prediction probabilistically,
+  Can estimate a linear model probabilistically ,
 
   \begin{itemize}
   \item Let output be a random variable $Y$, with sample space $\mcC$. 
@@ -370,44 +451,30 @@
   \item Interested in estimating parameters $\theta$ of, 
     \[ P(Y | X; \theta) \] 
   \end{itemize}
-  We will be informal and use $p(\boldy=c | \boldx)$ for 
+  Informally we use $p(\boldy=c | \boldx)$ for 
   $P(Y = c | X = \boldx)$.
   
 \end{frame}
 
 
 
-\begin{frame}{Probabilistic Linear Models} 
+\begin{frame}{Log-Likelihood as Loss } 
   % Estimate 
   \begin{itemize}
   \item $(\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n)$; supervised data
   \item Select parameters to maximize likelihood of training data.
-    \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) \] 
+    \[ \mathcal{L}(\theta) =  - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) \] 
   For linear models $\theta = (\boldW, \boldb)$ 
 
-  \item Do this by minimizing negative log-likelihood.
+  \item Do this by minimizing negative log-likelihood (NLL).
     \[ \argmin_\theta \mathcal{L}(\theta)\] 
   \end{itemize}
-
 \end{frame}
-
-\begin{frame}{Properties: Probabilistic Model}
-  \begin{itemize}
-  \item Gives more than 
-  \item Allows variant decision rules (for instance minimum bayes' risk)
-  \end{itemize}
-  
-  \begin{itemize}
-  \item May be less efficient to train. 
-  \item 
-  \end{itemize}
-\end{frame}
-
 
 
 \subsection{Linear Model 1: Naive Bayes}
 
-\begin{frame}{Probabilistic Factorization} 
+\begin{frame}{Naive Bayes 1: Probabilistic Factorization} 
   % Estimate 
   Reminder, Bayes Rule
 
@@ -420,13 +487,12 @@
   % Read as \textbf{posterior} is proportional to \textbf{likelihood} times 
   % the \textbf{prior}.
 
-  For NLL, $p(\boldx)$ doesn't matter, estimate likelihood $p(\boldx | \boldy)$ and
-  prior $p(\boldy)$.
+  For NLL, $p(\boldx)$ doesn't matter, estimate $p(\boldx | \boldy)$ and $p(\boldy)$.
 
 
   \air
 
-  For a sparse model, we write, 
+  For a sparse model, with observed classes we can write as,
   
   \[p(x_{f_1}=1, \ldots, x_{f_k}=1 | \boldy=c ) p(\boldy=c)\]
 
@@ -435,7 +501,7 @@
 \end{frame}
 
 
-\begin{frame}{Naive Bayes Assumption} 
+\begin{frame}{Naive Bayes 2: Independence Assumption} 
 
   \begin{eqnarray*}
     && p(x_{f_1}=1, \ldots, x_{f_k}=1 | \boldy=c ) p(\boldy=c) =\\
@@ -444,7 +510,7 @@
   \end{eqnarray*}
 
   
-  First is by chain-rule, second is by assumption (Naive bayes). 
+  First is by chain-rule, second is by assumption.
 
 \end{frame}
 
@@ -453,13 +519,12 @@
 \begin{frame}{Multinomial Model} 
   Brief aside, 
   \begin{itemize}
-  \item $P(S; \theta)$; parameterized as a multinomial distribution (multinoulli in )  
+  \item $P(S; \theta)$; parameterized as a multinomial distribution.
 
   \item Minimizing NLL for multinomial for data has a closed-form.
 
-    \[ \theta_s = \sum_{i=1}^n \frac{\indicator(s_i = s)}{n} \]
+    \[ P(S=s; \theta) = \theta_s = \sum_{i=1}^n \frac{\indicator(s_i = s)}{n} \]
 
-    \[ P(S=s; \theta) = \theta_s \]
 
   \item Exercise: Derive this by minimizing $\mathcal{L}$. 
 
@@ -470,175 +535,240 @@
 
 \begin{frame}{Multinomial Naive Bayes}
   \begin{itemize}
-  \item  Both the prior $p(\boldy = c)$ and the likelihood $p(\boldx | \boldy)$ are
-    parameterized as multinomial (multinoulli) distributions.
+  \item  Both  $p(\boldy)$ and $p(\boldx | \boldy)$ are
+    parameterized as multinomials.
     
-  \item Fit prior as,
+  \item Fit first as,
     \[p(\boldy = c) = \sum_{i = 1}^n \frac{1(\boldy_i = c)}{n}\]
-    
-  \item Fit likelihood as,
+    \pause
+
+  \item Fit second using count matrix $\boldF$ ,
     \begin{itemize}
       \item Let \[F_{f,c} = \sum_{i = 1}^n \indicator(\boldy_i = c) \indicator(x_{i, f} = 1) \mathrm{\ for all\ } c\in \mcC, f\in \mcF\] 
       \item Then,
-      
-      \[p(x_f | \boldy=c) = \frac{F_{f, c}}{\displaystyle \sum_{f' \in \mcF} F_{f',c}}  \]     
+      \[p(x_f = 1 | \boldy=c) = \frac{F_{f, c}}{\displaystyle \sum_{f' \in \mcF} F_{f',c}}  \]     
     \end{itemize}
   \end{itemize}
 
+\pause
     How does this become a linear classifier? 
   \[ W_{f, c} =  \log p(x_f = 1 | \boldy=c)  \] 
-  \[ b_c = \log p(\boldy=c)  \mathrm{ for all  }c\in \mcY \] 
+  \[ b_c = \log p(\boldy=c)  \mathrm{\ for all\  }c\in \mcY \] 
 
-  So 
-  \[\log p(\boldx | \boldy) p(\boldy) =  \boldx \boldW + \boldb  \]
 \end{frame}
 
 
 \begin{frame}{Digression: Zipf's Law}
-  Word features ... 
+
+  \includegraphics[width=\textwidth]{../notebooks/zipf}
 \end{frame}
 
 \begin{frame}{Laplacian Smoothing}
+  Method for handling the long tail of words by distributing mass, 
   \begin{itemize}
-  \item   In order to handle the long tail of words. 
-    Add a value of $\alpha$ to each element in the sample space before normalization.
-    Where $\alpha$ is a smoothing hyperparameter 
-  \item 
-    \[ \theta_s =  \frac{\alpha + \sum_{i=1}^n \indicator{s_i = s}}{\alpha|\mcS| n} \]
+  \item  Add a value of $\alpha$ to each element in the sample space before normalization.
+
+    \[ \theta_s =  \frac{\alpha + \sum_{i=1}^n \indicator(s_i = s)}{\alpha|\mcS|  + n} \]
     
   \item (Similar to Dirichlet prior in a Bayesian interpretation.) 
   \end{itemize}
-
+  
+\pause
   For naive Bayes:
-  \begin{itemize}
-  \item \[\hat{\boldF} = \alpha + F\]
-  \end{itemize}
+  \[\hat{\boldF} = \alpha + F\]
+ 
 \end{frame}
 
 \begin{frame}{Naive Bayes In Practice}
-  
-  % Results from paper.
   \begin{itemize}
-  \item Incredibly fast
-  \end{itemize}
+  \item Very fast to train
+  \item Relatively interpretable.
+  \item Performs quite well on small datasets  \cite{wang2012baselines}
+
+  \begin{figure}
+    \includegraphics{data}
+    \caption{  (RT-S [movie review], CR [customer reports], MPQA [opinion polarity], SUBJ [subjectivity])}
+  \end{figure}
+\end{itemize}
+
+  % Results from paper.
 \end{frame}
 
 \subsection{Linear Model 2: Multiclass Logistic Regression}
 
-\begin{frame}{The Softmax}
+\begin{frame}{Multiclass Logisitic Regression}
 
-  Instead of factoring into multinomial, use a soft-max to force a distribution
+  Alternative parametrization of probabilistic model.
+
   
-  \[\softmax(\hat{\boldy}) = \frac{\exp(\hat{\boldy})}{\displaystyle \sum_{c \in \mcC} \exp(\hat{y})}  \]
+  Use a softmax to force a distribution,
+  
+  \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c \in \mcC} \exp(z_c)}  \]
 
   \begin{itemize}
   \item Exercise: Confirm always gives a distribution.
 
-  \item Note denominator is known as the \textit{partition function}.
+  \item Denominator known as \textit{partition} function (we'll see many times).
   \end{itemize}
 
 \end{frame}
 
 
-\begin{frame}{Why is it called softmax?}
-  \[\softmax(\hat{\boldy}) = \frac{\exp(x)}{\displaystyle  \exp(x) + \exp(y)}  \]
-  \includegraphics[width=5cm]{softmax}
-  \[\argmax(\hat{\boldy}) = \indicator(x > y) \]
-  \includegraphics[width=5cm]{argmax}
+\begin{frame}{Why is it called the softmax?}
+
+  \begin{columns}[t]
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{softmax}
+      \end{figure}
+      \[\softmax([x\ y]) = \frac{\exp(x)}{\displaystyle  \exp(x) + \exp(y)}  \]
+    \end{column}
+
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+      \includegraphics[width=5cm]{argmax}
+      \end{figure}
+      \[\argmax([x\ y]) = \indicator(x > y) \]      
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Multiclass logistic regression}
   
-  \[ \hat{\boldy} = \boldx \boldW + \boldb\] 
+  \[ \boldz = \boldx \boldW + \boldb\] 
 
-    \[ p(\boldy =c | \boldx; \theta) = 
-      \frac{\exp(\hat{\boldy_c})}{\displaystyle \sum_{\displaystyle c' \in \mcC} \exp(\hat{\boldy_{c'}})}   \] 
+    \[ p(\boldy =c | \boldx; \theta) = \hat{y} = \softmax(\boldz) = 
+      \frac{\exp(z_c)}{ \sum_{\displaystyle c'} \exp(z_{c'})}   \] 
+    \begin{itemize}
+    \item $\boldW \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
+    \end{itemize}
+
 \end{frame}
 
-\begin{frame}{Special Case: Binary Classification}
-  For binary classification this is often 
-  \begin{enumerate}
-  \item   \[y = \boldx \boldW + b\]   
-  \end{enumerate}
+\begin{frame}{Special Case: Logistic Regression}
+  For binary classification:
+  \begin{eqnarray*}
+   \softmax([z_1\ z_2]) &=& \frac{\exp(z_1)}{\exp(z_1) + \exp(z_2)} \\
+ &=& \frac{1}{1 + \exp(-(z_1-z_2))} = \sigma(z_1 -z_2)
+  \end{eqnarray*}
 
-  \[ \softmax() = \frac{\exp(y_1)}{(\exp(y_1) + \exp(y_2))} = \frac{1}{1 + \exp{-(y_1-y_2)}} = \sigma(y_1 -y_2)\]
-
-  
-  Logistic sigmoid function
-
-  \[\sigma(t) = \frac{1}{1 + \exp{-t}} \]
-  
-  Which is standard for logistic regression.
+  Logistic sigmoid function:
+  \[\sigma(t) = \frac{1}{1 + \exp(-t)} \]
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{sigmoid}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{A Model with Many Names}
   \begin{itemize}
-  \item   Multinomial logistic regression
+  \item  Multinomial Logistic Regression
 
-  \item Log-Linear (particularly in NLP)
+  \item Log-Linear Model (particularly in NLP)
 
-  \item  Softmax Regression
+  \item Softmax Regression
 
-  \item Max-Entropy ()
+  \item Max-Entropy (MaxEnt)
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Benefits of Logistic Regression}
-  \begin{itemize}
-  \item 
-  \end{itemize}
-  \begin{itemize}
-  \item Fitting parameters is much more difficult.
-  \end{itemize}
-  Models similar to LR will be the main focus of this class.
-\end{frame}
 
 
 
 \begin{frame}{Fitting Parameters}
   Recall probabilistic objective is:
 
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) \] 
-
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) = \sum_{i=1}^n L_{cross-entropy}(\boldy_i, \hat{\boldy}_i) \] 
+4
   And the distribution is parameterized as a softmax,
   \begin{eqnarray*}
-   \log p(\boldy=c | \boldx; \theta) &=& \log \softmax(\boldx \boldW  + \boldb)_c \\
-    &=&\hat{y}_c - \log \sum_{c' \in \mcC} \exp(\hat{y}_{c'}) 
+    L_{cross-entropy}(\boldy, \hat{\boldy}) &=& -\log p(\boldy=c | \boldx; \theta) \\
+    &=& \log \softmax(\boldz)_c \\
+    &=&\hat{z}_c - \log \sum_{c' \in \mcC} \exp(z_{c'}) 
   \end{eqnarray*}
 
-  However, this is much harder to solve, no closed-form.
-
+  However, this is much harder to minimize, \textbf{no closed form}.
   
 \end{frame}
 
 
-\begin{frame}{Computing Parameter Gradients}
-  Consider one example $(\boldx, \boldy)$ maximizing $\log p(\boldy | \boldx; \theta)$, 
+\begin{frame}{Symbolic Gradients}
+  
+  \begin{itemize}
+  \item 
+
+  Partials of $L(y, \hat{y})$
+
+  \[ \frac{\partial L(y, \hat{y})}{\partial \hat{y}_j} = \frac{\indicator(y_j = 1)} {\hat{y}_j}  \]
+  \pause 
+
+  \item
+    Partials of $\hat{\boldy} = \softmax(\boldz)$ 
+
+  \[ \frac{\partial \hat{y}_j }{\partial z_i} =
+    \begin{cases}
+      \hat{y}_i (1 - \hat{y}_i) & i = j\\
+      - \hat{y}_i \hat{y}_j & i \neq j \\
+    \end{cases} \]
+
+  \pause 
+  \item Partials of $\boldz  = \boldx \boldW + \boldb $ 
+
+  \[ \frac{\partial z_i }{\partial b_{i'}} = \indicator(i = i') \ \  \frac{\partial z_i }{\partial W_{f, i'}} = \indicator(i = i') \]
+
+  \end{itemize}
+
+  \structure{Homework:} Compute these for yourself.
+\end{frame}
+
+\begin{frame}{Review: Chain Rule}
+  Assume we have a function and a loss:
+
+  \[ f : \reals^m \rightarrow \reals^n \ \ \  L : \reals^n \rightarrow \reals \] 
+
+  Then 
+
+  \[ \frac{\partial L(f(\boldx))}{\partial x_i} = \sum_{j =1}^n \frac{\partial f(\boldx)_j} {\partial  x_i} \frac{\partial L(f(\boldx))} {\partial f(\boldx)_j}   \]
+
+  \pause
+
+  For Softmax regression:
+  
+  \[ \frac{\partial L(y, \hat{y})}{\partial z_i} = \sum_{j} \frac{\partial \hat{y}_j }{\partial z_i}  \frac{\indicator(y_j = 1)} {\hat{y}_j} =     \begin{cases}
+      1 - \hat{y}_i & y_i = 1\\
+      -\hat{y}_j & ow. \\
+    \end{cases} \] 
+\end{frame}
+
+
+
+\begin{frame}{Minimizing Gradients in Practice}
+  Consider one example $(\boldx, \boldy)$, we compute forward and then backward,
 
   \begin{enumerate}
-  \item Compute scores $\hat{\boldy} =  \boldx \boldW + \boldb$  
-  \item Compute log softmax of scores, $\log \softmax(\hat{\boldy})$  
-  \item Compute gradient of $\mathcal{L}$ with respect to scores $\hat{\boldy}$ for all $c \in \mcC$ 
+  \item Compute scores $\boldz =  \boldx \boldW + \boldb$  
+  \item Compute softmax of scores, $\hat{\boldy} = \softmax(\boldz)$  
+  \item Compute loss of scores, $L(\boldy, \hat{\boldy})$  
 
-  \[\frac{\partial \mathcal{L} }{\partial y_{c}} = -\indicator(\boldy = \delta(c)) - \frac{\exp(\hat{y}_c)}{\sum_{c'} \exp(\hat{y}_{c'}) }  \]
-    
-  \item Compute gradient of $\boldb$ for all $c\in \mcC$ (Chain rule), 
+  \pause
+  \item Compute gradient $\frac{\partial L(y, \hat{y})}{\partial \hat{y}_j}$.
 
-  \[\frac{\partial \mathcal{L}}{\partial b_c} = 
-    \frac{\partial \mathcal{L}}{\partial y_c}\]
+  \item Compute gradient $\frac{\partial L(y, \hat{y})}{\partial z_i}$.
 
-  \item Compute gradient of $\boldW$ for all $c\in \mcC, f \in \mcF$, 
+  \item Compute gradient of $\boldb$ for all $i'\in \mcC$ and $\boldW$ for all $i'\in \mcC, f \in \mcF$, 
 
-  \[\frac{\partial \mathcal{L}}{\partial W_{f, c}} = 
-     \frac{\partial \mathcal{L}}{\partial y_c}\]
+  \[\frac{\partial L}{\partial b_i'} = 
+    \frac{\partial L}{\partial z_i'} \ \ \ \ \frac{\partial L}{\partial W_{f, i'}} = 
+     \frac{\partial L}{\partial z_i'}\]
 
   \end{enumerate}
-  % Compute gradients:
-  
-  
-  % \[\frac{\bolddelta \mathcal{L}}{\bolddelta \theta_i} = -\sum_i
-  %   \boldy_i - \sum_{c' \in \mcC} \boldy_c p(\boldy =c | \boldx_i ;\theta) \]
 \end{frame}
 
 \begin{frame}{Gradient-Based Optimization: SGD}
@@ -647,15 +777,14 @@
       \Procedure{SGD}{}
       \While{training criterion is not met}
       \State{Sample a training example $\boldx_i, \boldy_i$}
-      \State{Compute the loss $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$}
-      \State{Compute gradients $\hat{\boldg}$ of $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\hat{\boldg}$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
       \State{$\theta \gets \theta + \eta_k \hat{\boldg}$}
       \EndWhile{}
       \State{\Return{$\theta$}}
       \EndProcedure{}
     \end{algorithmic}
   \end{figure}
-
 \end{frame}
 
 
@@ -666,8 +795,8 @@
       \State{Sample a minibatch of $m$ examples $(\boldx_1, \boldy_1), \ldots, (\boldx_m, \boldy_m) $}
       \State{$\hat{\boldg} \gets 0$}
       \For{$i = 1 \mathrm{\ to\ } m$}
-      \State{Compute the loss $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$}
-      \State{Compute gradients $\boldg'$ of $\mathcal{L}(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\boldg'$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
       \State{$\hat{\boldg} \gets \hat{\boldg} +  \frac{1}{m} \boldg'$}
       \EndFor{}
       \State{$\theta \gets \theta + \eta_k \hat{\boldg}$}
@@ -680,6 +809,9 @@
     % Will return.
 \end{frame}
 
+\begin{frame}{Softmax Notes: Regularization}
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\hat{\boldy}, \boldy) + ||\theta||^2_2\] 
+\end{frame}
 
 \begin{frame}{Softmax Notes: Calculating Log-Sum-Exp}
   \begin{itemize}
@@ -689,54 +821,140 @@
 \end{frame}
 
 
-
-\begin{frame}{Softmax Notes: Regularization}
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) + ||\theta||^2_2\] 
-
-
+\begin{frame}{Pros and Cons of Logistic Regression}
+  \begin{itemize}
+  \item Less strong independence assumption.
+  \item Can be very effective with good features.
+  \item Still yields a probability distribution.
+  \item Fitting parameters is more difficult.
+  \end{itemize}
+  
+  Similar models make will be the main focus of this class.
 \end{frame}
 
-\subsection{Margin-Based classification}
+
+\subsection{Linear Model 3: Multiclass Hinge-Loss}
 
 
-\begin{frame}{Non-Probabilistic Classification}
+\begin{frame}{Other Loss Functions}
+  
   What if we just try to directly find $\boldW$ and $\boldb$? 
-     \[\boldy = \boldx \boldW + \boldb\]   
+     \[\hat{\boldy} = \boldx \boldW + \boldb\]   
+     
+     \begin{itemize}
+     \item No longer a probabilistic interpretation.
+     \item Just try to find parameters that fit training data.
+     \end{itemize}
 
-  Need to find a suitable training objective.
 \end{frame}
 
 
-\begin{frame}{Hinge/SVM Objective}
-  For a given example $\boldy_i$,
+\begin{frame}{Hinge Loss}
 
+  \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{hinge}(\hat{\boldy}, \boldy) \] 
+
+
+  \[ L(\hat{\boldy}, \boldy) =  \max\{0, 1 - (\hat{y}_{c} + \hat{y}_{c'}) \}  \]
+
+  Where 
   \begin{itemize}
   \item   Let $c$ be defined as gold class $y_{i, c} = 1$  
-  \item   Let $\bar{c}$ be defined as the highest scoring non-gold class 
-    \[\bar{c} = \argmax_{c \in \mcC \setminus\{c\}} \hat{y}_c \] 
-  % \item   Define \[\hat{\boldy}_i = \boldx_i \boldW + \boldb \] 
-
-  %     \item  
+  \item   Let $c'$ be defined as the highest scoring non-gold class 
+    \[c' = \argmax_{i \in \mcC \setminus\{c\}} \hat{y}_i \] 
   \end{itemize}
 
 
-    \[ \mathcal{L}_{margin}(\theta) = \sum_{i=1}^n \max\{0, 1 - \hat{y}_{i, c} + \hat{y}_{i, \bar{c}}\}  + ||\theta||^2_2 \]
 \end{frame}
 
+% \begin{frame}{Hinge Loss}
+%   For a given example $\boldy_i$,
 
-\begin{frame}
-  \[hinge(\hat{\boldy}) = \indicate(\max\{0, 1 - (y - x)\}) \]
-  \includegraphics[width=5cm]{hinge}                                  
+%   \begin{itemize}
+%   \item   Where $c$ is gold class $y_{i, c} = 1$  
+%   \item    $\bar{c}$ is the highest scoring non-gold class 
+%     \[\bar{c} = \argmax_{c \in \mcC \setminus\{c\}} \hat{y}_c \] 
+%   \end{itemize}
+
+
+%     \[ \mathcal{L}_{margin}(\theta) = \sum_{i=1}^n \max\{0, 1 - \hat{y}_{i, c} + \hat{y}_{i, \bar{c}}\}  + ||\theta||^2_2 \]
+% \end{frame}
+
+
+\begin{frame}{Hinge Loss}
+  \begin{columns}[t]
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{hinge}
+
+      \end{figure}
+      \[hinge(\hat{\boldy}) = \indicator(\max\{0, 1 - (y - x)) \]
+    \end{column}
+
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+      \includegraphics[width=5cm]{argmax}
+      \end{figure}
+      \[\argmax([x\ y]) = \indicator(x > y) \]      
+    \end{column}
+  \end{columns}
 \end{frame}  
 
-\begin{frame}{Margin}
-  \[\frac{\bolddelta \mathcal{L}}{\bolddelta \theta_i} = \sum_i \boldy_i - \boldy_{\hat{c}}  \]
+
+\begin{frame}{Symbolic Gradients}
+
+  \begin{itemize}
+  \item   Let $c$ be defined as gold class $y_{i, c} = 1$  
+  \item   Let $c'$ be defined as the highest scoring non-gold class 
+    \[c' = \argmax_{i \in \mcC \setminus\{c\}} \hat{y}_i \] 
+  \end{itemize}
+  
+  Much simpler than logistic regression.
+
+  \begin{itemize}
+  \item Partials of $L(y, \hat{y})$
+
+  \[ \frac{\partial L(y,k \hat{y})}{\partial \hat{y}_j} = \indicator(j = c) - \indicator(j = c')  \]
+
+   \end{itemize}
 \end{frame}
 
 
 
-\begin{frame}{Current State of the Art} 
+
+\begin{frame}{Notes: Hinge Loss: Regularization}
+  \begin{itemize}
+  \item   Many different names,
+  \begin{itemize}
+  \item Margin Classifier
+  \item Multiclass Hinge
+  \item Linear SVM
+  \end{itemize}
+
+  \item Important to use regularization.  
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\hat{\boldy}, \boldy) + ||\theta||^2_2\] 
+
+  \item Can be much more efficient to train than LR. (No partition).
+
+  \end{itemize}
+\end{frame}
   
+
+\begin{frame}{Results: Longer Reviews}
+  \begin{figure}
+    \centering
+    \includegraphics{svm}
+    \caption{IMDB (longer movie review), Subj (longer subjectivity)}
+  \end{figure}
+
+  \begin{itemize}
+  \item NBSVM is hinge-loss interpolated with Naive Bayes.
+  \end{itemize}
 \end{frame}
 
 \end{document}
