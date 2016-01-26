@@ -1,6 +1,6 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-
+\usepackage{pdfpages}
 
 \title{Statistical Natural Language Processing}
 
@@ -12,38 +12,93 @@
   \titlepage
 \end{frame}
 
+\section{Applications}
 
-\section{History}
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=3-4]{slides.pdf}
+}
 
 \begin{frame}
+  \begin{center}
+    \includegraphics{siri}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[height=\textheight]{echo}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[height=\textheight]{abelincoln}
+  \end{center}
+\end{frame}
+
+% \begin{frame}{Automatic Translation}
+%   \begin{center}
+%     \includegraphics{translate}
+%   \end{center}
+% \end{frame}
+
+\section{Scientific Challenges}
+
+\begin{frame}
+    \hspace*{-1cm} \includegraphics[width=1.2\textwidth]{../notebooks/zipf}  
+\end{frame}
+
+
+\begin{frame}{Challenge 1: Lexicons and Lexical Semantics}
+  \textbf{Zipf' Law:}
+  \begin{quote}
+    The frequency of any word is inversely proportional to its rank in the frequency table.
+  \end{quote}
+
+  \begin{itemize}
+  \item I.e. it is common to use rare words. 
+  \item Central issue in NLP is dealing cleverly with rare words. 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{(2) Structure and Probabilistic Modeling }
+  \textbf{The Shannon Game:}
+  \begin{quote}
+    Given the last 100 words, can we predict the next one?
+  \end{quote} 
   
+
+  \texttt{The pin-tailed snipe (Gallinago stenura) is a small stocky wader. It breeds in northern Russia and migrates to spend the \_\_ } 
+
+
+  \begin{itemize}
+  \item Probabilistic models have become very effective at this task.
+  \item Crucial for speech recognition (Jelinek), OCR, automatic translations, etc. 
+  \end{itemize}
+
+
+
 \end{frame}
 
-\begin{frame}{1) Lexical Semantics}
-  the frequency of any word is inversely proportional to its rank in the frequency table
-  \hspace*{-1cm} \includegraphics[width=1.2\textwidth]{../notebooks/zipf}  
+\begin{frame}{(3) Compositionality and Syntax}
+  \begin{quote}
+    Probabilistic models give no insight into some of the basic
+    problems of syntactic structure 
+  \end{quote} -Chomsky
+
 \end{frame}
 
-\begin{frame}{2) Surface Structure}
-  Probabilistic models give no insight into some of the basic problems of syntactic structure -
-  Chomsky
-
-  
-\end{frame}
-
-\begin{frame}{3) Compositionality}
-Language is not merely a bag-of-words but a tool with particular properties - Harris  
-\end{frame}
-
-\begin{frame}{4) Document Structure}
+\begin{frame}{(4) Document Structure and Discourse}
+  Language is not merely a bag-of-words but a tool with particular properties - Harris  
   \begin{center}
     \includegraphics[width=\textwidth]{cort}
   \end{center}
 \end{frame}
 
-
-
-\begin{frame}{5) Beyond}
+\begin{frame}{(5) Questions Beyond Text}
 \begin{verbatim}
    The city councilmen refused the demonstrators a permit because they [feared/advocated] violence.
 \end{verbatim}
