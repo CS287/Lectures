@@ -2,7 +2,7 @@
 \usepackage{../common_slides}
 \usepackage{pdfpages}
 
-\title{Statistical Natural Language Processing}
+\title{CS287: Statistical Natural Language Processing}
 
 \newenvironment{changemargin}{%
 \begin{list}{}{%
@@ -262,7 +262,7 @@ It is based on the belief that in modeling language understanding, we must deal 
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}{LSTM}
   \begin{center}
     \includegraphics[width=\textwidth]{LSTM3-chain}
   \end{center}
@@ -279,6 +279,26 @@ It is based on the belief that in modeling language understanding, we must deal 
 \begin{frame}
   \begin{center}
     \includegraphics[width=\textwidth]{lstm1}
+  \end{center}
+\end{frame}
+
+\begin{frame}{GPU Processing}
+
+  \begin{itemize}
+  \item Neural Networks are remarkably parallel-izable. 
+  \end{itemize}
+
+  GPU Implementation of a variant of HW1  
+
+  \begin{center}
+    \begin{tabular}{lll}
+      \toprule
+      & non-GPU & GPU\\
+      \midrule
+      per epoch& 2475s & 54.0 s \\
+      per batch & 787ms & 15.6 ms\\
+      \bottomrule
+    \end{tabular}
   \end{center}
 \end{frame}
 
@@ -318,57 +338,6 @@ It is based on the belief that in modeling language understanding, we must deal 
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Topics}
-
-  \begin{enumerate}
-  \item Machine Learning for Text
-    \pause
-    \air
-  \item Feed-Forward Neural Networks
-    \pause
-    \air 
-  \item Language Modeling and Word Embeddings 
-    \pause
-    \air
-  \item Recurrent Neural Networks
-    \pause
-    \air
-  \item Conditional Random Fields and Structured Prediction
-  \end{enumerate}
-
-
-\end{frame}
-
-\begin{frame}{Homeworks}
-  Each homework will require you to replicate a research result,
-
-  \begin{itemize}
-  \item Text Classification
-  \item Sentence Tagging
-  \item Language Modeling (1)
-  \item Language Modeling (2) (LSTMs)
-  \item Name-Entity Recognition (CRFs)
-  \end{itemize}
-
-\end{frame}
-
-\begin{frame}{Applications}
-  Lectures on NLP applications
-  
-  \begin{itemize}
-  \item Language Modeling
-    \air 
-  \item Coreference and Pronoun Anaphora
-    \air
-
-  \item Neural Machine Translation
-    \air 
-
-  \item Syntactic Parsing
-
-  \end{itemize}
-\end{frame}
-
 \begin{frame}{Background}
   \begin{itemize}
   \item Some college-level Machine Learning course
@@ -394,9 +363,121 @@ It is based on the belief that in modeling language understanding, we must deal 
   \end{itemize}
 \end{frame}
 
+\begin{frame}{Topics}
+
+  \begin{enumerate}
+  \item Machine Learning for Text
+    \pause
+    \air
+  \item Feed-Forward Neural Networks
+    \pause
+    \air 
+  \item Language Modeling and Word Embeddings 
+    \pause
+    \air
+  \item Recurrent Neural Networks
+    \pause
+    \air
+  \item Conditional Random Fields and Structured Prediction
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Homeworks}
+  Each homework will require you to replicate a research result,
+
+  \begin{itemize}
+  \item Text Classification
+  \item Sentence Tagging
+  \item Language Modeling (1)
+  \item Language Modeling (2) (LSTMs)
+  \item Name-Entity Recognition (CRFs)
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Programming}
+  Assignments use,
+  \begin{itemize}
+  \item Python for text processing and visualization
+  \item Lua/Torch for neural networks
+
+  \begin{center}
+    \includegraphics[width=4cm]{torch}
+  \end{center}
+
+   \item First section on Fri. will be introduction.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Applications}
+  Lectures on NLP applications
+  
+  \begin{itemize}
+  \item Language Modeling
+    \air 
+  \item Coreference and Pronoun Anaphora
+    \air
+
+  \item Neural Machine Translation
+    \air 
+
+  \item Syntactic Parsing
+
+  \end{itemize}
+\end{frame}
+
 
 \begin{frame}{Final Project}
-  
+  \begin{itemize}
+  \item Empirical project done in teams
+    \air 
+
+  \item Research-level project on current topics
+    \air
+
+  \item Expect top projects to be conference submissions.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Project Ideas}
+  Projects we work on,
+  \begin{itemize}
+  \item Morphology in language modeling
+  \item In-Document Coreference
+  \item Surface ordering of words in a sentence. 
+  \item Question-Answering in Text
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Project Ideas}
+  Projects we work on $\ldots$
+  \begin{itemize}
+  \item Morphology in language modeling
+  \item In-Document Coreference
+  \item Surface ordering of words in a sentence. 
+  \item Question-Answering in Text
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Project Ideas}
+  Projects to consider $\ldots$
+  \begin{itemize}
+  \item Information Extraction from Documents
+  \item Twitter and Social Network Modeling
+  \item Visualization of NLP networks
+  \item Deep-Reinforcement Learning and Languages
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{}
+  \begin{center}
+    \includegraphics[height=\textheight]{minsky}
+  \end{center}
+  \notes{- Two undergraduate students Marvin Minsky at Harvard in 1950, build the first neural network computer the SNARC (3000 Vacuum tubes and a surplus autopilot mechanism form a B-24 bomber)
+- von neumann ``If it isn't now it will be someday''}
 \end{frame}
 
 
