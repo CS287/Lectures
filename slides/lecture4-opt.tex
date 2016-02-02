@@ -1,0 +1,260 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+
+\title{Text Classification\\ + \\ Machine Learning Review 3 }
+\date{}
+\author{CS 287}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\subsection{Linear Model 3: Multiclass Hinge-Loss}
+
+
+\begin{frame}{Other Loss Functions}
+  
+  What if we just try to directly find $\boldW$ and $\boldb$? 
+     \[\hat{\boldy} = \boldx \boldW + \boldb\]   
+     
+     \begin{itemize}
+     \item $f(x) = x$ 
+     \item No longer a probabilistic interpretation.
+     \item Just try to find parameters that fit training data.
+     \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Ideal Loss}
+  \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{0/1}(\hat{\boldy}, \boldy) \] 
+
+  \[ L(\hat{\boldy}, \boldy) =  \indicator(\argmax_{c'} \hat{y}_{c'} = c) \}  \]
+\end{frame}
+
+
+\begin{frame}{Hinge or ReLU Function}
+  \begin{itemize}
+  \item \[\relu(z) = \max\{0, z\}  \]
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Hinge Loss}
+
+  \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{hinge}(\hat{\boldy}, \boldy) \] 
+
+
+  \[ L(\hat{\boldy}, \boldy) =  \max\{0, 1 - (\hat{y}_{c} + \hat{y}_{c'}) \}  \]
+
+  Where 
+  \begin{itemize}
+  \item   Let $c$ be defined as true class $y_{i, c} = 1$  
+  \item   Let $c'$ be defined as the highest scoring non-true class 
+    \[c' = \argmax_{i \in \mcC \setminus\{c\}} \hat{y}_i \] 
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Hinge Loss}
+%   For a given example $\boldy_i$,
+
+%   \begin{itemize}
+%   \item   Where $c$ is gold class $y_{i, c} = 1$  
+%   \item    $\bar{c}$ is the highest scoring non-gold class 
+%     \[\bar{c} = \argmax_{c \in \mcC \setminus\{c\}} \hat{y}_c \] 
+%   \end{itemize}
+
+
+%     \[ \mathcal{L}_{margin}(\theta) = \sum_{i=1}^n \max\{0, 1 - \hat{y}_{i, c} + \hat{y}_{i, \bar{c}}\}  + ||\theta||^2_2 \]
+% \end{frame}
+
+
+\begin{frame}{Hinge Loss}
+  \begin{columns}[t]
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{hinge}
+
+      \end{figure}
+      \[hinge(\hat{\boldy}) = \indicator(\max\{0, 1 - (y - x)) \]
+    \end{column}
+
+    \begin{column}[t]{0.5\textwidth}
+
+
+      \begin{figure}
+        \centering
+      \includegraphics[width=5cm]{argmax}
+      \end{figure}
+      \[\argmax([x\ y]) = \indicator(x > y) \]      
+    \end{column}
+  \end{columns}
+\end{frame}  
+
+
+
+
+\begin{frame}{Hinge-Loss Properties}
+  
+\end{frame}
+
+
+\begin{frame}{Symbolic Gradients}
+
+  \begin{itemize}
+  \item   Let $c$ be defined as true class $y_{i, c} = 1$  
+  \item   Let $c'$ be defined as the highest scoring non-true class 
+    \[c' = \argmax_{i \in \mcC \setminus\{c\}} \hat{y}_i \] 
+  \end{itemize}
+  
+  Much simpler than logistic regression.
+
+  \begin{itemize}
+  \item Partials of $L(y, \hat{y})$
+
+  \[ \frac{\partial L(y,k \hat{y})}{\partial \hat{y}_j} = \indicator(j = c) - \indicator(j = c')  \]
+
+   \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Notes: Hinge Loss: Regularization}
+  \begin{itemize}
+  \item   Many different names,
+  \begin{itemize}
+  \item Margin Classifier
+  \item Multiclass Hinge
+  \item Linear SVM
+  \end{itemize}
+
+  \item Important to use regularization.  
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\hat{\boldy}, \boldy) + ||\theta||^2_2\] 
+
+  \item Can be much more efficient to train than LR. (No partition).
+
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kernels}
+  
+\end{frame}
+
+\begin{frame}{Results: Longer Reviews}
+  \begin{figure}
+    \centering
+    \includegraphics{svm}
+    \caption{IMDB (longer movie review), Subj (longer subjectivity)}
+  \end{figure}
+
+  \begin{itemize}
+  \item NBSVM is hinge-loss interpolated with Naive Bayes.
+  \end{itemize}
+\end{frame}
+
+
+
+\section{Black-Box Optimization}
+
+\begin{frame}{First-Order Methods}
+  \begin{itemize}
+  \item Minimize function $L(\theta)$
+  \item Require computing $L(\theta)$ and gradient $L'(\theta)$.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Gradient Descent}
+  \begin{figure}
+    \begin{algorithmic}
+      \While{training criterion is not met}
+      \State{Sample a minibatch of $m$ examples $(\boldx_1, \boldy_1), \ldots, (\boldx_m, \boldy_m) $}
+      \State{$\hat{\boldg} \gets 0$}
+      \For{$i = 1 \mathrm{\ to\ } m$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\boldg'$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\hat{\boldg} \gets \hat{\boldg} +  \frac{1}{m} \boldg'$}
+      \EndFor{}
+      \State{$\theta \gets \theta - \eta_k \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+    \end{algorithmic}
+  \end{figure}  
+\end{frame}
+
+
+\begin{frame}{Stochastic First-Order Methods}
+  \begin{itemize}
+  \item Minimize function $L(\theta)$
+  \item Require computing $L(\theta), $
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Stochastic Optimization}
+  \begin{itemize}
+  \item Select subset of training examples.
+  \item Compute gradient of loss
+  \item Take step.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Gradient-Based Optimization: Minibatch SGD}
+  \begin{figure}
+    \begin{algorithmic}
+      \While{training criterion is not met}
+      \State{Sample a minibatch of $m$ examples $(\boldx_1, \boldy_1), \ldots, (\boldx_m, \boldy_m) $}
+      \State{$\hat{\boldg} \gets 0$}
+      \For{$i = 1 \mathrm{\ to\ } m$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\boldg'$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\hat{\boldg} \gets \hat{\boldg} +  \frac{1}{m} \boldg'$}
+      \EndFor{}
+      \State{$\theta \gets \theta - \eta_k \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+    \end{algorithmic}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}{SGD with Momentum}
+  
+\end{frame}
+
+
+\begin{frame}{AdaGrad}
+  
+\end{frame}
+
+
+\begin{frame}{Second-Order Methods}
+  \begin{itemize}
+  \item Minimize function $L(\theta)$
+  \item Require computing $L(\theta)$, gradient $L'(\theta)$, and Hessian $L''(\theta)$.
+
+  \item Often intractable due to Hessian size
+
+    \[ |\theta|^2 \] 
+  \end{itemize}
+  
+\end{frame}
+
+
+
+\begin{frame}{L-BFGS Methods}
+  \begin{itemize}
+  \item Approximation of second-order optimization. 
+  \end{itemize}  
+\end{frame}
+
+
+
+\end{frame}
+
+\end{document}  
