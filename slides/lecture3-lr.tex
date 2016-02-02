@@ -12,7 +12,83 @@
   \titlepage
 \end{frame}
 
-\section{Text Classification }
+
+
+\begin{frame}{Quiz: Naive Bayes}
+  Given bag-of-word features \[\mcF = \{\mathrm{\texttt{The, movie, was, terrible, rocked, A}} \}\] and two training data points:
+    
+  \begin{center}
+    Class 1: \texttt{The movie was terrible}
+  
+    Class 2: \texttt{The movie rocked}
+  \end{center}
+  \\
+
+  \air 
+
+  What is the conditional distribution $P(Y | X)$ of the new example ``\texttt{terrible movie}''  with $\alpha =0$?
+
+
+  \air 
+
+  What about ``\texttt{A terrible movie}'' with $\alpha =1$?
+
+\end{frame}
+
+\begin{frame}{Answer: Naive Bayes (1) }
+  \texttt{terrible movie}
+  \air 
+
+  Prior is simple: $p(\boldy) =  \begin{bmatrix} 1/2 & 1/2 \end{bmatrix}$  
+
+  Construct count matrix:
+  \[ \boldF =
+    \begin{bmatrix}
+      1 & 1 & 1 & 1 & 0 & 0 \\
+      1 & 1 & 0 & 0 & 1 & 0 \\
+    \end{bmatrix}
+  \] 
+  
+  With $\alpha = \epsilon$,
+
+  \[ p(\boldx | \boldy) =     \begin{bmatrix}
+      1/2 & 1/2 & 1/2 & 1/2 & 0 & 0 \\
+      1/3 & 1/3 & 0 & 0 & 1/3 & 0 \\
+    \end{bmatrix} 
+  \]
+
+  \[ p(\boldy | \boldx) \propto \begin{bmatrix} 1/2 \times 1/2 \times 1/2 &  1/2 \times 0 \times 1/3  \end{bmatrix} = \begin{bmatrix} 1 &  0 \end{bmatrix}  \]
+
+\end{frame}
+  
+\begin{frame}{Answer: Naive Bayes (2) }
+  \texttt{A terrible movie}
+  \air 
+
+  With $\alpha = 1$,
+
+  \[ \bar{\boldF} =
+    \begin{bmatrix}
+      2 & 2 & 2 & 2 & 1 & 1 \\
+      2 & 2 & 1 & 1 & 2 & 1 \\
+    \end{bmatrix}
+  \] 
+
+  \[ p(\boldx | \boldy) =     \begin{bmatrix}
+      1/5 & 1/5 & 1/5 & 1/5 & 1/10 & 1/10 \\
+      2/9 & 2/9 & 1/9 & 1/9 & 2/9 & 1/9 \\
+    \end{bmatrix} 
+  \]
+
+  \begin{eqnarray*}
+    p(\boldy | \boldx) &\propto& \begin{bmatrix} 1/2 \times 1/10 \times 1/5 \times 1/5 &  1/2 \times 1/9 \times 1/9 \times 2/9  \end{bmatrix} \\
+    &\approx&     \begin{bmatrix} 0.593 & 0.407 \end{bmatrix} 
+  \end{eqnarray*}
+
+
+
+\end{frame}
+\section{Classification Review}
 
 \begin{frame}{Review: Multiclass Sentiment}
     \begin{itemize}
@@ -122,7 +198,7 @@
   
 \end{frame}
 
-
+\section{Discriminative Models}
 
 \begin{frame}{Discriminative Model. Conditional Log-Likelihood as Loss } 
   % Estimate 
@@ -147,7 +223,7 @@
   
   \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c } \exp(z_c)}  \]
 
-  \[\log \softmax(\boldz) = \exp(\boldz) - \log \sum_{c} \exp(z_c)  \]
+  \[\log \softmax(\boldz) = \boldz - \log \sum_{c} \exp(z_c)  \]
 
 
   \begin{itemize}
@@ -158,12 +234,6 @@
 
 \end{frame}
 
-\begin{frame}{Softmax Notes: Calculating Log-Sum-Exp}
-  \begin{itemize}
-  \item Calculating $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'}$ directly numerical issues.
-  \item Instead $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'} - M) + M$ where $M = \max_{c'\in\mcC} \hat{y}_c'$ 
-  \end{itemize}
-\end{frame}
 
 
 \begin{frame}{Why is it called the softmax?}
@@ -195,7 +265,7 @@
   \begin{itemize}
   \item Direct estimation of conditional $p(\boldy =c | \boldx; \theta)$
   
-    \[\hat{\boldy} = \log p(\boldy =c | \boldx; \theta) =  \log \softmax(\boldx \boldW + \boldb) \] 
+    \[\hat{\boldy} =  p(\boldy =c | \boldx; \theta) =  \softmax(\boldx \boldW + \boldb) \] 
   \item $\boldW \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
 
   \item ``Regression'' of the distribution.
@@ -217,19 +287,19 @@
 \end{frame}
 
 \begin{frame}{Example: Multiclass Logistic Regression}
-  \[ \boldW = \begin{bmatrix} 1  & 1 & 0 \\ 0 & 0 & 0 \\ \end{bmatrix} \]
-
-  \[ \boldb = \begin{bmatrix} 1  & 1  & 0\\ \end{bmatrix} \]
+  3 classes, 2 features, 
   
-  \[ \boldx = \begin{bmatrix} 1  & 1 \\ \end{bmatrix} \]
+  \begin{eqnarray*}
+    \boldW = \begin{bmatrix} 1  & 2 & -1 \\ -8 & 2 & 3 \\ \end{bmatrix}  &&   \boldb = \begin{bmatrix} 0  & 0  & 0\\ \end{bmatrix} \ \  \boldx = \begin{bmatrix} 1  & 0 \\ \end{bmatrix} \\
+  \end{eqnarray*}
+  \[ \boldz = \boldx \boldW + \boldb = \begin{bmatrix} 1 & 2 & -1 \\ \end{bmatrix} \]
 
-  \[ \boldz = \boldx \boldW + \boldb = \begin{bmatrix} 1 & 1 & 1 \\ \end{bmatrix} \]
+  Log-partition function,  
+  \[ \log \sum_c \exp(z_c) = \log ( \exp(1)  +  \exp(2) + \exp(-1) ) \approx 2.349 \] 
 
-  \[ \log \sum \exp = \log [ \exp(1)  +  \exp(2) + \exp(3) ] =  \] 
+  \[\log \softmax(\boldz) \approx \begin{bmatrix}  1 - 2.349   &  2- 2.349 & -1 - 2.349 \\ \end{bmatrix}  \] 
 
-  \[ \hat{\boldy} = \begin{bmatrix}  1 -   &  1- & 1- \\ \end{bmatrix}  \] 
-
-
+  \[p(\boldy| \boldx) = \begin{bmatrix} 0.259 & 0.705 & 0.035 \end{bmatrix}   \]
 \end{frame}
 
 \begin{frame}{Important Case: Logistic Regression}
@@ -247,30 +317,56 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{A Model with Many Names}
+\begin{frame}{Multiclass Logistic Regression: A Model with Many Names}
   \begin{itemize}
   \item  Multinomial Logistic Regression
 
+
   \item Log-Linear Model (particularly in NLP)
+    
+    \[\log \softmax(\boldz) = \boldz - \log \sum_{c} \exp(z_c)  \]
 
+    
   \item Softmax Regression
-
+    
+    
   \item Max-Entropy (MaxEnt)
+    
+    
   \end{itemize}
 \end{frame}
 
 
+\section{Optimization}
+
+
+\begin{frame}{Cross-Entropy Loss}
+  Define the cross-entropy of two distributions $\boldp$ and $\hat{\boldp}$, 
+  \[ \textrm{cross-entropy}(\boldp, \hat{\boldp})= -\sum_{c}p_{c'} \log \hat{p}_{c'}  \]
+
+  Can use to compare true with prediction,
+
+  \[L_{cross-entropy}(\boldy, \hat{\boldy}) = - \sum_{c} y_{c'} \log \hat{y}_{c'} \]
+
+  Common case, when $y_c = 1$ for class $c$,
+  \[L_{cross-entropy}(\boldy, \hat{\boldy}) = - \log \hat{y}_c \mathrm{\ where\ }y_c = 1 \]
+
+  
+
+  \[ \hat{\boldy} = p(\boldy_i | \boldx_i; \theta) \]
 
 
 
-\begin{frame}{Fitting Parameters}
-  Recall probabilistic objective is:
+\end{frame}
+
+\begin{frame}{Loss Minimization}
+    \[ L_{cross-entropy}(\boldy, \hat{\boldy})=  - \log \hat{y}_c \mathrm{\ where\ }y_c = 1   \]
+
+  Equivalent to probabilistic objective:
 
   \[ \mathcal{L}(\theta) =  - \sum_{i=1}^n \log p(\boldy_i | \boldx_i; \theta) = \sum_{i=1}^n L_{cross-entropy}(\boldy_i, \hat{\boldy}_i) \] 
 
-  Name the inner terms:
-  \[ \hat{\boldy} = \log p(\boldy_i | \boldx_i; \theta) \]
-    \[ L_{cross-entropy}(\boldy, \hat{\boldy})= - \log \hat{y}_c \mathrm{\ where\ }y_c = 1   \]
+
   And the distribution is parameterized as a softmax,
   \begin{eqnarray*}
     L_{cross-entropy}(\boldy, \hat{\boldy}) &=& - \log \hat{y}_c\\
@@ -282,6 +378,8 @@
   
 \end{frame}
 
+
+
 \begin{frame}{Review: Calculus!}
   \begin{align*} 
     &\frac{d (w x)  }{d x} = w   & \frac{d (u/v) }{d x} = \frac{u'v -   uv'} {v^2}  \\
@@ -291,7 +389,7 @@
   \begin{itemize}
   \item For function $f: \reals^n \mapsto \reals^m $ Jacobian is 
     \[ \boldJ = \begin{bmatrix} \frac{\partial f(\boldx)_1}{\partial x_1} & \ldots&  \frac{\partial f(\boldx)_1}{\partial x_n} \\ 
-      &\vdots& \\
+      &\ddots& \\
       \frac{\partial f(\boldx)_m}{\partial x_1} & \ldots &  \frac{\partial f(\boldx)_m}{\partial x_n} \\ 
     \end{bmatrix}\]
 
@@ -324,7 +422,7 @@
   \pause 
   \item Partials of $\boldz  = \boldx \boldW + \boldb $ 
 
-  \[ \frac{\partial z_i }{\partial b_{i'}} = \indicator(i = i') \ \  \frac{\partial z_i }{\partial W_{f, i'}} = \indicator(i = i') \]
+  \[ \frac{\partial z_i }{\partial b_{i'}} = \indicator(i = i') \ \  \frac{\partial z_i }{\partial W_{f, i'}} = x_f \indicator(i = i') \]
 
   \end{itemize}
 
@@ -355,17 +453,28 @@
 
   \[\frac{\partial L}{\partial b_{i}} = 
     \frac{\partial L}{\partial z_{i}} \ \ \ \ \frac{\partial L}{\partial W_{f, i}} = 
-     \frac{\partial L}{\partial z_{i}}\]
+     x_f \frac{\partial L}{\partial z_{i}}\]
+
+   \pause
+   Intuition:
+   \begin{itemize}
+   \item Nothing happens on correct classification.
+   \item Weight of true features increases based on prob not given.
+   \item Weight of false features decreases based on prob given.
+   \end{itemize}
 \end{frame}
+
+
 
 
 \begin{frame}{Optimization}
   Complete objective (without bias):
   \[ \mathcal{L}(\theta) =  - \sum_{i=1}^n (\boldx_i \boldW )_{c_i}  + \log \sum_{c'} \exp  (\boldx_i \boldW  )_{c'} \] 
   \begin{itemize}
-  \item First term is linear in $\boldW$. 
-  \item Second term is log-soft-max of a linear functions of $\boldW$.
+  \item First term is linear in $\boldW$ (convex)
+  \item Second term is log-sum-exp of a linear functions of $\boldW$ (convex).
   \item Objective is convex, but not strictly convex.
+  \item Hard Exercise: Prove (Boyd and  Vandenberghe, 2004 p. 72-74)
   \end{itemize}
 \end{frame}
 
@@ -386,7 +495,7 @@
  
   \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\boldy_i, \hat{\boldy}_i) + \frac{\lambda}{2} ||\theta||^2_2\] 
   \begin{itemize}
-  \item Objective is convex, but not strictly convex.
+  \item Objective is strictly convex.
   \end{itemize}
 
   For L2 regularization gradients for multiclass logistic regression:
@@ -412,7 +521,7 @@
 \end{frame}
 
 \begin{frame}{Gradients-based minimization}
-  Consider one example $(\boldx, \boldy)$, we compute forward and then backward,
+  Consider one example $(\boldx, \boldy)$, we compute ``forward'' and then ``backward'',
 
   \begin{enumerate}
   \item Compute scores $\boldz =  \boldx \boldW + \boldb$  
@@ -429,10 +538,17 @@
   % \[\frac{\partial L}{\partial b_i'} = 
   %   \frac{\partial L}{\partial z_i'} \ \ \ \ \frac{\partial L}{\partial W_{f, i'}} = 
   %    \frac{\partial L}{\partial z_i'}\]
-    \pause
-  \item Update parameters based on gradients
 
   \end{enumerate}
+\end{frame}
+
+\begin{frame}{Optimization}
+  In next class we will talk more about gradient-based optimization.
+
+  \begin{itemize}
+  \item Here we simply describe an algorithm.
+
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Gradient-Based Optimization: SGD}
@@ -452,18 +568,56 @@
 \end{frame}
 
 
-
-
-\begin{frame}{Pros and Cons of Logistic Regression}
-  \begin{itemize}
-  \item Less strong independence assumption.
-  \item Can be very effective with good features.
-  \item Still yields a probability distribution.
-  \item Fitting parameters is more difficult.
-  \end{itemize}
-  
-  Similar models make will be the main focus of this class.
+\begin{frame}{Gradient Descent}
+  \begin{figure}
+    \begin{algorithmic}
+      \While{training criterion is not met}
+      \State{Sample a minibatch of $m$ examples $(\boldx_1, \boldy_1), \ldots, (\boldx_m, \boldy_m) $}
+      \State{$\hat{\boldg} \gets 0$}
+      \For{$i = 1 \mathrm{\ to\ } m$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\boldg'$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\hat{\boldg} \gets \hat{\boldg} +  \frac{1}{m} \boldg'$}
+      \EndFor{}
+      \State{$\theta \gets \theta - \eta_k \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+    \end{algorithmic}
+  \end{figure}  
 \end{frame}
+
+
+\begin{frame}{Pros and Cons of Logistic Regression (Murphy, p 268)}
+  \textcolor{red}{Cons}
+  \begin{itemize}
+  \item Harder to fit versus naive Bayes.
+  \item Must fit all classes together.
+  \item Not a good fit for semi-supervised/missing data cases
+
+  \end{itemize}
+  \textcolor{blue}{Pros}
+  \begin{itemize}
+  \item Better calibrated probability estimates
+  \item Natural handling of feature input 
+ 
+    \begin{itemize}
+    \item Features likely not multinomials
+    \end{itemize}
+
+  \item (For us) extend naturally to neural networks 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Softmax Notes: Calculating Log-Sum-Exp}
+  \begin{itemize}
+  \item Calculating $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'}$ directly numerical issues.
+  \item Instead $\log \sum_{c' \in \mcC} \exp(\hat{y}_{c'} - M) + M$ where $M = \max_{c'\in\mcC} \hat{y}_c'$ 
+  \end{itemize}
+\end{frame}
+
+
+
 
 
 \end{document}
