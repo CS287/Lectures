@@ -27,12 +27,9 @@
   \air 
 
   What is the conditional distribution $P(Y | X)$ of the new example ``\texttt{terrible movie}''  with $\alpha =0$?
-
-
   \air 
 
-  What about ``\texttt{A terrible movie}'' with $\alpha =1$?
-
+  What about ``\texttt{A terrible movie}'' with $\alpha =1$ ?
 \end{frame}
 
 \begin{frame}{Answer: Naive Bayes (1) }
@@ -336,13 +333,26 @@
   \end{itemize}
 \end{frame}
 
+\section{Loss}
 
-\section{Optimization}
+\begin{frame}{Regression with Squared Loss }
+  Define the squared error of two points $\boldp$ and $\boldq$, 
+  \[ \textrm{squared-error}(\boldp, \boldq)= ||\boldp - \boldq||^2_2  \]
+
+  Can use to compare true with prediction,
+
+  \[L_{squared-error}(\boldy, \hat{\boldy}) = ||\boldy - \hat{\boldy}||^2_2 \]
+
+  Common case, when $y_c = 1$ for class $c$,
+  \[L_{squared-error}(\boldy, \hat{\boldy}) = ||\bolddelta(c) - \hat{\boldy} ||_2^2  \mathrm{\ where\ }y_c = 1 \]
+
+  \textbf{Not} a good metric for comparing distributions.
+\end{frame}
 
 
 \begin{frame}{Cross-Entropy Loss}
-  Define the cross-entropy of two distributions $\boldp$ and $\hat{\boldp}$, 
-  \[ \textrm{cross-entropy}(\boldp, \hat{\boldp})= -\sum_{c}p_{c'} \log \hat{p}_{c'}  \]
+  Define the cross-entropy of two distributions $\boldp$ and $\boldq$, 
+  \[ H(\boldp, \boldq)= -\sum_{c}p_{c'} \log q_{c'}  \]
 
   Can use to compare true with prediction,
 
@@ -351,12 +361,7 @@
   Common case, when $y_c = 1$ for class $c$,
   \[L_{cross-entropy}(\boldy, \hat{\boldy}) = - \log \hat{y}_c \mathrm{\ where\ }y_c = 1 \]
 
-  
-
   \[ \hat{\boldy} = p(\boldy_i | \boldx_i; \theta) \]
-
-
-
 \end{frame}
 
 \begin{frame}{Loss Minimization}
@@ -374,12 +379,61 @@
     &=& - z_c + \log \sum_{c' \in \mcC} \exp(z_{c'}) 
   \end{eqnarray*}
 
-  However, this is much harder to minimize, \textbf{no closed form}.
+  However, this has \textbf{no closed form} for minimization.
   
 \end{frame}
 
+\begin{frame}{Objective}
+  Complete objective:
+  \[ \mathcal{L}(\theta) =  - \sum_{i=1}^n (\boldx_i \boldW + \boldb )_{c_i}  + \log \sum_{c'} \exp  (\boldx_i \boldW  + \boldb )_{c'} \] 
+  \begin{itemize}
+  \item First term is linear in $\boldW$ (convex)
+  \item Second term is log-sum-exp of a linear functions of $\boldW$ (convex).
+  \item Objective is convex, but not strictly convex.
+  \item Exercise(Hard) (Boyd and  Vandenberghe, 2004 p. 72-74)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Objective}
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{lrobj}
+  \end{figure}
+  
+  \begin{center}
+    Loss for 2 classes, only bias, parameters $x, y$
+  \end{center}
+  \[ L([x\ y]) = - 10 \log \softmax([x\ y])_1 -5\log \softmax([x\ y])_2 \] 
+
+\end{frame}
+
+\begin{frame}{$\ell_2$ Regularization}
+ 
+  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\boldy_i, \hat{\boldy}_i) + \frac{\lambda}{2} ||\theta||^2_2\] 
+  \begin{itemize}
+  \item Prevents overfitting on the training data
+  \item LR will naturally send $||W|| \rightarrow \infty$ (Murphy, p.252)  
+  \item Objective becomes strictly convex.
+  \end{itemize}
+
+\end{frame}
 
 
+\begin{frame}{Regularized Optimization}
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{lrobjl2}
+  \end{figure}
+  
+  \begin{center}
+    Loss for 2 classes, only bias, parameters $x, y$, $\lambda=2$
+  \end{center}
+  \[ L([x\ y]) = - 10 \log \softmax([x\ y])_1 -5\log \softmax([x\ y])_2 + ||[x\ y]||_2^2\] 
+
+\end{frame}
+
+
+\section{Optimization}
 \begin{frame}{Review: Calculus!}
   \begin{align*} 
     &\frac{d (w x)  }{d x} = w   & \frac{d (u/v) }{d x} = \frac{u'v -   uv'} {v^2}  \\
@@ -466,60 +520,6 @@
 
 
 
-
-\begin{frame}{Optimization}
-  Complete objective (without bias):
-  \[ \mathcal{L}(\theta) =  - \sum_{i=1}^n (\boldx_i \boldW )_{c_i}  + \log \sum_{c'} \exp  (\boldx_i \boldW  )_{c'} \] 
-  \begin{itemize}
-  \item First term is linear in $\boldW$ (convex)
-  \item Second term is log-sum-exp of a linear functions of $\boldW$ (convex).
-  \item Objective is convex, but not strictly convex.
-  \item Hard Exercise: Prove (Boyd and  Vandenberghe, 2004 p. 72-74)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Optimization}
-  \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{lrobj}
-  \end{figure}
-  
-  \begin{center}
-    Loss for 2 classes, only bias, parameters $x, y$
-  \end{center}
-  \[ L([x\ y]) = - 10 \log \softmax([x\ y])_1 -5\log \softmax([x\ y])_2 \] 
-
-\end{frame}
-
-\begin{frame}{Regularization}
- 
-  \[ \mathcal{L}(\theta) = - \sum_{i=1}^n L(\boldy_i, \hat{\boldy}_i) + \frac{\lambda}{2} ||\theta||^2_2\] 
-  \begin{itemize}
-  \item Objective is strictly convex.
-  \end{itemize}
-
-  For L2 regularization gradients for multiclass logistic regression:
-  
-  \[\frac{\partial L}{\partial b_{i}} = 
-    \frac{\partial L}{\partial z_{i}} + \lambda b_{i} \ \ \ \ \frac{\partial L}{\partial W_{f, i}} = 
-     \frac{\partial L}{\partial z_{i}} + \lambda  W_{f, i}\]
-
-\end{frame}
-
-
-\begin{frame}{Regularized Optimization}
-  \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{lrobjl2}
-  \end{figure}
-  
-  \begin{center}
-    Loss for 2 classes, only bias, parameters $x, y$, $\lambda=2$
-  \end{center}
-  \[ L([x\ y]) = - 10 \log \softmax([x\ y])_1 -5\log \softmax([x\ y])_2 + ||[x\ y]||_2^2\] 
-
-\end{frame}
-
 \begin{frame}{Gradients-based minimization}
   Consider one example $(\boldx, \boldy)$, we compute ``forward'' and then ``backward'',
 
@@ -541,6 +541,7 @@
 
   \end{enumerate}
 \end{frame}
+
 
 \begin{frame}{Optimization}
   In next class we will talk more about gradient-based optimization.
@@ -568,7 +569,7 @@
 \end{frame}
 
 
-\begin{frame}{Gradient Descent}
+\begin{frame}{Gradient-Based Optimization: Mini-Batch SGD}
   \begin{figure}
     \begin{algorithmic}
       \While{training criterion is not met}
@@ -584,6 +585,24 @@
       \State{\Return{$\theta$}}
     \end{algorithmic}
   \end{figure}  
+\end{frame}
+
+
+\begin{frame}{Optimization with Regularization}
+  The gradient with respect to the regularizer has a simple form for $\ell_2$:
+
+  \[ \frac{\partial ||\theta||}{\partial W_{f, i}} = \lambda  W_{f, i}\]
+
+  But note that we are doing mini-batches, one solution is to split update:
+
+  \[\theta \gets \theta - \eta_k (\hat{\boldg} + \lambda/n \theta) \] 
+
+
+  \[\theta \gets  (1 -\eta_k \lambda/n) \theta -  \eta_k (\hat{\boldg}) \] 
+
+
+  Often called ``weight decay''.
+
 \end{frame}
 
 
