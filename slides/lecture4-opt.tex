@@ -10,7 +10,125 @@
   \titlepage
 \end{frame}
 
-\subsection{Multiclass Hinge-Loss}
+\begin{frame}{Review: Gradients for Softmax Regression}
+
+  For multiclass logistic regression:
+  
+  \[ \frac{\partial L(\boldy, \hat{\boldy})}{\partial z_i} = \sum_{j} \frac{\partial \hat{y}_j }{\partial z_i}  \frac{\indicator(j = c)} {\hat{y}_j} =     \begin{cases}
+      -(1 - \hat{y}_i) & i = c\\
+      \hat{y}_i & ow. \\
+    \end{cases} \] 
+
+  Therefore for parameters $\theta$, 
+
+  \[\frac{\partial L}{\partial b_{i}} = 
+    \frac{\partial L}{\partial z_{i}} \ \ \ \ \frac{\partial L}{\partial W_{f, i}} = 
+     x_f \frac{\partial L}{\partial z_{i}}\]
+
+   \pause
+   Intuition:
+   \begin{itemize}
+   \item Nothing happens on correct classification.
+   \item Weight of true features increases based on prob not given.
+   \item Weight of false features decreases based on prob given.
+   \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Gradient-Based Optimization: SGD}
+  \begin{figure}
+    \begin{algorithmic}
+      \Procedure{SGD}{}
+      \While{training criterion is not met}
+      \State{Sample a training example $\boldx_i, \boldy_i$}
+      \State{Compute the loss $L(\hat{\boldy}_i, \boldy_i;\theta)$}
+      \State{Compute gradients $\hat{\boldg}$ of $L(\hat{\boldy}_i, \boldy_i;\theta)$ with respect to $\theta$}
+      \State{$\theta \gets \theta - \eta \hat{\boldg}$}
+      \EndWhile{}
+      \State{\Return{$\theta$}}
+      \EndProcedure{}
+    \end{algorithmic}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}{Quiz: Softmax Regression}
+  Given bag-of-word features \[\mcF = \{\mathrm{\texttt{The, movie, was, terrible, rocked, A}} \}\] and two training data points:
+    
+  \begin{center}
+    Class 1: \texttt{The movie was terrible}
+  
+    Class 2: \texttt{The movie rocked}
+  \end{center}
+  \\
+
+  \air 
+
+  Assume that we start with parameters $\boldW = 0$ and $\boldb = 0$,
+  and we train with learning rate $\eta = 1$ and $\lambda = 0$. What is
+  the loss and the parameters after one pass through the data in order?
+\end{frame}
+
+\begin{frame}{Answer: Softmax Regression (1) }
+  First iteration,
+  \[\hat{\boldy}_1 = \begin{bmatrix} 0.5 0.5 \end{bmatrix}\]
+
+  \[ L(\boldy_1, \hat{\boldy}_1) = - \log 0.5 \]
+
+  \[ \boldW =
+  \begin{bmatrix}
+    0.5 & 0.5 & 0.5 & 0.5 & 0 & 0 \\
+    -0.5 & -0.5 & -0.5 & -0.5 && 0 & 0 \\
+  \end{bmatrix}
+  \]
+
+  
+  \[ \boldb =
+  \begin{bmatrix}
+    0.5 & -0.5 \\
+  \end{bmatrix} \]
+\end{frame}
+
+
+\begin{frame}{Answer: Softmax Regression (2) }
+  Second iteration,
+
+  \[\hat{\boldy}_1 = \softmax([1.5\ -1.5] ) \approx \begin{bmatrix} 0.95 \  0.05  \end{bmatrix}\]
+
+  \[ L(\boldy_2, \hat{\boldy}_2) = - \log 0.05 \]
+
+  \[ \boldW \approx
+  \begin{bmatrix}
+    -0.45 & -0.45 & 0.5 & 0.5 & -0.95 & 0 \\
+     0.45 & 0.45 & -0.5 & -0.5 & 0.95 & 0 \\
+  \end{bmatrix}
+  \]
+
+  \[ \boldb =
+  \begin{bmatrix}
+    0.5 & -0.5 \\
+  \end{bmatrix} \]
+\end{frame}
+
+
+\begin{frame}{Today's Class}
+  So far
+  \begin{itemize}
+  \item Naive Bayes (Multinomial)
+  \item Multiclass Logistic Regression (SGD)
+  \end{itemize}
+
+  Today
+
+  \begin{itemize}
+  \item Multiclass Hinge-loss
+  \item More about optimization
+  \end{itemize}
+\end{frame}
+
+
+\section{Multiclass Hinge-Loss}
+
 
 
 \begin{frame}{Other Loss Functions}
@@ -27,6 +145,8 @@
 \end{frame}
 
 \begin{frame}{Ideal Loss}
+  
+  
   \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{0/1}(\hat{\boldy}, \boldy) \] 
 
   \[ L(\hat{\boldy}, \boldy) =  \indicator(\argmax_{c'} \hat{y}_{c'} = c) \}  \]
