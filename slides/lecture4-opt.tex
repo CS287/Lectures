@@ -1,6 +1,6 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-
+\setbeamercovered{invisible}
 \title{Text Classification\\ + \\ Machine Learning Review 3 }
 \date{}
 \author{CS 287}
@@ -9,6 +9,29 @@
 \begin{frame}
   \titlepage
 \end{frame}
+
+\begin{frame}{Review:  Logistic Regression (Murphy, p 268)}
+  \textcolor{red}{Cons}
+  \begin{itemize}
+  \item Harder to fit versus naive Bayes.
+  \item Must fit all classes together.
+  \item Not a good fit for semi-supervised/missing data cases
+
+  \end{itemize}
+  \textcolor{blue}{Pros}
+  \begin{itemize}
+  \item Better calibrated probability estimates
+  \item Natural handling of feature input 
+ 
+    \begin{itemize}
+    \item Features likely not multinomials
+    \end{itemize}
+
+  \item (For us) extend naturally to neural networks 
+  \end{itemize}
+\end{frame}
+
+
 
 \begin{frame}{Review: Gradients for Softmax Regression}
 
@@ -106,7 +129,7 @@
 
   \[ \boldb =
   \begin{bmatrix}
-    0.5 & -0.5 \\
+    -0.45 & 0.45 \\
   \end{bmatrix} \]
 \end{frame}
 
@@ -135,7 +158,6 @@
      \[\hat{\boldy} = \boldx \boldW + \boldb\]   
      
      \begin{itemize}
-     \item $f(x) = x$ 
      \item No longer a probabilistic interpretation.
      \item Just try to find parameters that fit training data.
      \end{itemize}
@@ -143,21 +165,10 @@
 \end{frame}
 
 \begin{frame}{0/1 Loss}
-  
-  \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{0/1}(\boldy, \hat{\boldy}) \] 
+  Just count the number of training examples we classify correctly,  
+  \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{0/1}(\boldy, \hat{\boldy}) = \indicator(\argmax_{c'} \hat{y}_{c'} \neq c)   \]
 
-  Just count the number of training examples we classify correctly,
-
-  \[ L_{0/1}(\boldy, \hat{\boldy}) =  \indicator(\argmax_{c'} \hat{y}_{c'} \neq c)   \]
-\end{frame}
-
-
-\begin{frame}{0/1 Loss}
-  
-
-  \[ L_{0/1}(\boldy, \hat{\boldy}) =  \indicator(\argmax_{c'} \hat{y}_{c'} \neq c)   \]
-
-
+  \pause
 \[ \frac{\partial L(\boldy, \hat{\boldy})}{\partial \hat{y}_j} = \begin{cases}0 & j = c\\ 0 & o.w. \end{cases}  \]
 
       \begin{figure}
@@ -169,12 +180,29 @@
 \end{frame}
 
 
+% \begin{frame}{0/1 Loss}
+  
+
+%   \[ L_{0/1}(\boldy, \hat{\boldy}) =  \indicator(\argmax_{c'} \hat{y}_{c'} \neq c)   \]
+
+
+% \[ \frac{\partial L(\boldy, \hat{\boldy})}{\partial \hat{y}_j} = \begin{cases}0 & j = c\\ 0 & o.w. \end{cases}  \]
+
+%       \begin{figure}
+%         \centering
+%       \includegraphics[width=3cm]{argmax}
+%       \end{figure}
+%       \[L_{0/1}([x\ y]) = \indicator(x > y) \]      
+
+% \end{frame}
+
+
 \begin{frame}{Hinge Loss}
 
   \[{\mathcal{L}(\theta)} = \sum_{i=1}^n L_{hinge}(\boldy,\hat{\boldy}) \] 
 
 
-  \[ L_{hinge}(\boldy, \hat{\boldy}) =  \max\{0, 1 - (\hat{y}_{c} + \hat{y}_{c'}) \}  \]
+  \[ L_{hinge}(\boldy, \hat{\boldy}) =  \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'}) \}  \]
 
   Where 
   \begin{itemize}
@@ -184,7 +212,7 @@
 
   \pause
 
-  Minimizing hinge loss acts as a ``surrogate'' loss for 0/1. 
+  Minimizing hinge loss is an upper-bound for 0/1. 
 
   \[ L_{hinge}(\boldy, \hat{\boldy}) \geq L_{0/1}(\boldy, \hat{\boldy})\] 
 \end{frame}
@@ -218,7 +246,7 @@
   \[L_{hinge}([0\ 1], [x\ y]) = \max\{0, 1 - (y -x) \} = \relu(1 -(y-x)) \] 
 
 
-  Rectified linear unit:
+  Neural network name (Rectified linear unit):
 
   \[\relu(t) = \max\{0, t\}  \]
 
@@ -248,7 +276,7 @@
 \begin{frame}{Hinge-Loss Properties}
   Complete objective:
   \begin{eqnarray*}
-     \mathcal{L}_hinge(\theta) &=& \sum_{i=1}^n \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'})\} \\
+     \mathcal{L}_{hinge}(\theta) &=& \sum_{i=1}^n \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'})\} \\
     &=& \sum_{i=1}^n \max\{0,  1 - (\hat{y}_{c} - \max_{c' \in \mcC \setminus\{c\}} \hat{y}_{c'}) \}     
   \end{eqnarray*}
 
@@ -261,6 +289,8 @@
 \end{frame}
 
 \begin{frame}{Piecewise Linear Objective}
+    \[\mathcal{L}(\theta) = \sum_{i=1}^n \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'})\}   \]
+
   \begin{center}
     \includegraphics[width=5cm]{hingenol2}
     \[10*\max\{0,1 - (y-x)\}+5*\max\{0,1-(x-y)\}\]
@@ -268,7 +298,7 @@
 \end{frame}
 
 \begin{frame}{Objective with Regularization}
-    \[\mathcal{L}(\theta) &=& \sum_{i=1}^n \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'}) *\lambda ||\theta||^2 \]
+    \[\mathcal{L}(\theta) = \sum_{i=1}^n \max\{0, 1 - (\hat{y}_{c} - \hat{y}_{c'})\}  + \lambda ||\theta||^2 \]
   \begin{center}
 
     \includegraphics[width=5cm]{hingel2}
@@ -282,7 +312,7 @@
 \begin{frame}{(Sub)Gradient Rule}
 
   \begin{itemize}
-  \item Technically $\ReLU$ is non-differentiable.
+  \item Technically $\relu$ is non-differentiable.
   \item Only an issue at $0$, generally for ``ties''.
   \item We informally use subgradients, 
     
@@ -355,27 +385,43 @@
 \section{Black-Box Optimization}
 
 
-\begin{frame}{Black-Box Optimization Methods}
-  Brief tour of optimization methods used in ML and NLP.
+% \begin{frame}{Black-Box Optimization Methods}
+%   Brief tour of optimization methods used in ML and NLP.
+%   % \begin{center}
+%   %   \includegraphics[width=5cm]{hingel2}
+%   % \end{center}
+% \end{frame}
+
+\begin{frame}{Optimization Methods}
+  \air
+  \textbf{Goal:} Minimize function $\mathcal{L}: \reals^{|\theta|} \mapsto \reals $
+  \air
   
 
-  \textbf{Goal:} Minimize function $L: \reals^{|\theta|} \mapsto \reals $
+
 
   First-order Methods
+  \[\mathcal{L}(\theta + \bolddelta) \approx \mathcal{L}(\theta) + L'(\theta)^\top \dot \bolddelta\]
+
   \begin{itemize}
   \item Require computing $L(\theta)$ and gradient $L'(\theta)$.
   \end{itemize}
 
   Second-order Methods
+  \[\mathcal{L}(\theta + \bolddelta) \approx \mathcal{L}(\theta) + L'(\theta)^\top \bolddelta + 1/2 \bolddelta^\top \boldH \bolddelta^\top \]
+
   \begin{itemize}
-  \item  Require computing $L(\theta)$ and gradient $L'(\theta)$ and Hessian $L''(\theta)$.
+  \item  Require computing $L(\theta)$ and gradient $L'(\theta)$ and Hessian $\boldH$.
   \end{itemize}
 
-
+  Stochastic Methods
+  \begin{itemize}
+  \item  Require computing $\mathbb{E}(L(\theta))$ and expected gradient.
+  \end{itemize}
 \end{frame}
 
 
-\begin{frame}{First-Order: Gradient Descent}
+\begin{frame}{Gradient Descent}
   \begin{figure}
     \begin{algorithmic}
       \While{training criterion is not met}
@@ -394,78 +440,91 @@
   \end{figure}  
 \end{frame}
 
-\begin{frame}{}
-  \includegraphics{}
+\begin{frame}{Choosing the Learning Rate}
+  \begin{center}
+    \includegraphics[width=4cm]{converge}
+    \includegraphics[width=4cm]{diverge}
+  \end{center}
+  
+
+  \begin{center}
+    \includegraphics[width=7cm]{grad}
+  \end{center}
 \end{frame}
 
+
 \begin{frame}{Gradient Descent with Momentum}
-  Standard Gradient Descent:
+  Standard Gradient Descent (figure from Boyd):
   \[\theta_{k+1} \gets \theta_{k} - \eta_k \hat{\boldg}\]
+
+  \begin{center}
+    \includegraphics[width=9cm]{heavyball}
+  \end{center}
 
   Momentum terms:
   \[\theta_{k+1} \gets \theta_{k} - \eta_k \hat{\boldg} + \mu_k(\theta_{k} - \theta_{k-1}) \]
 
   \begin{itemize}
-  \item Also known as ``Heavy ball method''
+  \item Also known as: Heavy-ball method
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Second-Order}
 
-  Assume we also compute Hessian $\hat{\boldH}$ 
+  Requires  compute Hessian $\hat{\boldH}$ 
 
-   Second order update becomes:
+   Second-order update becomes:
   \[\theta_{k+1} \gets \theta_{k} - \eta_k \hat{\boldH}^{-1} \hat{\boldg} \]
 
+
+  \begin{center}
+    \includegraphics[width=8cm]{newton}
+  \end{center}
   \begin{itemize}
-  \item Gives the correct second-order approximation to Taylor series
   \item Used for strictly convex functions (although there are variants)
-  \item Also known as ``Newton's Method''
+  \item Also known as: Newton's Method
   \end{itemize}
 
 \end{frame}
 
 
-\begin{frame}{Second-Order Methods}
-  \begin{itemize}
-  \item In practice, second-order methods are often infeasible.
-  \item Simply storing the Hessian is $O(|\theta|^2)$.
-  \item However, first-order methods are quite slow.
-  \end{itemize}
-\end{frame}
+% \begin{frame}{Second-Order Methods}
+%   \begin{itemize}
+%   \item In practice, second-order methods are often infeasible.
+%   \item Simply storing the Hessian is $O(|\theta|^2)$.
+%   \item However, first-order methods are quite slow.
+%   \end{itemize}
+% \end{frame}
 
 
-\begin{frame}{Quasi-Newton Methods () }
-  Construct an approximate Hessian from 
-  first-order information
+\begin{frame}{Quasi-Newton Methods  }
+  Construct an approximate Hessian from  first-order information
   \begin{itemize}
   \item BFGS 
     \begin{itemize}
-    \item construct approx. 
-    \item Hessian directly $O(|\theta|^2)$
+    \item construct approx. Hessian directly
+    \item $O(|\theta|^2)$ space
     \end{itemize}
 
   \item L-BFGS; 
     \begin{itemize}
     \item limited-memory BFGS, only save last $m$ gradients
-    \item can often set $m <20$
-    \item $O(m|\theta|)$
+    \item can often set $m <20$ or smaller
     \end{itemize}
   \end{itemize}
   
-  Details are beyond scope of course. Method of choice for batch convex
-  optimization in ML.
+  Fast implementations available, specific details are beyond scope of course.
 
 \end{frame}
 
 \begin{frame}{Stochastic Methods}
   \begin{itemize}
   \item Minimize function $L(\theta)$
-  \item Require computing $\mathbb{E}(L(\theta))$ and $\mathbb{E}(L'(\theta))$
+  \item Require computing $\mathbb{E}(L(\theta))$ and gradient
   \end{itemize}
 
   \begin{itemize}
-  \item Typically, we do this by sampling a subset of the data.
+  \item Typically, we by sampling a subset of the data.
     computing a gradient, and updating
   \item Other first-order optimizers (like momentum) can be used.
   \end{itemize}
@@ -490,10 +549,18 @@
 \end{frame}
 
 
-\begin{frame}{Tricks On Using SGD}
+\begin{frame}{Tricks On Using SGD (Bottou 2012)}
   \begin{itemize}
-  \item Bottou (2012) is highly-readable (on website)
-  \item Discusses how to handle various regularizers and loss functions.
+
+
+    \item Can be crucial to experiment with learning rate.
+      \air 
+    \item Often useful to use development set for stopping.
+      \air
+    \item Shuffle data first and run over it.
+      \air
+    \item Also describes ``averaged'' versions which work well in practice.
+
   \end{itemize}
 \end{frame}
 
