@@ -19,7 +19,7 @@
    \raisebox{#1\matfield}{#2}%
 }
 \newcommand\matbox[4]{
-  \stackunder{\dimbox{#1}{#2}{$#4$}}{\scriptstyle(#3)}%
+  \stackunder{\dimbox{#1}{#2}{$#4$}}{\scriptstyle #3}%
 }
 
 \title{Part-of-Speech Tagging \\ + \\ Neural Networks}
@@ -40,7 +40,7 @@
 
   Consider now the squared hinge loss, (also called $\ell_2$ SVM)
 
-  \[L_{hinge^2} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'})^2 \} \]
+  \[L_{hinge^2} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'}) \}^2 \]
 
   What is the effect does this have on the loss?
   How do the parameters gradients change?
@@ -588,7 +588,7 @@ singular.
 \begin{frame}{Log-Bilinear Model}
 
 
-  \[ \hat{\boldy} = \log \softmax (\boldx \boldW^1 + \boldb) \]
+  \[ \hat{\boldy} =  \softmax (\boldx \boldW^1 + \boldb) \]
 
   \begin{itemize}
   \item Same form as multiclass logistic regression, but with dense features.
@@ -617,25 +617,39 @@ singular.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Embedding Gradients: Cross-Entropy}
+\begin{frame}[allowframebreaks]{Embedding Gradients: Cross-Entropy}
   Chain Rule:
   \[ \frac{\partial L(f(\boldx))}{\partial x_i} = \sum_{j =1}^m \frac{\partial f(\boldx)_j} {\partial  x_i} \frac{\partial L(f(\boldx))} {\partial f(\boldx)_j}   \]
 
 
-  \[ \hat{\boldy} = \log \softmax (\boldx \boldW^1 + \boldb) \]
+  \[ \hat{\boldy} = \softmax (\boldx \boldW^1 + \boldb) \]
 
-  \pause
+
+
+
+  Recall,
+
+  \[ \frac{\partial L(\boldy, \hat{\boldy})}{\partial z_i} =      \begin{cases}
+      -(1 - \hat{y}_i) & i = c\\
+      \hat{y}_i & ow. \\
+    \end{cases} \]
+
+
+
   \[\frac{\partial L}{\partial x_{f}} =
-    \sum_{i} W^1_{f, i} \frac{\partial L}{\partial z_{f, i}} =
-     W^1_{f,c}  (1-\hat{y}_c)  - \sum_{i \neq c} W^1_{f,i}  \hat{y}_i
+    \sum_{i} W^1_{f, i} \frac{\partial L}{\partial z_{i}} =
+     -W^1_{f,c}  (1-\hat{y}_c)  + \sum_{i \neq c} W^1_{f,i}  \hat{y}_i
   \]
+
+  \air
+  \air
 
   \[ \boldx = \boldx^0 \boldW^0 \]
 
-  \[\frac{\partial x_j}{\partial W^0_{k, j'}} = x^0_{k}  \indicator(j = j')  \]
+  \[\frac{\partial x_f}{\partial W^0_{k, f'}} = x^0_{k}  \indicator(f = f')   \]
 
   Update:
-  \[\frac{\partial L}{\partial W^0_{k,j'}} = x^0_{k}      (W^1_{j',c} (1-\hat{y}_c)  - \sum_{i \neq c} W^1_{j',i}  \hat{y}_i)  \]
+  \[\frac{\partial L}{\partial W^0_{k,f'}} = \sum_{f} x^0_{k} \indicator(f = f') \frac{\partial L}{\partial x_{f}}  =  x^0_{k}      (-W^1_{f',c} (1-\hat{y}_c)  + \sum_{i \neq c} W^1_{f',i}  \hat{y}_i)  \]
 \end{frame}
 
 
@@ -707,7 +721,7 @@ singular.
   \[ \boldx = [v(w_3)\  v(w_4) \  v(w_5) \ v(w_6) \ v(w_7)]  \]
 
   \[\renewcommand\matscale{.6}
-\matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{\boldx} \matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{}% \raiserows{1.5}{\matbox{4}{2}{d_0}{\dout}{\boldW^0}}  \matbox{4}{2}{\din}{\dout}{\boldW^1} +
+\matbox{1.5}{4}{\din /5}{} \matbox{1.5}{4}{\din /5}{} \matbox{1.5}{4}{\din /5}{\boldx} \matbox{1.5}{4}{\din /5}{} \matbox{1.5}{4}{\din /5}{}% \raiserows{1.5}{\matbox{4}{2}{d_0}{\dout}{\boldW^0}}  \matbox{4}{2}{\din}{\dout}{\boldW^1} +
 % \matbox{7}{2}{1}{\dout}{\boldb}
 \]
 
@@ -727,11 +741,11 @@ Rows of $\boldW^1$ encode position specific weights.
   \[ \boldx = [v(w_3)\  v(w_4) \  v(w_5) \ v(w_6) \ v(w_7) \ v_2(w_3)\  v_2(w_4) \  v_2(w_5) \ v_2(w_6) \ v_2(w_7)]  \]
 
   \[\renewcommand\matscale{.6}
-\matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{\boldx} \matbox{1.5}{4}{d_0}{} \matbox{1.5}{4}{d_0}{} \matbox{1.5}{2}{d_0'}{} \matbox{1.5}{2}{d_0'}{} \matbox{1.5}{2}{d_0'}{} \matbox{1.5}{2}{d_0'}{} \matbox{1.5}{2}{d_0'}{}% \raiserows{1.5}{\matbox{4}{2}{d_0}{\dout}{\boldW^0}}  \matbox{4}{2}{\din}{\dout}{\boldW^1} +
+\matbox{1.5}{4}{}{} \matbox{1.5}{4}{}{} \matbox{1.5}{4}{}{} \matbox{1.5}{4}{}{} \matbox{1.5}{4}{}{\boldx} \matbox{1.5}{2}{}{} \matbox{1.5}{2}{}{} \matbox{1.5}{2}{}{} \matbox{1.5}{2}{}{} \matbox{1.5}{2}{}{}% \raiserows{1.5}{\matbox{4}{2}{d_0}{\dout}{\boldW^0}}  \matbox{4}{2}{\din}{\dout}{\boldW^1} +
 % \matbox{7}{2}{1}{\dout}{\boldb}
 \]
 
-Rows of $\boldW^1$ encode position specific weights.
+Rows of $\boldW^1$ encode position/feature specific weights.
 \end{frame}
 
 
