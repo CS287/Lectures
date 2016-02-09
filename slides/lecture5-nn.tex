@@ -1,0 +1,314 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+
+
+\title{Part-of-Speech Tagging \\ + \\ Neural Networks}
+\date{}
+\author{CS 287}
+\begin{document}
+
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}{Quiz: ReLU}
+  Last class we focused on standard hinge loss. 
+  Consider now the squared hinge loss, 
+
+  \[L_{hinge} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'})^2 \} \] 
+
+  What is the effect does this have on the loss?
+  How do the parameters gradients change?
+\end{frame}
+
+\section{Sentence Tagging}
+
+\begin{frame}{Penn Treebank}
+  Hi! I am the ptb. 
+\end{frame}
+
+\begin{frame}{Penn Treebank}
+  Statistics 
+\end{frame}
+
+\begin{frame}{Parse Tree}
+  
+\end{frame}
+
+\begin{frame}{Dataset: Penn Treebank}
+  Penn Treebank, \cite{}
+  \begin{itemize}
+  \item Central dataset in NLP. 
+  \item ~1M word tokens, collected from Wall Street Journal.
+  \item Annotated with syntactic structure. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Shared Tasks}
+  
+\end{frame}
+
+\begin{frame}{Tagset}
+  Pass out examples
+\end{frame}
+
+\begin{frame}{Linguistically}
+  Why are tags important useful. 
+\end{frame}
+
+\begin{frame}{Tagging}
+  
+\end{frame}
+
+\begin{frame}{}
+  How hard is this task?
+  
+  rare words. 
+\end{frame}
+
+\begin{frame}{Tag Features: Word Properties}
+  Representation can use specific aspects of text.
+  \begin{itemize}
+  \item $\mcF$; Spelling, all-capitals, trigger words, etc. 
+  \item $\boldx = \sum_{i} \bolddelta(f_i)$ 
+  \end{itemize}
+
+  Example: Spam Email
+
+  \begin{center}
+    \texttt{Your diploma puts a UUNIVERSITY JOB PLACEMENT COUNSELOR at
+      your disposal.}
+  \end{center}
+  \[  \boldx = v(\texttt{misspelling}) + v(\texttt{allcapital}) + v(\texttt{trigger:diploma}) + \ldots\]
+  \[
+  \boldx^\top = 
+ \begin{bmatrix} 0 \\ \vdots \\ 0\\  0 \\  \end{bmatrix} + 
+ \begin{bmatrix} 0 \\ \vdots \\ 1\\ 0 \\  \end{bmatrix} +
+ \begin{bmatrix} 0 \\ \vdots \\ 0\\  1 \\  \end{bmatrix} = 
+ \begin{bmatrix} 1 \\ \vdots \\ 1 \\ 1 \\  \end{bmatrix}     \begin{matrix*}[l] \mathrm{\texttt{misspelling}} \\ \vdots \\ \mathrm{\texttt{capital}} \\ \mathrm{\texttt{word:diploma}} \\ \end{matrix*}
+  \]
+\end{frame}
+
+\begin{frame}{Features used in state of the art}
+  
+\end{frame}
+
+
+
+
+\begin{frame}{}
+  What if we just used words and context? 
+\end{frame}
+
+
+\section{Window Models}
+
+\begin{frame}{Sentence Tagging}
+  \begin{itemize}
+  \item $w_1, \ldots, w_n$; sentence words
+  \item $t_1, \ldots, t_n$; sentence tags
+  \item $\mcC$; output class, set of tags.  
+  \end{itemize}  
+\end{frame}
+
+
+\begin{frame}{Window Model}
+  \textbf{Goal:} predict $t_5$.
+
+  
+  \begin{itemize}
+  \item Windowed word model. 
+  
+  \[ w_1 w_2 [\textcolor{red}{w_3 w_4 w_5 w_6 w_7}] w_8 \] 
+
+  \item $w_3, w_4$; left context  
+  \item $w_6, w_7$; right context  
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Boundary Cases}
+  \textbf{Goal:} predict $t_2$.
+  \[ [\textcolor{red}{ <s> w_1 w_2 w_3 w_4}] w_5 w_6 w_7 w_8 \] 
+
+
+  \textbf{Goal:} predict $t_8$.
+  \[  w_1 w_2 w_3 w_4 w_5 [\textcolor{red}{w_6 w_7 w_8  </s> </s>}] \] 
+k
+  Symbols $<s>$ and $</s>$ represent boundary padding. 
+\end{frame}
+
+
+\begin{frame}{The Role of Features}
+  \begin{itemize}
+  \item Recall Zipf's law. 
+  \item Many words are .. 
+  \item Can capture patterns. 
+    example.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{How much does this matter?}
+  graph of tagging.
+\end{frame}
+
+\begin{frame}{Sparse Tagging Model}
+  \begin{itemize}
+  \item Create training data,
+    \[ (\boldx_1, \boldy_1),\ldots , (\boldx_n, \boldy_n)\]
+  \item Each $\boldx_i$ includes features of window.
+  \item Each $\boldy_i$ is the one-hot tag encoding.
+  \item Prediction accuracy is measured identically. 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Naive Bayes/Logistic Regression for Tagging}
+  \begin{itemize}
+  \item Setup is identical to text classification.
+
+  \item \[ \hat{\boldy} = \boldx \boldW + \bold b \] 
+  \end{itemize}
+\end{frame}
+
+\section{Neural Networks}
+
+\begin{frame}
+  Collobert and Weston 
+  Natural Language Processing (almost) from Scratch
+\end{frame}
+
+\begin{frame}{Two ideas}
+
+
+  \begin{itemize}
+  \item Non-linear Models
+  \item Dense Word embeddings
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{(1) Non-Linear Models for Classification}
+  \begin{itemize}
+  \item Neural network represent any non-linear classifier, for example
+    \[ NN_1 = f_1(\boldx \boldW^1 + \boldb^1))  \]
+    \[ \hat{\boldy} = f_2(NN_1 \boldW^2 + \boldb^2)  \]
+  \item Where $\boldW^1 \in \reals^{\din \times dmid}, \boldb^1 \in \reals^{1\times dmid}$
+  \item  $\boldW^2 \in \reals^{dmid \times dout}, \boldb^2 \in \reals^{1\times \dout}$
+  \item Activation $f_1$ is non-linear.
+    
+  \end{itemize}
+  Decision $\argmax \hat{y}$ 
+\end{frame}
+
+\begin{frame}{}
+  Can learn non-linear decision boundary. 
+  Diagram
+\end{frame}
+
+\begin{frame}
+  For instance, $f_1$ Sigmoid and $f_2$ softmax
+
+  \[ \frac{\partial L(y, \hat{y})}{\partial \hat{y}_j} = \frac{\indicator(y_j = 1)} {\hat{y}_j}  \]
+
+\end{frame}
+
+
+\begin{frame}
+  For instance, $f_1$ ReLU and $f_2 $hinge-loss
+
+  
+\end{frame}
+
+
+\begin{frame}{Backpropagation} 
+  \begin{itemize}
+  \item Chain rule 
+  \end{itemize}
+\end{frame}
+
+\section{Dense Features}
+ 
+\begin{frame}{(2) Dense Features}
+  
+  Instead of defining $\boldx = \sum_{i=1}^n \delta(f_i)$ 
+
+
+  Where $v : \mcF \mapsto \reals^d$ for instance $v(f) = \delta(f) \boldW^0$ 
+
+  and define  $\boldx = [ v(f_1) \ldots v(f_k)] $ 
+
+  (For now we assume all examples have fixed length) 
+
+\end{frame}
+
+\begin{frame}{Dense Features for Tagging}
+  
+  Instead of defining $\boldx = \sum_{i=1}^n \delta(f_i)$ 
+
+
+  Where $v : \mcF \mapsto \reals^d$ for instance $v(f) = \delta(f) \boldW^0$ 
+
+  and define  $\boldx = [ v(f_1) \ldots v(f_k)] $ 
+
+  (For now we assume all examples have fixed length) 
+
+\end{frame}
+
+\begin{frame}{Dense Features for Tagging}
+  
+  Instead of defining $\boldx = \sum_{i=1}^n \delta(f_i)$ 
+
+
+  Where $v : \mcF \mapsto \reals^d$ for instance $v(f) = \delta(f) \boldW^0$ 
+
+  and define  $\boldx = [ v^1(f_1) \ldots v^1(f_k) \ldots v^2(f_k+1) \ldots v^2(f_k)] $ 
+
+  (For now we assume all examples have fixed length) 
+
+\end{frame}
+
+
+
+
+\begin{frame}{Parameters}
+  \begin{itemize}
+  \item With word features $|\mcV|$ 
+
+  \item With all pair word features $|\mcV|^2$ 
+
+
+  \item With word embedding features $d |\mcV|$ 
+    
+    Representation that allows parameter sharing.
+  \end{itemize}  
+\end{frame}
+
+
+
+
+\begin{frame}{Lookup layer is Learned too}
+  results
+\end{frame}
+
+\begin{frame}
+  Results 
+  Pretty good
+  \begin{table}
+    \centering
+    
+  \end{table}
+\end{frame}
+
+\begin{frame}{}
+  objective
+
+  Diagram 
+\end{frame}
+
+
+
+\end{document}
+
