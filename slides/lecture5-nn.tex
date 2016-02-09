@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-
+\setbeamercovered{invisible}
+\usepackage{tikz-qtree}
 
 \title{Part-of-Speech Tagging \\ + \\ Neural Networks}
 \date{}
@@ -15,7 +16,7 @@
 
 \begin{frame}{Quiz: ReLU}
   Last class we focused on standard hinge loss. 
-  Consider now the squared hinge loss, 
+  Consider now the squared hinge loss, ($\ell_2$ SVM) 
 
   \[L_{hinge} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'})^2 \} \] 
 
@@ -23,72 +24,329 @@
   How do the parameters gradients change?
 \end{frame}
 
-\section{Sentence Tagging}
+\section{Syntactic Annotation}
 
-\begin{frame}{Penn Treebank}
-  Hi! I am the ptb. 
-\end{frame}
-
-\begin{frame}{Penn Treebank}
-  Statistics 
-\end{frame}
-
-\begin{frame}{Parse Tree}
-  
-\end{frame}
-
-\begin{frame}{Dataset: Penn Treebank}
-  Penn Treebank, \cite{}
+\begin{frame}{Penn Treebank (Marcus et al, 1993)}
   \begin{itemize}
-  \item Central dataset in NLP. 
-  \item ~1M word tokens, collected from Wall Street Journal.
-  \item Annotated with syntactic structure. 
+    \item The ur-dataset of statistical NLP
+      \air 
+    \item Constructed from 1989-1992.
+      \air
+    \item Contains 4.5 million token 
+      \air 
+    \item Around 1 million make up the core PTB, text from 1989 Wall Street Journal
   \end{itemize}
-\end{frame}
-
-\begin{frame}{Shared Tasks}
-  
-\end{frame}
-
-\begin{frame}{Tagset}
-  Pass out examples
-\end{frame}
-
-\begin{frame}{Linguistically}
-  Why are tags important useful. 
 \end{frame}
 
 \begin{frame}{Tagging}
-  
+    \begin{quote}
+So
+what
+if
+Steinbach
+had
+struck
+just
+seven
+home
+runs
+in
+130
+regular-season
+games
+,
+and
+batted
+in
+the
+seventh
+position
+of
+the
+A
+'s
+lineup
+.
+  \end{quote}
+
 \end{frame}
 
-\begin{frame}{}
-  How hard is this task?
-  
-  rare words. 
+\begin{frame}{Part-of-Speech Tags}
+
+  \begin{quote}
+So/RB
+what/WP
+if/IN
+Steinbach/NNP
+had/VBD
+struck/VBN
+just/RB
+seven/CD
+home/NN
+runs/NNS
+in/IN
+130/CD
+regular-season/JJ
+games/NNS
+,/,
+and/CC
+batted/VBD
+in/IN
+the/DT
+seventh/JJ
+position/NN
+of/IN
+the/DT
+A/NNP
+'s/NNP
+lineup/NN
+./.
+  \end{quote}
+
 \end{frame}
 
-\begin{frame}{Tag Features: Word Properties}
+\begin{frame}{Syntax}
+\begin{center}
+\scalebox{0.3}{
+
+\Tree [.S [.S  [.NP [.ADJP Battle-tested industrial ]
+managers ]
+[.? here ]
+[.? always ]
+[.VP buck ] ]
+[.? [.PP up
+[.NP nervous newcomers ] ] ]
+[.? [.PP with
+[.NP the tale
+[.PP of
+[.NP the
+[.ADJP first ] ] ] ] ] ]
+[.? [.PP of
+[.NP their countrymen ] ] ]
+[.? [.S [.NP * ]
+to
+[.VP visit
+[.NP Mexico ] ] ] ]
+[.? , ]
+[.? [.NP a boatload
+[.PP of
+[.NP warriors ] ]
+[.VP blown
+[.? ashore ]
+[.NP 375 years ] ] ] ]
+[.? ago ]
+[.? . ]   ]}
+\end{center}
+
+\pause
+\begin{center}
+ 
+\scalebox{0.5} {
+\Tree  [.NP a boatload
+[.PP of
+[.NP warriors ] ]
+[.VP blown
+[.? ashore ]
+[.NP 375 years ] ] ]}
+\end{center}
+\end{frame}
+
+\begin{frame}[allowframebreaks,t]{``Simplified'' English Tagset}
+  \begin{enumerate}
+  \item , Punctuation
+  \item CC Coordinating conjunction
+  \item CD Cardinal number
+  \item DT Determiner
+  \item EX Existential there
+  \item FW Foreign word
+  \item IN Preposition or subordinating conjunction
+  \item  JJ Adjective
+  \item JJR Adjective, comparative
+  \item JJS Adjective, superlative
+  \item LS List item marker
+  \item MD Modal
+  \item NN Noun, singular or mass
+  \item NNS Noun, plural
+  \item NNP Proper noun, singular
+  \item NNPS Proper noun, plural
+  \item PDT Predeterminer
+  \item POS Possessive ending
+  \item PRP Personal pronoun
+  \item PRP\$ Possessive pronoun
+  \item RB Adverb
+  \item RBR Adverb, comparative
+  \item RBS Adverb, superlative
+  \item RP Particle
+  \item SYM Symbol
+  \item TO to
+  \item UH Interjection
+  \item VB Verb, base form
+  \item VBD Verb, past tense
+  \item VBG Verb, gerund or present participle
+  \item VBN Verb, past participle
+  \item VBP Verb, non-3rd person singular present
+  \item VBZ Verb, 3rd person singular present
+  \item WDT Wh-determiner
+  \item WP  Wh-pronoun
+  \item WP\$ Possessive wh-pronoun
+  \item WRB Wh-adverb
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+
+
+\textbf{NN or NNS}
+
+\begin{quote}
+  Whether a noun is tagged singular or plural depends not on its
+  semantic properties, but on whether it triggers singular or plural
+  agreement on a verb. We illustrate this below for common nouns, but
+  the same criterion also applies to proper nouns.
+  
+Any noun that triggers singular agreement on a verb should be tagged as singular, even if it ends in final -s.
+
+\air 
+
+\textnormal{EXAMPLE: Linguistics NN is/*are a difficult field.}
+
+\air 
+If a noun is semantically plural or collective, but triggers singular agreement, it should be tagged as
+singular.
+
+\air 
+\textnormal{EXAMPLES: The group/NN has/*have disbanded.}
+
+\textnormal{The jury/NN is/*are deliberating.} 
+
+\end{quote}
+
+\end{frame}
+
+
+\begin{frame}{Language Specific?}
+  \begin{itemize}
+  \item Chinese has circumpositions, German doesn't really gerunds, etc. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Universal Part-of-Speech Tags}
+
+  \begin{enumerate}
+  \item VERB - verbs (all tenses and modes)
+  \item NOUN - nouns (common and proper)
+  \item PRON - pronouns 
+  \item ADJ - adjectives
+  \item ADV - adverbs
+  \item ADP - adpositions (prepositions and postpositions)
+  \item CONJ - conjunctions
+  \item DET - determiners
+  \item NUM - cardinal numbers
+  \item PRT - particles or other function words
+  \item X - other: foreign words, typos, abbreviations
+  \item . - punctuation
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Why do tags matter?}
+  \begin{itemize}
+    \item Interesting linguistic question.
+      \air 
+
+    \item Used for many downstream NLP tasks. 
+    \air
+
+    \item Benchmark linguistic NLP task. 
+  \end{itemize}
+  \pause
+
+  However note, 
+
+  \begin{itemize}
+  \item Possibly have ``solved'' PTB tagging (Manning, 2011)
+    \air 
+
+  \item Deep Learning skepticism  
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Strawman: Sparse Tagging Models}
+  Let,
+  \begin{itemize}
+  \item $\mcF$; just be the set of word type
+    \air 
+  \item $\mcC$; be the set of part-of-speech tags, $|\mcC|\approx 40$
+    \air
+  \item Use a linear model, $\hat{y} = f(\boldx \boldW + \boldb)$ 
+  \end{itemize}
+  However this runs into clear issues.
+
+\end{frame}
+
+
+\begin{frame}{Why is tagging hard?}
+  \begin{enumerate}
+  \item 
+  Rare Words
+  \begin{itemize}
+  \item 3\% of tokens in PTB dev are unseen.
+  \item What can we even do with these? 
+  \end{itemize}
+  
+  \item Ambiguous Words
+  \begin{itemize}
+  \item Around 50\% of seen dev tokens are ambiguous in train.
+  \item How can we decide between different tags for the same type?
+  \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Better Tag Features: Word Properties}
   Representation can use specific aspects of text.
   \begin{itemize}
-  \item $\mcF$; Spelling, all-capitals, trigger words, etc. 
+  \item $\mcF$; Prefixes, suffixes, hyphens, first capital, all-capital, hasdigits, etc. 
   \item $\boldx = \sum_{i} \bolddelta(f_i)$ 
   \end{itemize}
 
-  Example: Spam Email
+  Example: Rare word tagging
 
   \begin{center}
-    \texttt{Your diploma puts a UUNIVERSITY JOB PLACEMENT COUNSELOR at
-      your disposal.}
+    \texttt{in 130 regular-season/JJ games ,}
   \end{center}
-  \[  \boldx = v(\texttt{misspelling}) + v(\texttt{allcapital}) + v(\texttt{trigger:diploma}) + \ldots\]
-  \[
-  \boldx^\top = 
- \begin{bmatrix} 0 \\ \vdots \\ 0\\  0 \\  \end{bmatrix} + 
- \begin{bmatrix} 0 \\ \vdots \\ 1\\ 0 \\  \end{bmatrix} +
- \begin{bmatrix} 0 \\ \vdots \\ 0\\  1 \\  \end{bmatrix} = 
- \begin{bmatrix} 1 \\ \vdots \\ 1 \\ 1 \\  \end{bmatrix}     \begin{matrix*}[l] \mathrm{\texttt{misspelling}} \\ \vdots \\ \mathrm{\texttt{capital}} \\ \mathrm{\texttt{word:diploma}} \\ \end{matrix*}
-  \]
+  \begin{eqnarray*} 
+    \boldx &=& \delta(\texttt{prefix:3:reg}) + \delta(\texttt{prefix:2:re}) \\
+    &+& \delta(\texttt{prefix:1:r}) + \delta(\texttt{has-hyphen}) \\
+    &+& \delta(\texttt{lower-case}) + \delta(\texttt{suffix:3:son}) \ldots
+  \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Better Tag Features: Tag Sequence}
+  Representation can use specific aspects of text.
+  \begin{itemize}
+  \item $\mcF$; Prefixes, suffixes, hyphens, first capital, all-capital, hasdigits, etc.
+  \item \alert{Also} include features on previous tags
+  \end{itemize}
+
+  Example: Rare word tagging with context
+
+  \begin{center}
+    \texttt{in 130/CD regular-season/JJ games ,}
+  \end{center}
+  \begin{eqnarray*} 
+    \boldx &=& \delta(\texttt{last:CD}) + \delta(\texttt{prefix:3:reg}) + \delta(\texttt{prefix:2:re}) \\
+    &+& \delta(\texttt{prefix:1:r}) + \delta(\texttt{has-hyphen}) \\
+    &+& \delta(\texttt{lower-case}) + \delta(\texttt{suffix:3:son}) \ldots
+  \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Modeling Context}
+  \begin{itemize}
+  \item Features on context require inference.
+  \item Still standard way to do tagging. 
+  \item Very fast implementation in Stanford CoreNLP 
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Features used in state of the art}
