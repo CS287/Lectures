@@ -1,8 +1,7 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-\setbeamercovered{invisible}
 \usepackage{tikz-qtree}
-
+\usepackage{listings}
 \usepackage{stackengine}
 \stackMath
 \newlength\matfield
@@ -34,108 +33,64 @@
 \end{frame}
 
 
-\begin{frame}{Quiz: ReLU}
-  Last class we focused on standard hinge loss.
-  Consider now the squared hinge loss, ($\ell_2$ SVM)
+\begin{frame}{Quiz}
+  Last class we focused on hinge loss.
 
-  \[L_{hinge} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'})^2 \} \]
+  \[L_{hinge} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'}) \} \]
+
+  Consider now the squared hinge loss, (also called $\ell_2$ SVM)
+
+  \[L_{hinge^2} = \max\{0, 1 - (\hat{y}_c - \hat{y}_{c'})^2 \} \]
 
   What is the effect does this have on the loss?
   How do the parameters gradients change?
 \end{frame}
 
 
-\begin{frame}{Today's Class}
-  \begin{itemize}
-  \item Part-of-Speech Tagging as a Motivating Example
-    \air
 
-  \item Bilinear Models
-    \air
-
-  \item Windowed Models
-  \end{itemize}
-\end{frame}
-
-\section{Syntactic Annotation}
+\section{Part-of-Speech Data}
 
 \begin{frame}{Penn Treebank (Marcus et al, 1993)}
-  \begin{itemize}
-    \item The ur-dataset of statistical NLP
-      \air
-    \item Constructed from 1989-1992.
-      \air
-    \item Contains 4.5 million token
-      \air
-    \item Around 1 million make up the core PTB, text from 1989 Wall Street Journal
-  \end{itemize}
-\end{frame}
 
-\begin{frame}{Tagging}
-    \begin{quote}
-So
-what
-if
-Steinbach
-had
-struck
-just
-seven
-home
-runs
-in
-130
-regular-season
-games
-,
-and
-batted
-in
-the
-seventh
-position
-of
-the
-A
-'s
-lineup
-.
-  \end{quote}
+\lstset{ basicstyle=\ttfamily, breaklines=true}
 
-\end{frame}
-
-\begin{frame}{Part-of-Speech Tags}
-
-  \begin{quote}
-So/RB
-what/WP
-if/IN
-Steinbach/NNP
-had/VBD
-struck/VBN
-just/RB
-seven/CD
-home/NN
-runs/NNS
-in/IN
-130/CD
-regular-season/JJ
-games/NNS
-,/,
-and/CC
-batted/VBD
-in/IN
-the/DT
-seventh/JJ
-position/NN
-of/IN
-the/DT
-A/NNP
-'s/NNP
-lineup/NN
-./.
-  \end{quote}
-
+\texttt{
+( (S (CC But)
+    (SBAR-ADV (IN while)
+      (S
+        (NP-SBJ (DT the) (NNP New) (NNP York) (NNP Stock) (NNP Exchange) )
+        (VP (VBD did) (RB n't)
+          (VP (VB fall)
+            (ADVP-CLR (RB apart) )
+            (NP-TMP (NNP Friday) )
+            (SBAR-TMP (IN as)
+              (S
+                (NP-SBJ (DT the) (NNP Dow)
+                (NNP Jones) (NNP Industrial) (NNP Average) )
+                (VP (VBD plunged)
+                  (NP-EXT
+                    (NP (CD 190.58) (NNS points) )
+                    (PRN (: -)
+                      (NP
+                        (NP (JJS most) )
+                        (PP (IN of)
+                          (NP (PRP it) ))
+                        (PP-TMP (IN in)
+                          (NP (DT the) (JJ final) (NN hour) )))
+                      (: -) )))))))))
+    (NP-SBJ-2 (PRP it) )
+    (ADVP (RB barely) )
+    (VP (VBD managed)
+      (S
+        (NP-SBJ (-NONE- -2) )
+        (VP (TO to)
+          (VP (VB stay)
+            (NP-LOC-PRD
+              (NP (DT this) (NN side) )
+              (PP (IN of)
+                (NP (NN chaos) )))))))
+    (. .)))
+}
 \end{frame}
 
 \begin{frame}{Syntax}
@@ -174,7 +129,7 @@ to
 \pause
 \begin{center}
 
-\scalebox{0.5} {
+\scalebox{0.7} {
 \Tree  [.NP a boatload
 [.PP of
 [.NP warriors ] ]
@@ -183,6 +138,111 @@ to
 [.NP 375 years ] ] ]}
 \end{center}
 \end{frame}
+
+
+\begin{frame}{Tagging}
+    \begin{quote}
+So
+what
+if
+Steinbach
+had
+struck
+just
+seven
+home
+runs
+in
+130
+regular-season
+games
+,
+and
+batted
+in
+the
+seventh
+position
+of
+the
+A
+'s
+lineup
+.
+  \end{quote}
+
+\end{frame}
+
+
+\begin{frame}{Part-of-Speech Tags}
+
+  \begin{quote}
+So/RB
+what/WP
+if/IN
+Steinbach/NNP
+had/VBD
+struck/VBN
+just/RB
+seven/CD
+home/NN
+runs/NNS
+in/IN
+130/CD
+regular-season/JJ
+games/NNS
+,/,
+and/CC
+batted/VBD
+in/IN
+the/DT
+seventh/JJ
+position/NN
+of/IN
+the/DT
+A/NNP
+'s/NNP
+lineup/NN
+./.
+  \end{quote}
+
+\end{frame}
+
+
+\begin{frame}{Part-of-Speech Tags}
+
+  \begin{quote}
+So/RB
+what/WP
+if/IN
+Steinbach/NNP
+had/VBD
+struck/VBN
+just/RB
+seven/CD
+home/NN
+runs/NNS
+in/IN
+130/CD
+regular-season/JJ
+games/NNS
+,/,
+and/CC
+batted/VBD
+in/IN
+the/DT
+seventh/JJ
+position/NN
+of/IN
+the/DT
+A/NNP
+'s/NNP
+lineup/NN
+./.
+  \end{quote}
+
+\end{frame}
+
 
 \begin{frame}[allowframebreaks,t]{``Simplified'' English Tagset}
   \begin{enumerate}
@@ -259,11 +319,17 @@ singular.
 
 \begin{frame}{Language Specific?}
   \begin{itemize}
-  \item Chinese has circumpositions, German doesn't really gerunds, etc.
+  \item Which of these tags are English only?
+    \air
+
+  \item Are there  phenomenon that these don't cover?
+    \air
+
+  \item Should our models be language specific?
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Universal Part-of-Speech Tags}
+\begin{frame}{Universal Part-of-Speech Tags (Petrov et al, 2012)}
 
   \begin{enumerate}
   \item VERB - verbs (all tenses and modes)
@@ -304,16 +370,17 @@ singular.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Strawman: Sparse Tagging Models}
+\section{Part-of-Speech Models}
+
+\begin{frame}{Strawman: Sparse Word-only Tagging Models}
   Let,
   \begin{itemize}
   \item $\mcF$; just be the set of word type
     \air
   \item $\mcC$; be the set of part-of-speech tags, $|\mcC|\approx 40$
     \air
-  \item Use a linear model, $\hat{y} = f(\boldx \boldW + \boldb)$
+  \item Proposal: Use a linear model, $\hat{y} = f(\boldx \boldW + \boldb)$
   \end{itemize}
-  However this runs into clear issues.
 
 \end{frame}
 
@@ -346,7 +413,7 @@ singular.
   Example: Rare word tagging
 
   \begin{center}
-    \texttt{in 130 regular-season/JJ games ,}
+    \texttt{in 130 \alert{regular-season/*} games ,}
   \end{center}
   \begin{eqnarray*}
     \boldx &=& \delta(\texttt{prefix:3:reg}) + \delta(\texttt{prefix:2:re}) \\
@@ -359,53 +426,57 @@ singular.
   Representation can use specific aspects of text.
   \begin{itemize}
   \item $\mcF$; Prefixes, suffixes, hyphens, first capital, all-capital, hasdigits, etc.
-  \item \alert{Also} include features on previous tags
+  \item \structure{Also} include features on previous tags
   \end{itemize}
 
   Example: Rare word tagging with context
 
   \begin{center}
-    \texttt{in 130/CD regular-season/JJ games ,}
+    \texttt{in \structure{130/CD} \alert{regular-season/*} games ,}
   \end{center}
   \begin{eqnarray*}
     \boldx &=& \delta(\texttt{last:CD}) + \delta(\texttt{prefix:3:reg}) + \delta(\texttt{prefix:2:re}) \\
     &+& \delta(\texttt{prefix:1:r}) + \delta(\texttt{has-hyphen}) \\
     &+& \delta(\texttt{lower-case}) + \delta(\texttt{suffix:3:son}) \ldots
   \end{eqnarray*}
+
+  \alert{However,} requires search. HMM-style sequence algorithms.
 \end{frame}
 
-\begin{frame}{Modeling Context}
-  \begin{itemize}
-  \item Features on context require inference.
-  \item Still standard way to do tagging.
-  \item Very fast implementation in Stanford CoreNLP
-  \end{itemize}
-\end{frame}
+% \begin{frame}{Modeling Context}
+%   \begin{itemize}
+%   \item Features on context require inference.
+%   \item Still standard way to do tagging.
+%   \item Very fast implementation in Stanford CoreNLP
+%   \end{itemize}
+% \end{frame}
 
-\begin{frame}{NLP From Scratch (Collobert et al. 2011)}
-  What if we just used words and context?
+\begin{frame}{NLP (almost) From Scratch (Collobert et al. 2011)}
+  Exercise: What if we just used words and context?
 
   \begin{itemize}
-  \item No lexical features (mostly)
+  \item No word-specific features (mostly)
     \air
 
-  \item No inference (mostly)
+  \item No search over previous decisions
+
+    \air
   \end{itemize}
 
 
 
-  We will work our way up to the full paper.
+  Next couple classes, we will work our way up to this paper,
 
   \begin{enumerate}
-  \item Word representations with shared information
-  \item Contextual input representations
-  \item Semi-Supervised training.
+  \item Dense word features
+  \item Contextual windowed representations
+  \item Neural networks architecture
+  \item Semi-supervised training
   \end{enumerate}
 \end{frame}
 
 
 \section{Bilinear Model}
-
 
 \begin{frame}{Motivation: Dense Features}
   \begin{itemize}
@@ -413,9 +484,7 @@ singular.
     \air
   \item Features allow us to share information between words.
     \air
-  \item However, requires knowledge of what to share.
-    \air
-  \item We will build up to dense, $\boldx \in \reals^{1\times \din}$.
+  \item Can this be learned?
   \end{itemize}
 \end{frame}
 
@@ -424,7 +493,7 @@ singular.
   Bilinear model,
   \[\hat{\boldy} = f((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
   \begin{itemize}
-  \item $\boldx^0 \in \reals^{1 \times d_0}$ usually $\boldx^0 \in \{0, 1\}^{1 \times d_0}$ or one-hot
+  \item $\boldx^0 \in \reals^{1 \times d_0}$ start with one-hot.
   \item $\boldW^0 \in \reals^{d_0 \times \din}$, $d_0 = |\mcF|$
   \item $\boldW^1 \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
   \end{itemize}
@@ -432,7 +501,7 @@ singular.
   Notes:
   \begin{itemize}
   \item Bilinear parameter interaction.
-  \item
+  \item $d_0 >> \din$, e.g. $d_0 = 10000, \din = 50$
   \end{itemize}
 
 \end{frame}
@@ -465,7 +534,7 @@ singular.
 \end{frame}
 
 \begin{frame}{Embedding Layer}
-  \[ (\boldx^0 \boldW^0)\]
+  \[ \boldx^0 \boldW^0\]
   \begin{center}
 
   \scalebox{0.6}{
@@ -491,12 +560,16 @@ singular.
     \item Feature embeddings/ word embeddings
     \item Lookup Table
     \item Feature/Representation Learning
-    \item (In Torch, \texttt{nn.LookupTable} ($\boldx$ one-hot) or \texttt{nn.SparseLinear})
+    \item In Torch, \texttt{nn.LookupTable} ($\boldx^0$ one-hot)
     \end{itemize}
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Dense Features}
+  When dense features implied we will write,
+  \[\hat{\boldy} = f(\boldx\boldW^1 + \boldb)\]
+
+
   Example 1: single-word classfication with embeddings
 
   \[ \boldx = v(f_1; \theta) = \bolddelta(f_1) \boldW^0 = \boldx^0 \boldW^0\]
@@ -505,10 +578,9 @@ singular.
   \item $v: \mcF \mapsto \reals^{1\times \din}$; parameterized embedding function
   \end{itemize}
 
-  With dense features, we write bilinear model as,
-  \[\hat{\boldy} = f(\boldx\boldW^1 + \boldb)\]
 
-  Example 2: Bag-of-words classfication with embeddings
+  \pause
+  \mathbf{Example 2}: Bag-of-words classfication with embeddings
 
   \[ \boldx = \sum_{i=1}^{k} v(f_i; \theta) = \sum_{i=1}^{k} \bolddelta(f_i) \boldW^0\]
 \end{frame}
@@ -549,8 +621,10 @@ singular.
   Chain Rule:
   \[ \frac{\partial L(f(\boldx))}{\partial x_i} = \sum_{j =1}^m \frac{\partial f(\boldx)_j} {\partial  x_i} \frac{\partial L(f(\boldx))} {\partial f(\boldx)_j}   \]
 
+
   \[ \hat{\boldy} = \log \softmax (\boldx \boldW^1 + \boldb) \]
 
+  \pause
   \[\frac{\partial L}{\partial x_{f}} =
     \sum_{i} W^1_{f, i} \frac{\partial L}{\partial z_{f, i}} =
      W^1_{f,c}  (1-\hat{y}_c)  - \sum_{i \neq c} W^1_{f,i}  \hat{y}_i
@@ -565,18 +639,18 @@ singular.
 \end{frame}
 
 
-\begin{frame}{Geometric Interpretation}
-  \begin{center}
-    [On Board]
-  \end{center}
-\end{frame}
+% \begin{frame}{Geometric Interpretation}
+%   \begin{center}
+%     [On Board]
+%   \end{center}
+% \end{frame}
 
 \section{Windowed Models}
 
 
-\begin{frame}{}
+% \begin{frame}{}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Sentence Tagging}
   \begin{itemize}
