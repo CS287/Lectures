@@ -1,6 +1,6 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-
+\usepackage{pdfpages}
 \usepackage{stackengine}
 \stackMath
 \newlength\matfield
@@ -47,7 +47,7 @@
 \begin{frame}{Review:  Bilinear Model: Intuition}
   \[ (\boldx^0 \boldW^0)\boldW^1 + \boldb\]
 
-  
+
   \[
     \begin{bmatrix}
       0 & \ldots & \textcolor{red}{1} & \ldots & 0 \\
@@ -143,7 +143,7 @@ Rows of $\boldW^1$ encode position specific weights.
 
 
 
-      
+
   \[{\tiny
     \begin{bmatrix}
        \textcolor{red}{1}   & \textcolor{red}{1} &  \textcolor{red}{1} &
@@ -183,32 +183,32 @@ Rows of $\boldW^1$ encode position specific weights.
 \end{frame}
 
 
-\begin{frame}{Part-of-Speech Tagging}
-  Consider the following windowed model, and 
+\begin{frame}{Part-of-Speech Tagging 1}
+  Consider the following windowed model, and
   assume for now a linear model.
 
-  \[w_1\ \mathrm{\texttt{the}}\ w_3\ w_4\ w_5\] 
-  
+  \[ [ w_1\ \mathrm{\texttt{the}}\ w_3\ w_4\ w_5 ]\]
+
 
   \begin{itemize}
   \item What information do we have about the tag of $w_3$?
-    \air 
+    \air
 
   \item What weight should the features values associated with
     \texttt{the} in position $w_2$ take?
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Part-of-Speech Tagging}
-  Next Consider the following windowed model, and 
+\begin{frame}{Part-of-Speech Tagging 2}
+  Next Consider the following windowed model, and
   assume for now a linear model.
 
-  \[w_1\ w_2 \ w_3\ \mathrm{\texttt{dog}} \ w_5\] 
-  
+  \[[ w_1\ w_2 \ w_3\ \mathrm{\texttt{dog}} \ w_5 ]\]
+
 
   \begin{itemize}
   \item What information do we have about the tag of $w_3$?
-    \air 
+    \air
 
   \item What weight should the features values associated with
     \texttt{dog} in position $w_4$ take?
@@ -217,24 +217,20 @@ Rows of $\boldW^1$ encode position specific weights.
 \end{frame}
 
 
-\begin{frame}{Part-of-Speech Tagging}
-  Now finally consider the following windowed model, and 
+\begin{frame}{Part-of-Speech Tagging 3}
+  Now finally consider the following windowed model, and
   assume for now a linear model.
 
-  \[w_1\ \texttt{the} \ w_3\ \mathrm{\texttt{dog}} \ w_5\] 
-  
+  \[[w_1\ \texttt{the} \ w_3\ \mathrm{\texttt{dog}} \ w_5] \]
+
 
   \begin{itemize}
   \item What information do we have about the tag of $w_3$?
-    \air 
+    \air
 
   \item What weight would we want if we combined both the features values?
   \end{itemize}
 
-\end{frame}
-
-\begin{frame}{Table}
-  
 \end{frame}
 
 \section{Neural Networks}
@@ -244,7 +240,6 @@ Rows of $\boldW^1$ encode position specific weights.
     \includegraphics[width=5cm]{brain}
   \end{center}
 \end{frame}
-
 
 \begin{frame}{Neural Network}
   One-layer multi-layer perceptron architecture,
@@ -262,7 +257,7 @@ Rows of $\boldW^1$ encode position specific weights.
 
 \begin{frame}{Schematic}
   \begin{center}
-    
+
 
   \begin{tikzpicture}
     \node(aa)[draw, circle]{$x_1$};
@@ -278,21 +273,21 @@ Rows of $\boldW^1$ encode position specific weights.
 
     \node(bd)[below of =  bc, draw, circle]{$h_{\dhid}$};
 
-    \path[draw] (aa) -- (ba); 
-    \path[draw] (aa) -- (bb); 
-    \path[draw] (aa) -- (bd); 
+    \path[draw] (aa) -- (ba);
+    \path[draw] (aa) -- (bb);
+    \path[draw] (aa) -- (bd);
 
-    \path[draw] (ab) -- (ba); 
-    \path[draw] (ab) -- (bb); 
-    \path[draw] (ab) -- (bd); 
+    \path[draw] (ab) -- (ba);
+    \path[draw] (ab) -- (bb);
+    \path[draw] (ab) -- (bd);
 
-    \path[draw] (ac) -- (ba); 
-    \path[draw] (ac) -- (bb); 
-    \path[draw] (ac) -- (bd); 
+    \path[draw] (ac) -- (ba);
+    \path[draw] (ac) -- (bb);
+    \path[draw] (ac) -- (bd);
 
-    \path[draw] (ae) -- (ba); 
-    \path[draw] (ae) -- (bb); 
-    \path[draw] (ae) -- (bd); 
+    \path[draw] (ae) -- (ba);
+    \path[draw] (ae) -- (bb);
+    \path[draw] (ae) -- (bd);
 
 
     \node(ca)[xshift= 2cm, yshift=0.5cm, right of = ba, draw, circle]{$z_1$};
@@ -302,56 +297,113 @@ Rows of $\boldW^1$ encode position specific weights.
     \node(ce)[below of =  cd, draw, circle]{$z_{\dout}$};
 
 
-    \path[draw] (ba) -- (ca); 
-    \path[draw] (ba) -- (cb); 
-    \path[draw] (ba) -- (cc); 
-    \path[draw] (ba) -- (ce); 
+    \path[draw] (ba) -- (ca);
+    \path[draw] (ba) -- (cb);
+    \path[draw] (ba) -- (cc);
+    \path[draw] (ba) -- (ce);
 
-    \path[draw] (bb) -- (ca); 
-    \path[draw] (bb) -- (cb); 
-    \path[draw] (bb) -- (cc); 
-    \path[draw] (bb) -- (ce); 
+    \path[draw] (bb) -- (ca);
+    \path[draw] (bb) -- (cb);
+    \path[draw] (bb) -- (cc);
+    \path[draw] (bb) -- (ce);
 
-    \path[draw] (bd) -- (ca); 
-    \path[draw] (bd) -- (cb); 
-    \path[draw] (bd) -- (cc); 
-    \path[draw] (bd) -- (ce); 
+    \path[draw] (bd) -- (ca);
+    \path[draw] (bd) -- (cb);
+    \path[draw] (bd) -- (cc);
+    \path[draw] (bd) -- (ce);
 
 
-  \end{tikzpicture}  
+  \end{tikzpicture}
   \end{center}
 \end{frame}
 
-\begin{frame}{Non-Linear Functions}
+
+\begin{frame}{Non-Linearities: 0/1}
+  0/1 function:
+  \[0/1(t) = \indicator(t > 0) \]
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{../notebooks/01}
+  \end{figure}
+
+  \begin{itemize}
+  \item $01((\boldx\boldW^1 + \boldb^1)_i)$
+  \item Intuition: On, if above a threshold
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Exercise}
+  Input layer to $NN_{MLP1}$ is the sparse indicator features
+  of the word at each position.
+
+  \begin{itemize}
+  \item Design a network to recognize
+  \[[w_1\ \texttt{the} \ w_3\ \mathrm{\texttt{dog}} \ w_5] \]
+
+  \item Design a network to recognize  where $w_2$ is not \texttt{the}
+  \[[w_1\ w_2 \ w_3\ \mathrm{\texttt{dog}} \ w_5] \]
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Feature Conjunctions}
+  Many NLP tasks require conjunctive features, examples
+  \begin{itemize}
+  \item Sequence-based taggers look at last two-part of speech tags.
+    \air
+
+  \item Chinese part-of-speech taggers look at first character and last tag.
+    \air
+
+  \item Higher-level models (parses) look at tags of words and distances apart (example)
+  \end{itemize}
+  \air
+
+  For some natural language tasks, conjunctions are painstakingly hard.
+
+  \pause
+  \begin{itemize}
+  \item NNs: Capacity to learn conjunctions and feature combinations.
+    \air
+
+  \item Also possible with other convex models such as SVMs
+  \end{itemize}
+\end{frame}
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=14]{swacl15}
+\includepdf[pages=16]{swacl15}
+}
+
+
+\begin{frame}{Non-Linearities: 0/1}
+  0/1 function:
+  \[0/1(t) = \indicator(t > 0) \]
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{../notebooks/01}
+    \includegraphics[width=5cm]{../notebooks/01grad}
+  \end{figure}
+
+  \begin{itemize}
+  \item Issue: No gradient anywhere
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Non-Linear Functions: Sigmoid}
   Logistic sigmoid function:
   \[\sigma(t) = \frac{1}{1 + \exp(-t)} \]
   \begin{figure}
     \centering
-    \includegraphics[width=5cm]{../notebooks/sigmoid}
+    \includegraphics[width=5cm]{../notebooks/sigmoid}     \includegraphics[width=5cm]{../notebooks/sigmoidgrad}
   \end{figure}
 
   \begin{itemize}
   \item $\sigma((\boldx\boldW^1 + \boldb^1)_i)$
   \item Intuition: Each hidden dimension (``neuron'') is result of logistic regression.
-  \item These probabilities are ``features'' for next layer. 
   \end{itemize}
-\end{frame}
-
-\begin{frame}{Feature Conjunctions}
-  Consider the example ... 
-\end{frame}
-
-
-\begin{frame}{Non-Convexity}
-
-  \begin{itemize}
-  \item 
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}
-  Why are these better?
 \end{frame}
 
 
@@ -361,134 +413,380 @@ Rows of $\boldW^1$ encode position specific weights.
     \centering
     \[\relu(t) = \max\{0, t\} \]
     \includegraphics[width=5cm]{../notebooks/Relu}
+    \includegraphics[width=5cm]{../notebooks/Relugrad}
   \end{figure}
-  Intuition:
+  \begin{itemize}
+  \item Intuition: Each hidden-unit gives activation margin
+  \item No gradient (saturation) when below 0.
+  \end{itemize}
 \end{frame}
-
-
-\begin{frame}{Saturation}
-  
-\end{frame}
-
 
 \begin{frame}{Saturation: Intuition}
-  
+  \begin{center}
+  \begin{tikzpicture}
+    \node(aa)[draw, circle]{$x_1$};
+    \node(ab)[below of =  aa, draw, circle]{$x_2$};
+    \node(ac)[below of = ab, draw,circle]{$x_3$};
+    \node(ad)[below of = ac]{$\vdots$};
+    \node(ae)[below of =  ad, draw, circle]{$x_{\din}$};
+
+
+    \node(ba)[xshift= 2cm, yshift=-0.5cm, right of = aa, draw, circle]{$h_1$};
+    \node(bb)[below of =  ba, draw, fill=gray, circle]{$h_2$};
+    \node(bc)[below of = bb]{$\vdots$};
+
+    \node(bd)[below of =  bc, draw, circle]{$h_{\dhid}$};
+
+    \path[draw] (aa) -- (ba);
+    \path[draw] (aa) -- (bb);
+    \path[draw] (aa) -- (bd);
+
+    \path[draw] (ab) -- (ba);
+    \path[draw] (ab) -- (bb);
+    \path[draw] (ab) -- (bd);
+
+    \path[draw] (ac) -- (ba);
+    \path[draw] (ac) -- (bb);
+    \path[draw] (ac) -- (bd);
+
+    \path[draw] (ae) -- (ba);
+    \path[draw] (ae) -- (bb);
+    \path[draw] (ae) -- (bd);
+
+
+    \node(ca)[xshift= 2cm, yshift=0.5cm, right of = ba, draw, circle]{$z_1$};
+    \node(cb)[below of =  ca, draw, circle]{$z_2$};
+    \node(cc)[below of =  cb, draw, circle]{$z_3$};
+    \node(cd)[below of = cc]{$\vdots$};
+    \node(ce)[below of =  cd, draw, circle]{$z_{\dout}$};
+
+
+    \path[draw] (ba) -- (ca);
+    \path[draw] (ba) -- (cb);
+    \path[draw] (ba) -- (cc);
+    \path[draw] (ba) -- (ce);
+
+    \path[draw] (bb) -- (ca);
+    \path[draw] (bb) -- (cb);
+    \path[draw] (bb) -- (cc);
+    \path[draw] (bb) -- (ce);
+
+    \path[draw] (bd) -- (ca);
+    \path[draw] (bd) -- (cb);
+    \path[draw] (bd) -- (cc);
+    \path[draw] (bd) -- (ce);
+  \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}{Other Non-Linearities: Tanh}
+  Hyperbolic Tangeant:
+  \begin{figure}
+    \centering
+    \[\tanh(t) = \frac{\exp(t) - \exp(-t)}{\exp(t) + \exp(-t)}  \]
     \includegraphics[width=5cm]{../notebooks/tanh}
+    \includegraphics[width=5cm]{../notebooks/tanhgrad}
+  \end{figure}
+  \begin{itemize}
+  \item Intuition: Similar to sigmoid, but range between 0 and -1.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Other Non-Linearities: Hard Tanh}
+  Hyperbolic Tangeant:
+  \begin{figure}
+    \centering
+    \[\mathrm{hardtanh}(t) =
+      \begin{cases}
+        -1& t < -1 \\
+        t & -1
+\leq t \leq 1\\
+        1 & t > 1\\
+      \end{cases}
+    \]
+    \includegraphics[width=5cm]{../notebooks/hardtanh}
+    \includegraphics[width=5cm]{../notebooks/hardtanhgrad}
+  \end{figure}
+  \begin{itemize}
+  \item Intuition: Similar to sigmoid, but range between 0 and -1.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Other Non-Linearities: Cube}
+  Cube non-linearity (directly encourage parameter interaction):
+  \begin{figure}
+    \centering
+    \[\mathrm{cube}(t) = t^3  \]
+    \includegraphics[width=5cm]{../notebooks/cube}
+    \includegraphics[width=5cm]{../notebooks/cubegrad}
+  \end{figure}
+  \begin{itemize}
+  \item Intuition: Directly encourage higher-order interactions.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Tagging from Scratch}
+  \begin{center}
+    \includegraphics[width=5cm]{cwfull}
+  \end{center}
 \end{frame}
 
 
 
 \begin{frame}{Function Approximator}
   MLP1 is a universal approximator
+
+  \begin{quote}
+    Can approximate with any desired non-zero amount of error a family
+    of functions that include all continuous functions on a closed and
+    bounded subset of $\reals^n$, and any function mapping from any
+    finite dimensional discrete space to another (YG)
+  \end{quote}
+
+  Caveats:
+  \begin{itemize}
+    \item Does not give size of hidden layer.
+    \item Does not specify how hard this is to learn.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Deep Neural Networks (DNNs)}
 
-  Can stack MLPs, 
+  Can stack MLPs, create deep fully connected networks,
 
   \[NN_{MLP1}(\boldx) =  g(\boldx\boldW^1 + \boldb^1)W^2 + \boldb^2\]
   \[NN_{MLP2}(\boldx) =  g(NN_{MLP1}(\boldx) \boldW^1 + \boldb^1)W^2 + \boldb^2\]
 
   \begin{itemize}
   \item Can have multiple hidden layers, etc.
+  \item Benefit: may be able to find better function
+  \item Known to be harder to train (although other approaches)
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Other types of networks}
-  Highway Network (one example)
-  \[NN_{MLP2}(\boldx) =  g(NN_{MLP1}(\boldx) \boldW^1 + \boldb^1)W^2 + \boldb^2\]
-
+\begin{frame}{Other Layers}
+  We will discuss many other neural network layers,
+  \begin{itemize}
+  \item convolutional
+  \item attention-based
+  \item gated layers
+  \item $\ldots$
+  \end{itemize}
 \end{frame}
 
+{
+\setbeamercolor{background canvas}{bg=}
 
-\begin{frame}{Deep Neural Networks (DNNs)}
-  
-\end{frame}
+
+\includepdf[pages=41-42]{highway}
+}
+
+
+
 
 \section{Backpropagation}
 
-\begin{frame}
-  Consider a vector-valued parameterized function  $f(\boldx;\boldtheta)$ where 
-  
+\begin{frame}{Sequential Neural Network}
+  Sequential neural networks consist of a series of composed functions,
+
+  Consider a vector-valued parameterized functions $f_1, \ldots, f_{k}$ where
+
   \begin{itemize}
-  \item $f(\boldx): \reals^m \mapsto \reals^n$; function
-  \item $\boldtheta \in \reals^d$; function parameters 
+  \item $f_i(\boldx;\btheta_i): \reals^{n_{i-1}} \mapsto \reals^{n_{i}}$; function
+  \item $\btheta \in \reals^{d_i}$; function parameters
+  \end{itemize}
+
+  Consider a scalar-valued loss function  $L(\boldy, \hat{\boldy})$ where
+
+  \begin{itemize}
+  \item $L(\boldy, *): \reals^{n_k} \mapsto \reals$; loss for input
   \end{itemize}
 \end{frame}
 
-
-\begin{frame}
-  Consider a scalar-valued loss function  $L(\boldx;\boldtheta)$ where 
-  
-  \begin{itemize}
-  \item $L(\boldx): \reals^n \mapsto \reals$; function
-  \end{itemize}
-\end{frame}
 
 \begin{frame}{Backpropagation}
-  Forward 
-  Compute $L(f(\ldots f()))$
-
-
-  Backward   
-
-  \[ \frac{\partial L}{\partial f(\ldots f(x_i))  } = \sum_{j =1}^m \frac{\partial f(\boldx)_j} {\partial  x_i} \frac{\partial L(f(\boldx))} {\partial f(\boldx)_j}   \]
-\end{frame}
-
-\begin{frame}{Torch Implementation}
-  \begin{tikzpicture}
-    \node{$\boldx$};
-    \node{$\frac{\partial L}{x_i}$};
-    \node{$\frac{\partial L}{f(\boldx)_j}$};
-    \node{$f(x)$};
-
-  \end{tikzpicture}
-    $\frac{\partial L}{\boldtheta_k}$
-    $\boldtheta$
-\end{frame}
-
-\begin{frame}{Torch Implementation}
-  \begin{tikzpicture}
-    \node{$\boldx$};
-    \node{$\frac{\partial L}{x_i}$};
-    \node{$\frac{\partial L}{f(\boldx)_j}$};
-    \node{$f(x)$};
-
-  \end{tikzpicture}
-    $\frac{\partial L}{\boldtheta_k}$
-    $\boldtheta$
-\end{frame}
-
-\begin{frame}{Torch Names}
-
   \begin{itemize}
-  \item $\boldx$; \textit{input}
-  \item $f(\boldx)$; \textit{self.output} (saved on forward pass)
-  \item $\frac{\partial L}{x_i}$; \textit{self.gradInput}
-  \item $\frac{\partial L}{f(\boldx)_j}$; \textit{gradOutput}
-  \item $\boldtheta$; \textit{gradWeight}
-  \item $\frac{\partial L}{\boldtheta}$; \textit{gradWeight}
+  \item Forward Step (f-prop):
+
+    Compute \[L(f_k(\ldots f_1(\boldx^0)))\]
+    Saving intermediary values
+    \[f_i(\ldots f_1(\boldx^0)))\]
+  \item Backward Step (b-prop):
+    \pause
+    \[ \frac{\partial L}{\partial f_i(\ldots f_1(\boldx^0))  } = \sum_{j =1}^{n_i} \frac{\partial f_{i+1}(\ldots f_1(\boldx^0))_j} {\partial f_i(\ldots f_1(\boldx^0)) } \frac{\partial L} {\partial f_{i+1}(\ldots f_1(\boldx^0))}_j   \]
+    \pause
+
+    \[ \frac{\partial L}{\partial \btheta_i  } = \sum_{j =1}^{n_i} \frac{\partial f_{i+1}(\ldots f_1(\boldx^0))_j} {\partial \btheta_i } \frac{\partial L} {\partial f_{i+1}(\ldots f_1(\boldx^0))}_j   \]
+
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Max}
-  
+\begin{frame}{Backpropagation: Data flow}
+  \begin{center}
+
+  \begin{tikzpicture}
+    \node(x){$f_{i}(\ldots f_{1}(\boldx^0)) $};
+    \node(t)[below right= of x, draw]{$f_{i+1}(*;\btheta_{i+1})$};
+
+    \node(fx)[above right=of t]{$f_{i+1}(f_{i}(\ldots f_{1}(\boldx^0)))$};
+    \node(gradin)[below left =of t]{$\displaystyle \frac{\partial L}{\partial f_i(\ldots f_1(\boldx^0))  } $};
+    \node(gradout)[below right= of t]{$\displaystyle  \frac{\partial L}{\partial f_{i+1}(\ldots f_1(\boldx^0))  }  $};
+    \node(gradweight)[below = of t, yshift=1cm]{$\displaystyle  \frac{\partial L}{\partial \btheta_{i+1}  }$};
+    \path[draw, ->] (x) -> (t);
+    \path[draw, ->] (t) -> (fx);
+    \path[draw, ->] (t) -> (gradin);
+    \path[draw, ->]  (gradout) -> (t);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Torch Implementation}
+  Torch uses declarative unit-based specification of NN
+  \begin{itemize}
+  \item Every function is a represented as a unit.
+    \air
+
+  \item Responsibilities:
+    \begin{enumerate}
+    \item Expose any parameters $\btheta_{i+1}$ as tensors
+    \item Compute $f_{i+1}(\boldx, \btheta_{i+1})$ (fprop)
+    \item Compute any necessary state needed for bprop
+    \item Compute chain-rule given  $\frac{\partial L}{\partial f_{i+1}(\ldots f_1(\boldx^0))}$ and $f_{i}(\ldots f_1(\boldx^0))$
+    \item Compute parameter gradient $\frac{\partial L}{\partial \btheta_{i+1}} $
+    \end{enumerate}
+  \item Contract: forward will always be called before backward.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Torch Units}
+  \begin{center}
+
+  \begin{tikzpicture}
+    \node(x)[text width=3cm,text centered]{input\\ $f_{i}(\ldots f_{1}(\boldx^0)) $};
+    \node(t)[text  width=3cm,text centered, below right= of x, draw]{weights \\ $f_{i+1}(*;\btheta_{i+1})$};
+
+    \node(fx)[text width=3cm,text centered, above right=of t]{self.output\\$f_{i+1}(f_{i}(\ldots f_{1}(\boldx^0)))$};
+    \node(gradin)[text width=3cm,text centered, below left =of t]{self.gradInput\\ $\displaystyle \frac{\partial L}{\partial f_i(\ldots f_1(\boldx^0))  } $};
+    \node(gradout)[text width=3cm,text centered, below right= of t]{gradOutput\\ $\displaystyle  \frac{\partial L}{\partial f_{i+1}(\ldots f_1(\boldx^0))  }  $};
+    \node(gradweight)[text width=3cm,text centered, below = of t]{self.gradWeight\\ $\displaystyle  \frac{\partial L}{\partial \btheta_{i+1}  }$};
+
+    \path[text width=3cm,text centered, draw, ->] (x) -> (t);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (fx);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (gradin);
+    \path[text width=3cm,text centered, draw, ->]  (gradout) -> (t);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Loss Criterions}
+
+  \begin{center}
+
+  \begin{tikzpicture}
+    \node(x)[text width=3cm,text centered]{prediction\\ $\hat{\boldy} $};
+    \node(t)[text  width=3cm,text centered, below right= of x, draw]{weights \\ $L(*, *)$};
+
+    \node(fx)[text width=3cm,text centered, above right=of t]{loss\\$L(\boldy, \hat{\boldy})$};
+    \node(gradin)[text width=3cm,text centered, below left =of t]{self.gradInput\\ $\displaystyle \frac{\partial L}{\partial \hat{\boldy} } $};
+    \node(gradout)[text width=3cm,text centered, below right= of t]{target \\ $\boldy$   };
+    % \node(gradweight)[text width=3cm,text centered, below = of t]{self.gradWeight\\ $\displaystyle  \frac{\partial L}{\partial \btheta_{i+1}  }$};
+
+    \path[text width=3cm,text centered, draw, ->] (x) -> (t);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (fx);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (gradin);
+    \path[text width=3cm,text centered, draw, ->]  (gradout) -> (t);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Torch Internals}
+  \begin{itemize}
+  \item Fprop step: \texttt{self:updateOutput}
+  \item Bprop step:  \texttt{self:updateGradInput}
+  \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Max}
-  
+\begin{frame}{Torch Internals}
+  \begin{itemize}
+  \item Fprop step: \texttt{self:updateOutput}
+  \item Bprop step:  \texttt{self:updateGradInput}
+  \end{itemize}
 \end{frame}
 
-\section{Semi-Supervised Training}
 
-\begin{frame}
 
+\begin{frame}{Torch Units: Batch}
+  \begin{center}
+
+  \begin{tikzpicture}
+    \node(x)[text width=3cm,text centered]{input\\ $f_{i}(\ldots f_{1}(\boldX^0)) $};
+    \node(t)[text  width=3cm,text centered, below right= of x, draw]{ $f_{i+1}(*;\btheta_{i+1})$};
+
+    \node(fx)[text width=3cm,text centered, above right=of t]{self.output\\$f_{i+1}(f_{i}(\ldots f_{1}(\boldX^0)))$};
+    \node(gradin)[text width=3cm,text centered, below left =of t]{self.gradInput\\ $\displaystyle \frac{\partial L}{\partial f_i(\ldots f_1(\boldX^0))  } $};
+    \node(gradout)[text width=3cm,text centered, below right= of t]{gradOutput\\ $\displaystyle  \frac{\partial L}{\partial f_{i+1}(\ldots f_1(\boldX^0))  }  $};
+    \node(gradweight)[text width=3cm,text centered, below = of t]{self.gradWeight\\ $\sum \displaystyle  \frac{\partial L}{\partial \btheta_{i+1}  }$};
+
+    \path[text width=3cm,text centered, draw, ->] (x) -> (t);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (fx);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (gradin);
+    \path[text width=3cm,text centered, draw, ->]  (gradout) -> (t);
+  \end{tikzpicture}
+  \end{center}
 \end{frame}
+
+\begin{frame}{Loss Criterions}
+
+  \begin{center}
+
+  \begin{tikzpicture}
+    \node(x)[text width=3cm,text centered]{prediction\\ $\hat{\boldY} $};
+    \node(t)[text  width=3cm,text centered, below right= of x, draw]{  $L(*, *)$};
+
+    \node(fx)[text width=3cm,text centered, above right=of t]{loss\\$L(\boldY, \hat{\boldY})$};
+    \node(gradin)[text width=3cm,text centered, below left =of t]{self.gradInput\\ $\displaystyle \frac{\partial L}{\partial \hat{\boldY} } $};
+    \node(gradout)[text width=3cm,text centered, below right= of t]{target \\ $\boldY$   };
+    % \node(gradweight)[text width=3cm,text centered, below = of t]{self.gradWeight\\ $\displaystyle  \frac{\partial L}{\partial \btheta_{i+1}  }$};
+
+    \path[text width=3cm,text centered, draw, ->] (x) -> (t);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (fx);
+    \path[text width=3cm,text centered, draw, ->] (t) -> (gradin);
+    \path[text width=3cm,text centered, draw, ->]  (gradout) -> (t);
+  \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Today}
+  \begin{itemize}
+  \item Benefits of neural networks
+    \air
+
+  \item Training neural networks
+  \end{itemize}
+
+  Next time:
+  Pretraining and word embeddings
+\end{frame}
+
+% \begin{frame}{Max}
+
+% \end{frame}
+
+
+% \begin{frame}{Max}
+
+% \end{frame}
+
+% \section{Semi-Supervised Training}
+
+% \begin{frame}
+
+% \end{frame}
 
 \end{document}
