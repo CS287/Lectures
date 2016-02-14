@@ -1,6 +1,6 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
-
+\usepackage{tikz-qtree}
 
 \title{Part-of-Speech Tagging \\ + \\ Neural Networks 3 }  }
 \date{}
@@ -65,9 +65,9 @@
   \textit{pooling}. Informally a pooling layer consists of aggregation
   unit, typically unparameterized, that reduce the input to a smaller
   size.
-  \air 
+  \air
 
-  Consider three pooling functions of the form $f: \reals^n \mapsto \reals$, 
+  Consider three pooling functions of the form $f: \reals^n \mapsto \reals$,
   \begin{enumerate}
   \item $ f(\boldx) = \max_{i} x_i $
   \item $ f(\boldx) = \min_{i} x_i $
@@ -75,20 +75,20 @@
   \end{enumerate}
   \air
 
-  What action do each of these functions have? What are their gradients? 
-  How would you implement backpropagation for these units? 
+  What action do each of these functions have? What are their gradients?
+  How would you implement backpropagation for these units?
 \end{frame}
 
 \begin{frame}{Quiz}
   \begin{itemize}
   \item \textbf{Max pooling}:  $f(\boldx) = \max_{i} x_i$
-    
+
     \begin{itemize}
     \item Keeps only the most activated input
     \item Fprop is simple; however must store $\argmax$ (``switch'')
     \item Bprop gradient is zero except for switch, which gets gradoutput
     \end{itemize}
-    \pause 
+    \pause
 
   \item \textbf{Min pooling}: $ f(\boldx) = \min_{i} x_i $
     \begin{itemize}
@@ -96,12 +96,12 @@
     \item Fprop is simple; however must store $\argmin$ (``switch'')
     \item Bprop gradient is zero except for switch, which gets gradoutput
     \end{itemize}
-    \pause 
-    
+    \pause
+
   \item \textbf{Avg pooling}: $ f(\boldx) = \sum_i x_i / |\boldx| $
     \begin{itemize}
     \item Keeps the average activation input
-    \item Fprop is simply mean. 
+    \item Fprop is simply mean.
     \item Gradoutput is averaged and passed to all inputs.
     \end{itemize}
   \end{itemize}
@@ -109,7 +109,7 @@
 
 \begin{frame}{What to do about words?}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{../notebooks/zipf}         
+    \includegraphics[width=0.8\textwidth]{../notebooks/zipf}
   \end{center}
 \end{frame}
 
@@ -132,7 +132,7 @@
 \begin{frame}{Representations}
   \begin{itemize}
   \item We would like shared representations of words
-    \air 
+    \air
 
   \item However, PTB only 1M words, relatively small
 
@@ -159,10 +159,10 @@
 
   \begin{itemize}
   \item English Wikipedia (631 million words tokens)
-    \air 
+    \air
   \item Reuters Corpus (221 million word tokens)
-    \air 
-  \item Total vocabulary size: 130,000 word types 
+    \air
+  \item Total vocabulary size: 130,000 word types
   \end{itemize}
 
   But this data has no labels...
@@ -170,10 +170,10 @@
 
 \begin{frame}{C\&W Embeddings}
   \begin{itemize}
-  \item All text in Wikipedia in some sense coherent. 
+  \item All text in Wikipedia in some sense coherent.
     \air
   \item Good embeddings should be able to help distinguish coherent text from nonsense
-    \air 
+    \air
 
   \item We can train on this task.
   \end{itemize}
@@ -181,14 +181,14 @@
 
 
 \begin{frame}{C\&W Setup}
-  Let $\mcV$ be the vocabulary of English and let $s$ 
+  Let $\mcV$ be the vocabulary of English and let $s$
   score any window of size $\dwin$, if we see the phrase
 
   \begin{itemize}
   \item [ the dog walks to the ]
   \end{itemize}
 
-  It should score higher by $s$ than 
+  It should score higher by $s$ than
 
   \begin{itemize}
   \item [ the dog \alert{house} to the ]
@@ -201,12 +201,12 @@
 \begin{frame}{C\&W Setup}
   Can estimate $s$ as a windowed neural network.
 
-  \[ s(w_1, \ldots, w_{\dwin}) = \mathrm{hardtanh}(\boldx \boldW^1 + \boldb^1) \boldW^2 + \boldb \] 
-  with 
+  \[ s(w_1, \ldots, w_{\dwin}) = \mathrm{hardtanh}(\boldx \boldW^1 + \boldb^1) \boldW^2 + \boldb \]
+  with
   \[ \boldx = [v(w_1)\  v(w_2) \  \ldots \  v(w_{\dwin})]  \]
 
   \begin{itemize}
-  \item $\din = \dwin \times 50$, $\dhid = 100$, $\dwin=11$, \alert{$\dout = 1$}!  
+  \item $\din = \dwin \times 50$, $\dhid = 100$, $\dwin=11$, \alert{$\dout = 1$}!
   \end{itemize}
 
   Example: Function $s$
@@ -220,29 +220,29 @@
   \begin{itemize}
   \item Different setup than previous experiments.
 
-    \air 
-  \item 
+    \air
+  \item
   \end{itemize}
 end{frame}
 
 
 \begin{frame}{Ranking Loss}
-  Given only example $\{ \boldx_1, \ldots, \boldx_n \}$ and for 
-  each example have set $\mcD(\boldx)$ of alternatives. 
-  
-  \[ \mathcal{L} = \sum_i \sum_{\boldx' \in \mcD(\boldx)} L_{ranking}(s(\boldx_i), s(\boldx') \] 
+  Given only example $\{ \boldx_1, \ldots, \boldx_n \}$ and for
+  each example have set $\mcD(\boldx)$ of alternatives.
 
-  \[ L_{ranking}(y, \hat{y}) = \max\{0, 1 - (y - \hat{y}) \}   \] 
+  \[ \mathcal{L} = \sum_i \sum_{\boldx' \in \mcD(\boldx)} L_{ranking}(s(\boldx_i), s(\boldx') \]
+
+  \[ L_{ranking}(y, \hat{y}) = \max\{0, 1 - (y - \hat{y}) \}   \]
 
   \textbf{Example:} C\&W ranking
 
-  $\boldx =$ [the dog walks to the] 
+  $\boldx =$ [the dog walks to the]
 
   $\mcD(\boldx) = \{$ [the dog skips to the], [the dog in to the], \ldots $\}$
 
   \begin{itemize}
   \item [Torch \texttt{nn.RankingCriterion}]
-    \air 
+    \air
   \item Note: slightly different setup, both $s(\boldx_i)$ and $s(\boldx')$ receive gradient.
   \end{itemize}
 \end{frame}
@@ -250,27 +250,27 @@ end{frame}
 \begin{frame}
   \begin{itemize}
   \item Vocabulary size $|\mcD(\boldx)| > 100,000$
-    \air 
-    
+    \air
+
   \item Training time for 4 weeks
-    \air 
+    \air
 
   \item (guy who invented torch)
   \end{itemize}
 \end{frame}
 
 \begin{frame}{WSABIE}
-  \textbf{Observation:} in many contexts  
+  \textbf{Observation:} in many contexts
   \[ L_{ranking}(y, \hat{y)} = \max\{0, 1 - (y - \hat{y}) \} = 0 \]
 
-  \air 
+  \air
 k
-  But for difficult contexts, may be easy to find 
+  But for difficult contexts, may be easy to find
 
   \[ L_{ranking}(y, \hat{y)} = \max\{0, 1 - (y - \hat{y}) \} \neq 0 \]
-  
+
   We can therefore sample from $\mcD(\boldx)$ to find an update.
-    
+
 \end{frame}
 
 \begin{frame}
@@ -288,26 +288,26 @@ k
 \begin{frame}{Other Embedding Method: word2vec}
   \begin{itemize}
   \item Instead of MLP uses Bilinear model (``linear'' in paper)
-    \air 
+    \air
 
   \item Instead of ranking model, directly predict word (cross-entropy)
-    \air 
+    \air
 
-  \item Two different models 
+  \item Two different models
     \begin{enumerate}
     \item Skipgram
     \item Continuous Bag-of-Words (CBOW)
     \end{enumerate}
 
-  \item Various other ideas. 
-    
+  \item Various other ideas.
+
   \end{itemize}
 \end{frame}
 
 \section{word2vec}
 
 \begin{frame}{word2vec}
-  
+
 \end{frame}
 
 \begin{frame}{Continuous Bag-of-Words (CBOW) }
@@ -321,16 +321,16 @@ k
   \[ \boldy = \delta(w_5) \]
 
   \[\renewcommand\matscale{.6}
-  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{}\]  
+  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{}\]
 
-  $\boldW^1$ is no longer partitioned by row  
+  $\boldW^1$ is no longer partitioned by row
 \end{frame}
 
 
 \begin{frame}{Skipgram}
   \begin{itemize}
   \item Also a bilinear model, after embedding
-  \item Attempt to predict outer word from middle 
+  \item Attempt to predict outer word from middle
   \end{itemize}
 
   Example: CBOW
@@ -338,54 +338,53 @@ k
   \[ \boldy = \delta(c)\ \mathrm{\ where\ } c \in \{w_3, w_4,w_6, w_7\}  \]
 
   \[\renewcommand\matscale{.6}
-  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din}{} \]  
+  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din}{} \]
 
-  $\boldW^1$ is no longer partitioned by row  
+  $\boldW^1$ is no longer partitioned by row
 \end{frame}
 
 \begin{frame}{Softmax}
-  
+
 \end{frame}
 
 \begin{frame}{Hierarchical Softmax}
 
-  
-  
+
+
 \end{frame}
 
 \begin{frame}{Negative Sampling}
-  
+
 \end{frame}
 
 \begin{frame}{Embedding Tasks}
-  
+
 \end{frame}
 
 \begin{frame}{Other Elements}
   \begin{itemize}
-  \item At each SGD step $\dwin$ is sampled 
+  \item At each SGD step $\dwin$ is sampled
 
   \item Frequent words are used less
-  \end{itemize}  
+  \end{itemize}
 \end{frame}
 
 \section{Comparing Embeddings}
 
 \begin{frame}
-  
+
 \end{frame}
 
 \section{Visualizing Embeddings}
 
 \begin{frame}
- 
+
 \end{frame}
 
 
 \begin{frame}
-  
+
 \end{frame}
 
 
 \end{document}
-
