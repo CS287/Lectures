@@ -216,36 +216,42 @@
 
 \begin{frame}{C\&W Embeddings}
   \begin{itemize}
-  \item All text in Wikipedia in some sense coherent.
+  \item Assumption: Text in Wikipedia is \textit{coherent} (in some sense).
     \air
-  \item Good embeddings should be able to help distinguish coherent text from nonsense
+  \item Most randomly corrupted text is \textit{incoherent}.
+    \air
+  \item Embeddings should distinguish coherence.
     \air
 
-  \item We can train on this task.
+  \item Common idea in unsupervised learning (distributional hypothesis).
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}{C\&W Setup}
   Let $\mcV$ be the vocabulary of English and let $s$
-  score any window of size $\dwin$, if we see the phrase
+  score any window of size $\dwin =5$, if we see the phrase
 
-  \begin{itemize}
-  \item [ the dog walks to the ]
-  \end{itemize}
+  \begin{center}
+  [ the dog walks to the ]
+  \end{center}
+
+
 
   It should score higher by $s$ than
+  \begin {center}
+  [ the dog \alert{house} to the ]
 
-  \begin{itemize}
-  \item [ the dog \alert{house} to the ]
-  \item [ the dog \alert{cats} to the ]
-  \item [ the dog \alert{skips} to the ]
-  \item ...
-  \end{itemize}
+   [ the dog \alert{cats} to the ]
+
+   [ the dog \alert{skips} to the ]
+
+   ...
+  \end{center}
 \end{frame}
 
 \begin{frame}{C\&W Setup}
-  Can estimate $s$ as a windowed neural network.
+  Can estimate score $s$ as a windowed neural network.
 
   \[ s(w_1, \ldots, w_{\dwin}) = \mathrm{hardtanh}(\boldx \boldW^1 + \boldb^1) \boldW^2 + \boldb \]
   with
@@ -265,9 +271,11 @@
 \begin{frame}{Training?}
   \begin{itemize}
   \item Different setup than previous experiments.
-
     \air
-  \item
+
+  \item No direct supervision $\boldy$
+    \air
+  \item Train to rank good examples better.
   \end{itemize}
 \end{frame}
 
@@ -276,24 +284,28 @@
   Given only example $\{ \boldx_1, \ldots, \boldx_n \}$ and for
   each example have set $\mcD(\boldx)$ of alternatives.
 
-  \[ \mathcal{L} = \sum_i \sum_{\boldx' \in \mcD(\boldx)} L_{ranking}(s(\boldx_i), s(\boldx') \]
+  \[ \mathcal{L}(\btheta) = \sum_i \sum_{\boldx' \in \mcD(\boldx)} L_{ranking}(s(\boldx_i;\btheta), s(\boldx'; \btheta) ) \]
 
   \[ L_{ranking}(y, \hat{y}) = \max\{0, 1 - (y - \hat{y}) \}   \]
 
   \textbf{Example:} C\&W ranking
 
-  $\boldx =$ [the dog walks to the]
-
-  $\mcD(\boldx) = \{$ [the dog skips to the], [the dog in to the], \ldots $\}$
-
-  \begin{itemize}
-  \item [Torch \texttt{nn.RankingCriterion}]
+  \begin{center}
+    $\boldx =$ [the dog walks to the]
     \air
-  \item Note: slightly different setup, both $s(\boldx_i)$ and $s(\boldx')$ receive gradient.
+
+    $\mcD(\boldx) = \{$ [the dog \alert{skips} to the], [the dog
+    \alert{in} to the], \ldots $\}$
+
+  \end{center}
+  \begin{itemize}
+  \item (Torch \texttt{nn.RankingCriterion})
+    \air
+  \item Note: slightly different setup.
   \end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{C\&W Embeddings in Practice}
   \begin{itemize}
   \item Vocabulary size $|\mcD(\boldx)| > 100,000$
     \air
@@ -301,17 +313,19 @@
   \item Training time for 4 weeks
     \air
 
-  \item (guy who invented torch)
+  \item (Collobert is main an author of Torch)
   \end{itemize}
 \end{frame}
 
-\begin{frame}{WSABIE}
+\begin{frame}{Sampling (Sketch of \textsc{Wsabie} (Weston, 2011))}
   \textbf{Observation:} in many contexts
   \[ L_{ranking}(y, \hat{y)} = \max\{0, 1 - (y - \hat{y}) \} = 0 \]
 
-  \air
-k
-  But for difficult contexts, may be easy to find
+  Particularly true later in training.
+
+  \airj
+
+  For difficult contexts, may be easy to find
 
   \[ L_{ranking}(y, \hat{y)} = \max\{0, 1 - (y - \hat{y}) \} \neq 0 \]
 
@@ -321,7 +335,7 @@ k
 
 \begin{frame}{C\&W Results}
   \begin{center}
-    \includegraphics[width=8cm]{cwresults}
+    \includegraphics[width=10cm]{cwresults}
   \end{center}
   \begin{enumerate}
   \item Use dense representations instead of sparse
@@ -333,13 +347,23 @@ k
 
 \section{word2vec}
 
-\begin{frame}{Other Embedding Method: word2vec}
+\begin{frame}{word2vec}
   \begin{itemize}
-  \item Instead of MLP uses Bilinear model (``linear'' in paper)
-    \air
+  \item Contributions:
+    \begin{itemize}
+    \item Scale embedding process to massive sizes
+    \item Experiments with several architectures
+    \item Empirical evaluations of embeddings
+    \item Influential release of software/data.
+    \end{itemize}
+    \pause
 
-  \item Instead of ranking model, directly predict word (cross-entropy)
-    \air
+  \item Differences with C\&W
+    \begin{itemize}
+    \item Instead of MLP uses (bi)linear model (linear in paper)
+    \item Instead of ranking model, directly predict word (cross-entropy)
+    \item Various other extensions.
+    \end{itemize}
 
   \item Two different models
     \begin{enumerate}
@@ -347,68 +371,86 @@ k
     \item Continuous Skip-gram
     \end{enumerate}
 
-  \item Various other ideas.
+
 
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Bilinear Model}
-  Bilinear model,
-  \[\hat{\boldy} = f((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+\begin{frame}{word2vec (Bilinear Model)}
+  Back to pure bilinear model, but with much bigger output space
+  \[\hat{\boldy} = \softmax((\frac{\sum_{i} \boldx_i^0 \boldW^0}{\dwin-1}) \boldW^1)\]
   \begin{itemize}
-  \item $\boldx^0 \in \reals^{1 \times d_0}$ start with one-hot.
-  \item $\boldW^0 \in \reals^{d_0 \times \din}$, $d_0 = |\mcF|$
-  \item $\boldW^1 \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
+  \item $\boldx^0_i \in \reals^{1 \times d_0}$ input words one-hot vectors .
+  \item $\boldW^0 \in \reals^{d_0 \times \din}$; $d_0 = |\mcV|$, word embeddings
+  \item $\boldW^1 \in \reals^{\din \times \dout}$; $d_{out} = |\mcV|$ output embeddings
   \end{itemize}
   \air
   Notes:
   \begin{itemize}
   \item Bilinear parameter interaction.
-  \item $d_0 >> \din$, e.g. $d_0 = 10000, \din = 50$
+  \item $d_0 >> \din$, e.g.  $50 \leq \din \leq 1000$, $10000 \leq |\mcV| \leq 1M$ or more
   \end{itemize}
 \end{frame}
 
 \begin{frame}{word2vec (Mikolov, 2013)}
   \begin{center}
-    \includegraphics[width=8cm]{word2vec}
+    \includegraphics[width=10cm]{word2vec}
   \end{center}
 \end{frame}
 
 \begin{frame}{Continuous Bag-of-Words (CBOW) }
+  \[\hat{\boldy} = \softmax((\frac{\sum_{i} \boldx_i^0 \boldW^0}{\dwin-1})\boldW^1)\]
   \begin{itemize}
-  \item Bag-of-words bilinear model, after embedding
+
   \item Attempt to predict the middle word
+    \begin{center}
+      [ \structure{the dog} \alert{walks} \structure{to the} ]
+    \end{center}
   \end{itemize}
 
   Example: CBOW
-  % \[ \boldx = v(w_3) +  v(w_4) +   v(w_6) + v(w_7)/$\dwin-1$   \]
-  % \[ \boldy = \delta(w_5) \]
+  \[ \boldx = \frac{v(w_3) +  v(w_4) +   v(w_6) + v(w_7)}{\dwin-1}  \]
+  \[ \boldy = \delta(w_5) \]
 
   % \[\renewcommand\matscale{.6}
   % \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{}\]
 
-  $\boldW^1$ is no longer partitioned by row
+  $\boldW^1$ is no longer partitioned by row (order is lost)
 \end{frame}
 
-\begin{frame}{Skip-gram}
+\begin{frame}{Continous Skip-gram}
+  \[\hat{\boldy} = \softmax(\boldx^0 \boldW^0)\boldW^1)\]
   \begin{itemize}
-  \item Also a bilinear model, after embedding
-  \item Attempt to predict outer word from middle
+  \item Also a bilinear model
+  \item Attempt to predict each context-word from middle
+
+  \begin{center}
+    [ \alert{the} \_\_\_ \structure{dog} \_\_\_ \_\_\_  ]
+  \end{center}
+
   \end{itemize}
 
   Example: Skip-gram
-%   \[ \boldx = v(w_5)$   \]
-%   \[ \boldy = \delta(c)\ \mathrm{\ where }\ c \in \{w_3, w_4,w_6,c w_7\}  \]
+  \[ \boldx = v(w_5)   \]
+  \[ \boldy = \delta(w_3)  \]
 
-%    \[\renewcommand\matscale{.6}
-%    \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din}{} \]
-
-% $\boldW^1$ is no longer partitioned by row
+  Done for each word in window.
 \end{frame}
 
 
-\begin{frame}{Softmax}
+\begin{frame}{Additional aspects}
+  \begin{itemize}
+  \item The window $\dwin$ is sampled for each SGD step
+    \air
+  \item SGD is done less for frequent words.
+    \air
+  \item We have slightly simplified the training objective.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Softmax Issues}
   Use a softmax to force a distribution,
 
   \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c\in \mcC } \exp(z_c)}  \]
@@ -416,152 +458,222 @@ k
   \[\log \softmax(\boldz) = \boldz - \log \sum_{c\in \mcC} \exp(z_c)  \]
 
   \begin{itemize}
-  \item Issue: class $\mcC$ is huge.
-  \item For C\&W, 100,000, for word2vec 1,000,000
-  \item Note datasets, 6 billion words
+  \item \textbf{Issue:} class $\mcC$ is huge.
+  \item For C\&W, 100,000, for word2vec 1,000,000 types
+  \item Note largest dataset is 6 billion words
   \end{itemize}
 
 \end{frame}
 
+\begin{frame}{Two-Layer Softmax}
+  First, clustering words into hard classes (for instance Brown clusters)
+
+  \air
+
+  Groups words into classes based on word-context.
+  \begin{center}
+    \Tree [ $\ldots$ [ .3 dog cat horse $\ldots$ ] $\ldots$ [ .5 car
+    truck motorcycle $\ldots$ ] ]
+  \end{center}
 
 
-\begin{frame}{}
-  First run hard clustering.
 
-  \[p(Y |X) = P(Y | C, X;\theta) P(C | X; \theta)\]
+
+\end{frame}
+
+\begin{frame}{Two-Layer Softmax}
+  Assume that we first generate a class $C$ and then a word,
+  \[p(Y |X) \approx P(Y | C, X;\theta) P(C | X; \theta)\]
+
+
+  Estimate distributions with a shared embedding layer,
 
   $P(C |X;\theta)$
-  \[\hat{\boldy} = \softmax((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+  \[\hat{\boldy}_1 = \softmax((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
 
 
-  $P(Y | C, X;\theta)$
-  \[\hat{\boldy} = \softmax((\boldx^0 \boldW^0)\boldW^{C} + \boldb))\]
+  $P(Y | C=class, X;\theta)$
+  \[\hat{\boldy}_2 = \softmax((\boldx^0 \boldW^0)\boldW^{class} + \boldb))\]
 \end{frame}
 
-\begin{frame}{}
-  \Tree  [ [ 1 ]  [ 2 ] [ 3 .a .b .c .d ]  4 5 ];
-\end{frame}
-
-\begin{frame}{}
-  Computing full $p(Y | X)$ still requires $O(|\mcV|)$ time.
-
-  $L_{2SM}() = -\log p(Y | X, C) -\log p(C | X) $
-\end{frame}
-
-
-\begin{frame}{}
-  \Tree  [ [ 1 ]  [ 2 ] [ 3 .a .b .c .d ]  4 5 ];
-\end{frame}
-
-\begin{frame}{}
-  \begin{itemize}
-  \item Best two-layer is with a balanced tree.
-  \item Requires $O(\sqrt{ |\mcV|})$
-
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Hierarchical Softmax}
-  \begin{itemize}
-
-  \item Requires $O(\log_2 |\mcV|)$
-  $L_{HSM}() = -\sum_{l=0}^{L(c)} \log p(\hat{\boldy}=\delta(c) | X, C_1, \ldots, C_l)  $
-  \item One paper on website (Mnih and Hinton, 2008)
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Huffman Encoding}
+\begin{frame}{Softmax as Tree}
   \begin{center}
-    \includegraphics[width=5cm]{HuffmanCodeAlg}
+    \Tree [ $\ldots$ [ .\alert{3} \alert{dog} cat horse $\ldots$ ] $\ldots$ [ .5 car
+    truck motorcycle $\ldots$ ] ]
   \end{center}
+  \[\hat{\boldy}^{(1)} = \softmax((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+
+
+  \[\hat{\boldy}^{(2)} = \softmax((\boldx^0 \boldW^0)\boldW^{class} + \boldb))\]
+  \begin{eqnarray*}
+    L_{2SM}(\boldy^{(1)}, \boldy^{(2)}, \hat{\boldy}^{(1)}, \hat{\boldy}^{(2)}) &=& -\log p(\boldy | \boldx, class(\boldy)) -\log p(class(\boldy) | \boldx)  \\
+    &=& - \log \hat{y}^{(1)}_{c^{{1}}} - \log \hat{y}^{(2)}_{c^{{2}}} \\
+  \end{eqnarray*}
 \end{frame}
 
-\begin{frame}{Hierarchical Softmax}
+
+
+\begin{frame}{Speed}
+  \begin{center}
+    \Tree [ $\ldots$ [ .\structure{3} \structure{dog cat horse $\ldots$} ] $\ldots$ [ .5 car
+    truck motorcycle $\ldots$ ] ]
+  \end{center}
+  \begin{itemize}
+  \item Computing loss only requires walking path.
+    \air
+  \item Two-layer a balanced tree.
+    \air
+  \item Computing loss requires $O(\sqrt{ |\mcV|})$
+
+    \air
+  \item (Note: computing full distribution requires $O(|\mcV|)$)
+
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Hierarchical Softmax(HSM) }
+  \begin{itemize}
+    \item Build multiple layer tree
+
+      \begin{eqnarray*}
+        L_{HSM}(\boldy^{(1)}, \ldots,  \boldy^{(C)}, \hat{\boldy}^{(1)}, \ldots,  \hat{\boldy}^{(C)})
+                                                                                    &=& - \sum_{i} \log \hat{y}^{(i)}_{c^{{i}}}  \\
+      \end{eqnarray*}
+
+
+  \item Balanced tree only requires $O(\log_2 |\mcV|)$
+
+  \air
+  \item Experiments on website (Mnih and Hinton, 2008)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{HSM with Huffman Encoding}
+  \begin{center}
+    \includegraphics[width=3cm]{HuffmanCodeAlg}
+  \end{center}
   \begin{itemize}
 
   \item Requires $O(\log_2 perp(unigram))$
+  \item Reduces time to only 1 day for 1.6 million tokens
   \end{itemize}
-\end{frame}
 
-
-\begin{frame}{Other Elements}
-  \begin{itemize}
-  \item At each SGD step $\dwin$ is sampled
-
-  \item Frequent words are used less
-  \end{itemize}
-\end{frame}
-
-
-\section{Embeddings}
-
-\begin{frame}{How good are embeddings?}
-  \begin{itemize}
-  \item Anecdotal Metric-based
-  \item Analogy task
-  \item Extrinsic Metrics
-  \end{itemize}
 \end{frame}
 
 \begin{frame}
+  \vspace{-5cm}
+
+  \hspace*{-2cm}
+  \includegraphics[width=1.5\textwidth]{../notebooks/graph}
+\end{frame}
+
+
+\section{Evaluating Embeddings}
+
+\begin{frame}{How good are embeddings?}
+  \begin{itemize}
+  \item Qualitative Analysis/Visualization
+    \air
+  \item Analogy task
+    \air
+  \item
+    \air
+  \item Extrinsic Metrics
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Metrics}
+
   Dot-product
 
   \[\boldx_{cat} \boldx_{dog}^{\top}\]
 
   Cosine Similarity
 
-  \[\frac{\boldx_{cat} \boldx_{dog}^{\top}}{||\boldx_{cat} || || \boldx_{dog}||  }\]
+  \[\frac{\boldx_{cat} \boldx_{dog}^{\top}}{||\boldx_{cat} ||\ || \boldx_{dog}||  }\]
 
 \end{frame}
 
-\begin{frame}
-  dog
-  \begin{tabular}{ll}
-  cat &  0.921800527377\\
-  dogs & 0.851315870426 \\
-  horse & 0.790758298322 \\
-  puppy & 0.775492121034 \\
-  pet & 0.772470734611 \\
-  rabbit& 0.772081457265 \\
-  pig& 0.749006160038 \\
-  snake & 0.73991884888 \\
-  \end{tabular}
+\begin{frame}{k-nearest neighbors (cosine sim)}
+  \begin{center}
+    dog
+    \begin{tabular}{ll}
+      cat &  0.921800527377\\
+      dogs & 0.851315870426 \\
+      horse & 0.790758298322 \\
+      puppy & 0.775492121034 \\
+      pet & 0.772470734611 \\
+      rabbit& 0.772081457265 \\
+      pig& 0.749006160038 \\
+      snake & 0.73991884888 \\
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+  \item Intuition: trained to match words that act the same.
+  \end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Empirical Measures: Analogy task }
   Analogy questions:
 
-  \texttt{A:B::C:\_\_}
+  \begin{center}
+    {\large \texttt{A:B::C:\_\_} }
+  \end{center}
+
 
   \begin{itemize}
   \item 5 types of semantic questions, 9 types of syntactic
   \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \[ \boldx' = \boldx_{B} - \boldx_{A} + \boldx_{C} \]
-
-  \[ \argmax_{\boldx_D}\frac{\boldx_{D} \boldx'^{\top}}{||\boldx_{D} || || \boldx'||  } \]
-\end{frame}
-
 \begin{frame}{Embedding Tasks}
   \begin{center}
-    \includegraphics[width=5cm]{analogy}
+    \includegraphics[width=10cm]{analogy}
   \end{center}
 \end{frame}
 
 
-\begin{frame}{Extrinsic Tasks}
+\begin{frame}{Analogy Prediction}
+
+  \begin{center}
+    {\large \texttt{A:B::C:\_\_} }
+  \end{center}
+
+  \[ \boldx' = \boldx_{B} - \boldx_{A} + \boldx_{C} \]
+
+  Project to the closest word,
+  \[ \argmax_{D \in \mcV}\frac{\boldx_{D} \boldx'^{\top}}{||\boldx_{D} || || \boldx'||  } \]
+
   \begin{itemize}
-  \item
+  \item Code example
   \end{itemize}
 \end{frame}
 
-
-\begin{frame}{Visualizations}
+\begin{frame}{Extrinsic Tasks}
   \begin{itemize}
-  \item Projections (PCA)
-  \item T-SNE
+  \item Text classification
+    \air
+
+  \item Part-of-speech tagging
+    \air
+
+
+  \item Many, many others over last couple years
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+  \item Word Embeddings
+    \air
+  \item Scaling issues and tricks
+
+    \air
+  \item Next Class: Language Modeling
   \end{itemize}
 \end{frame}
 
