@@ -1,8 +1,27 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
 \usepackage{tikz-qtree}
+\usepackage{stackengine}
+\stackMath
+\newlength\matfield
+\newlength\tmplength
+\def\matscale{1.}
+\newcommand\dimbox[3]{%
+  \setlength\matfield{\matscale\baselineskip}%
+  \setbox0=\hbox{\vphantom{X}\smash{#3}}%
+  \setlength{\tmplength}{#1\matfield-\ht0-\dp0}%
+  \fboxrule=1pt\fboxsep=-\fboxrule\relax%
+  \fbox{\makebox[#2\matfield]{\addstackgap[.5\tmplength]{\box0}}}%
+}
+\newcommand\raiserows[2]{%
+   \setlength\matfield{\matscale\baselineskip}%
+   \raisebox{#1\matfield}{#2}%
+}
+\newcommand\matbox[4]{
+  \stackunder{\dimbox{#1}{#2}{$#4$}}{\scriptstyle #3}%
+}
 
-\title{Part-of-Speech Tagging \\ + \\ Neural Networks 3 }  }
+\title{Part-of-Speech Tagging \\ + \\ Neural Networks 3: Word Embeddings}
 \date{}
 \author{CS 287}
 \begin{document}
@@ -16,7 +35,7 @@
 \begin{frame}{Review: Neural Networks}
   One-layer multi-layer perceptron architecture,
 
-  \[NN_{MLP1}(\boldx) =  g(\boldx\boldW^1 + \boldb^1)W^2 + \boldb^2\]
+  \[NN_{MLP1}(\boldx) =  g(\boldx\boldW^1 + \boldb^1)\boldW^2 + \boldb^2\]
   \begin{itemize}
   \item $\boldx\boldW + \boldb$; \textit{perceptron}
   \item $\boldx$ is the dense representation in $\reals^{1 \times \din}$
@@ -61,9 +80,9 @@
 
 
 \begin{frame}{Quiz}
-  One common class of operation in deep learning models is known as
+  One common class of operations in neural network models is known as
   \textit{pooling}. Informally a pooling layer consists of aggregation
-  unit, typically unparameterized, that reduce the input to a smaller
+  unit, typically unparameterized, that reduces the input to a smaller
   size.
   \air
 
@@ -71,7 +90,7 @@
   \begin{enumerate}
   \item $ f(\boldx) = \max_{i} x_i $
   \item $ f(\boldx) = \min_{i} x_i $
-  \item $ f(\boldx) = \sum_i x_i / |\boldx| $
+  \item $ f(\boldx) = \sum_i x_i / n $
   \end{enumerate}
   \air
 
@@ -98,7 +117,7 @@
     \end{itemize}
     \pause
 
-  \item \textbf{Avg pooling}: $ f(\boldx) = \sum_i x_i / |\boldx| $
+  \item \textbf{Avg pooling}: $ f(\boldx) = \sum_i x_i / n $
     \begin{itemize}
     \item Keeps the average activation input
     \item Fprop is simply mean.
@@ -107,40 +126,52 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{What to do about words?}
+\section{Embedding Motivation}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=5cm]{cwfull}
+  \end{center}
+  \begin{enumerate}
+  \item Use dense representations instead of sparse
+  \item Use windowed area instead of sequence models
+  \item Use neural networks to model windowed interactions
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{What about rare words?}
   \begin{center}
     \includegraphics[width=0.8\textwidth]{../notebooks/zipf}
   \end{center}
 \end{frame}
 
-\begin{frame}{Bilinear Model}
-  Bilinear model,
-  \[\hat{\boldy} = f((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+\begin{frame}{Word Embeddings}
+  Embedding layer,
+  \[ \boldx^0 \boldW^0 \]
   \begin{itemize}
-  \item $\boldx^0 \in \reals^{1 \times d_0}$ start with one-hot.
-  \item $\boldW^0 \in \reals^{d_0 \times \din}$, $d_0 = |\mcF|$
-  \item $\boldW^1 \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
+  \item $\boldx^0 \in \reals^{1 \times d_0}$ one-hot word.
+  \item $\boldW^0 \in \reals^{d_0 \times \din}$, $d_0 = |\mcV|$
   \end{itemize}
   \air
   Notes:
   \begin{itemize}
-  \item Bilinear parameter interaction.
   \item $d_0 >> \din$, e.g. $d_0 = 10000, \din = 50$
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Representations}
+\begin{frame}{Pretraining Representations}
   \begin{itemize}
-  \item We would like shared representations of words
+  \item We would strong shared representations of words
     \air
 
-  \item However, PTB only 1M words, relatively small
+  \item However, PTB only 1M labeled words, relatively small
 
     \air
-  \item Collobert et al. (2008, 2011) propose semi-supervised method.
+  \item Collobert et al. (2008, 2011) use semi-supervised method.
 
     \air
-  \item [Close connection to Bengio et al (2003) (next topic)]
+  \item (Close connection to Bengio et al (2003), next topic)
   \end{itemize}
 \end{frame}
 
@@ -150,23 +181,38 @@
   \begin{enumerate}
   \item Pretrain word embeddings $\boldW^0$ first.
   \item Substitute them in as first NN layer
-  \item (Optional) Fine-tune embeddings for final task
+  \item Fine-tune embeddings for final task
+    \begin{itemize}
+    \item Modify the first layer based on supervised gradients
+    \item Optional, some work skips this step
+    \end{itemize}
   \end{enumerate}
 \end{frame}
 
-\begin{frame}{New Corpora}
+\begin{frame}{Large Corpora}
   To learn rare word embeddings, need many more tokens,
 
   \begin{itemize}
-  \item English Wikipedia (631 million words tokens)
-    \air
-  \item Reuters Corpus (221 million word tokens)
-    \air
-  \item Total vocabulary size: 130,000 word types
-  \end{itemize}
+    \item C\&W
+      \begin{itemize}
+      \item English Wikipedia (631 million words tokens)
+        \air
+      \item Reuters Corpus (221 million word tokens)
+        \air
+      \item Total vocabulary size: 130,000 word types
+      \end{itemize}
+    \item word2vec
+      \begin{itemize}
+      \item Google News (6 billion word tokens)
+        \air
 
+      \item Total vocabulary size: $\approx$ 1M word types
+      \end{itemize}
+    \end{itemize}
   But this data has no labels...
 \end{frame}
+
+\section{C\&W Embeddings}
 
 \begin{frame}{C\&W Embeddings}
   \begin{itemize}
@@ -223,7 +269,7 @@
     \air
   \item
   \end{itemize}
-end{frame}
+\end{frame}
 
 
 \begin{frame}{Ranking Loss}
@@ -273,9 +319,9 @@ k
 
 \end{frame}
 
-\begin{frame}
+\begin{frame}{C\&W Results}
   \begin{center}
-    \includegraphics[width=5cm]{cwfull}
+    \includegraphics[width=8cm]{cwresults}
   \end{center}
   \begin{enumerate}
   \item Use dense representations instead of sparse
@@ -284,6 +330,8 @@ k
   \item Use semi-supervised learning to pretrain representations.
   \end{enumerate}
 \end{frame}
+
+\section{word2vec}
 
 \begin{frame}{Other Embedding Method: word2vec}
   \begin{itemize}
@@ -295,8 +343,8 @@ k
 
   \item Two different models
     \begin{enumerate}
-    \item Skipgram
     \item Continuous Bag-of-Words (CBOW)
+    \item Continuous Skip-gram
     \end{enumerate}
 
   \item Various other ideas.
@@ -304,10 +352,27 @@ k
   \end{itemize}
 \end{frame}
 
-\section{word2vec}
 
-\begin{frame}{word2vec}
+\begin{frame}{Bilinear Model}
+  Bilinear model,
+  \[\hat{\boldy} = f((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+  \begin{itemize}
+  \item $\boldx^0 \in \reals^{1 \times d_0}$ start with one-hot.
+  \item $\boldW^0 \in \reals^{d_0 \times \din}$, $d_0 = |\mcF|$
+  \item $\boldW^1 \in \reals^{\din \times \dout}, \boldb \in \reals^{1 \times \dout}$; model parameters
+  \end{itemize}
+  \air
+  Notes:
+  \begin{itemize}
+  \item Bilinear parameter interaction.
+  \item $d_0 >> \din$, e.g. $d_0 = 10000, \din = 50$
+  \end{itemize}
+\end{frame}
 
+\begin{frame}{word2vec (Mikolov, 2013)}
+  \begin{center}
+    \includegraphics[width=8cm]{word2vec}
+  \end{center}
 \end{frame}
 
 \begin{frame}{Continuous Bag-of-Words (CBOW) }
@@ -317,49 +382,107 @@ k
   \end{itemize}
 
   Example: CBOW
-  \[ \boldx = v(w_3) +  v(w_4) +   v(w_6) + v(w_7)/$\dwin-1$   \]
-  \[ \boldy = \delta(w_5) \]
+  % \[ \boldx = v(w_3) +  v(w_4) +   v(w_6) + v(w_7)/$\dwin-1$   \]
+  % \[ \boldy = \delta(w_5) \]
 
-  \[\renewcommand\matscale{.6}
-  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{}\]
+  % \[\renewcommand\matscale{.6}
+  % \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{}\]
 
   $\boldW^1$ is no longer partitioned by row
 \end{frame}
 
-
-\begin{frame}{Skipgram}
+\begin{frame}{Skip-gram}
   \begin{itemize}
   \item Also a bilinear model, after embedding
   \item Attempt to predict outer word from middle
   \end{itemize}
 
-  Example: CBOW
-  \[ \boldx = v(w_5)$   \]
-  \[ \boldy = \delta(c)\ \mathrm{\ where\ } c \in \{w_3, w_4,w_6, w_7\}  \]
+  Example: Skip-gram
+%   \[ \boldx = v(w_5)$   \]
+%   \[ \boldy = \delta(c)\ \mathrm{\ where }\ c \in \{w_3, w_4,w_6,c w_7\}  \]
 
-  \[\renewcommand\matscale{.6}
-  \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din}{} \]
+%    \[\renewcommand\matscale{.6}
+%    \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din }{\boldx} + \matbox{1.5}{4}{\din }{} + \matbox{1.5}{4}{\din}{} \]
 
-  $\boldW^1$ is no longer partitioned by row
+% $\boldW^1$ is no longer partitioned by row
 \end{frame}
 
-\begin{frame}{Softmax}
 
+\begin{frame}{Softmax}
+  Use a softmax to force a distribution,
+
+  \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c\in \mcC } \exp(z_c)}  \]
+
+  \[\log \softmax(\boldz) = \boldz - \log \sum_{c\in \mcC} \exp(z_c)  \]
+
+  \begin{itemize}
+  \item Issue: class $\mcC$ is huge.
+  \item For C\&W, 100,000, for word2vec 1,000,000
+  \item Note datasets, 6 billion words
+  \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{}
+  First run hard clustering.
+
+  \[p(Y |X) = P(Y | C, X;\theta) P(C | X; \theta)\]
+
+  $P(C |X;\theta)$
+  \[\hat{\boldy} = \softmax((\boldx^0 \boldW^0)\boldW^1 + \boldb)\]
+
+
+  $P(Y | C, X;\theta)$
+  \[\hat{\boldy} = \softmax((\boldx^0 \boldW^0)\boldW^{C} + \boldb))\]
+\end{frame}
+
+\begin{frame}{}
+  \Tree  [ [ 1 ]  [ 2 ] [ 3 .a .b .c .d ]  4 5 ];
+\end{frame}
+
+\begin{frame}{}
+  Computing full $p(Y | X)$ still requires $O(|\mcV|)$ time.
+
+  $L_{2SM}() = -\log p(Y | X, C) -\log p(C | X) $
+\end{frame}
+
+
+\begin{frame}{}
+  \Tree  [ [ 1 ]  [ 2 ] [ 3 .a .b .c .d ]  4 5 ];
+\end{frame}
+
+\begin{frame}{}
+  \begin{itemize}
+  \item Best two-layer is with a balanced tree.
+  \item Requires $O(\sqrt{ |\mcV|})$
+
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Hierarchical Softmax}
+  \begin{itemize}
 
-
-
+  \item Requires $O(\log_2 |\mcV|)$
+  $L_{HSM}() = -\sum_{l=0}^{L(c)} \log p(\hat{\boldy}=\delta(c) | X, C_1, \ldots, C_l)  $
+  \item One paper on website (Mnih and Hinton, 2008)
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Negative Sampling}
-
+\begin{frame}{Huffman Encoding}
+  \begin{center}
+    \includegraphics[width=5cm]{HuffmanCodeAlg}
+  \end{center}
 \end{frame}
 
-\begin{frame}{Embedding Tasks}
+\begin{frame}{Hierarchical Softmax}
+  \begin{itemize}
 
+  \item Requires $O(\log_2 perp(unigram))$
+  \end{itemize}
 \end{frame}
+
 
 \begin{frame}{Other Elements}
   \begin{itemize}
@@ -369,21 +492,77 @@ k
   \end{itemize}
 \end{frame}
 
-\section{Comparing Embeddings}
+
+\section{Embeddings}
+
+\begin{frame}{How good are embeddings?}
+  \begin{itemize}
+  \item Anecdotal Metric-based
+  \item Analogy task
+  \item Extrinsic Metrics
+  \end{itemize}
+\end{frame}
 
 \begin{frame}
+  Dot-product
+
+  \[\boldx_{cat} \boldx_{dog}^{\top}\]
+
+  Cosine Similarity
+
+  \[\frac{\boldx_{cat} \boldx_{dog}^{\top}}{||\boldx_{cat} || || \boldx_{dog}||  }\]
 
 \end{frame}
 
-\section{Visualizing Embeddings}
+\begin{frame}
+  dog
+  \begin{tabular}{ll}
+  cat &  0.921800527377\\
+  dogs & 0.851315870426 \\
+  horse & 0.790758298322 \\
+  puppy & 0.775492121034 \\
+  pet & 0.772470734611 \\
+  rabbit& 0.772081457265 \\
+  pig& 0.749006160038 \\
+  snake & 0.73991884888 \\
+  \end{tabular}
+\end{frame}
 
 \begin{frame}
+  Analogy questions:
 
+  \texttt{A:B::C:\_\_}
+
+  \begin{itemize}
+  \item 5 types of semantic questions, 9 types of syntactic
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \[ \boldx' = \boldx_{B} - \boldx_{A} + \boldx_{C} \]
+
+  \[ \argmax_{\boldx_D}\frac{\boldx_{D} \boldx'^{\top}}{||\boldx_{D} || || \boldx'||  } \]
+\end{frame}
+
+\begin{frame}{Embedding Tasks}
+  \begin{center}
+    \includegraphics[width=5cm]{analogy}
+  \end{center}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}{Extrinsic Tasks}
+  \begin{itemize}
+  \item
+  \end{itemize}
+\end{frame}
 
+
+\begin{frame}{Visualizations}
+  \begin{itemize}
+  \item Projections (PCA)
+  \item T-SNE
+  \end{itemize}
 \end{frame}
 
 
