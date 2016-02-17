@@ -1,37 +1,225 @@
 \documentclass{beamer}
 \usepackage{../common_slides}
 \usepackage{tikz-qtree}
+\usepackage{pdfpages}
 
-\title{Language Modeling \\ + \\ Feed-Forward Networks 3}
+\usepackage{graphicx}
+
+\makeatletter
+\newcommand*\bigcdot{\mathpalette\bigcdot@{.5}}
+\newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
+\makeatother
+
+\title{Language Modeling 1}
 \date{}
-\author{Alexander Rush}
+\author{CS287}
 \begin{document}
 
 \begin{frame}
   \titlepage
 \end{frame}
 
+\begin{frame}{Review: C\&W Setup}
+  Let $\mcV$ be the vocabulary of English and let $s$
+  score any window of size $\dwin =5$, if we see the phrase
+
+  \begin{center}
+  [ the dog walks to the ]
+  \end{center}
+
+
+
+  It should score higher by $s$ than
+  \begin {center}
+  [ the dog \alert{house} to the ]
+
+   [ the dog \alert{cats} to the ]
+
+   [ the dog \alert{skips} to the ]
+
+   ...
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{Review: Continuous Bag-of-Words (CBOW) }
+  \[\hat{\boldy} = \softmax((\frac{\sum_{i} \boldx_i^0 \boldW^0}{\dwin-1})\boldW^1)\]
+  \begin{itemize}
+
+  \item Attempt to predict the middle word
+    \begin{center}
+      [ \structure{the dog} \alert{walks} \structure{to the} ]
+    \end{center}
+  \end{itemize}
+
+  Example: CBOW
+  \[ \boldx = \frac{v(w_3) +  v(w_4) +   v(w_6) + v(w_7)}{\dwin-1}  \]
+  \[ \boldy = \delta(w_5) \]
+
+
+  $\boldW^1$ is no longer partitioned by row (order is lost)
+\end{frame}
+
+\begin{frame}{Review: Softmax Issues}
+  Use a softmax to force a distribution,
+
+  \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c\in \mcC } \exp(z_c)}  \]
+
+  \[\log \softmax(\boldz) = \boldz - \log \sum_{c\in \mcC} \exp(z_c)  \]
+
+  \begin{itemize}
+  \item \textbf{Issue:} class $\mcC$ is huge.
+  \item For C\&W, 100,000, for word2vec 1,000,000 types
+  \item Note largest dataset is 6 billion words
+  \end{itemize}
+
+\end{frame}
+
 \begin{frame}{Quiz}
   Consider the hierarchical softmax from the last class.
 
-  Say we have trained a depth-two balanced soft-max tree.
+  \begin{center}
+    \Tree [ $\ldots$ [ .\alert{3} \alert{dog} cat horse $\ldots$ ] $\ldots$ [ .5 car
+    truck motorcycle $\ldots$ ] ]
+  \end{center}
+
+  We have trained a depth-two balanced soft-max tree.
   Give an algorithm and time-complexity for:
 
   \begin{itemize}
-  \item Computing the probability of a class?
   \item Computing the optimal class decision?
+  \item Greedily approximating the optimal class decision.
+  \item Appropriately sampling a word.
   \item Computing the full distribution over classes?
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{The Language Modeling }
-  [The dog walked to the \alert{blank}]
+\begin{frame}[allowframebreaks]{Answers}
+  \begin{itemize}
+  \item Computing the optimal class decision i.e. $\argmax_{y} p(\boldy = y| \boldx)$?
+    \air 
+
+    \begin{itemize}
+    \item Requires full enumeration $O(|\mcV|)$ 
+      \[\argmax_{y} p(\boldy =y | \boldx) = \argmax_{y} p(\boldy | C, \boldx) p(C | \boldx) \]
+    \end{itemize}
+
+  \item Greedily approximating the optimal class decision.
+    \begin{itemize}
+    \item Walk tree $O(\sqrt{|\mcV|})$ 
+      \[\argmax_{y} p(\boldy =y | \boldx)  \]
+      \[c^* = \argmax_{y}  p(C | \boldx)\]
+      \[y^* = \argmax_{y}  p(\boldy | C=c^*, \boldx)\]
+    \end{itemize}
+   \air 
+
+  \item Appropriately sampling a word $y \sim p(\boldy =\delta(c) | \boldx)$?
+    \begin{itemize}
+    \item Walk tree $O(\sqrt{|\mcV|})$ 
+
+      \[y \sim p(\boldy =\delta(c) | \boldx)\] 
+      \[\hat{c} \sim   p(C | \boldx)\]
+      \[\hat{y} \sim   p(\boldy | C=\hat{c}, \boldx)\]
+    \end{itemize}
+
+
+  \item Computing the full distribution over classes?
+    \begin{itemize}
+    \item  Enumerate $O(|\mcV|)$ 
+      \[  p(\boldy =\delta(c) | \boldx) p(\boldy | C=\hat{c}, \boldx) \] 
+    \end{itemize}
+
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Language Modelling Interpretation}
-  [from talk]
+\section{Language Modeling}
+
+\begin{frame}{Language Modeling Task}
+  Given a sequence of text give a probability distribution 
+  over the next word. 
+
+\air
+
+  The Shannon game. Estimate the probability of the next letter/word
+  given the previous.
+
+  \begin{quote}
+    THE ROOM WAS NOT VERY LIGHT A SMALL OBLONG READING LAMP ON THE
+    DESK SHED GLOW ON POLISHED \_\_\_\
+  \end{quote}
+
+
 \end{frame}
+
+
+\begin{frame}{Language Modeling}
+  Shannon (1948) \textit{Mathematical Model of Communication} 
+
+\air
+  
+\begin{quote}  
+  We may consider a discrete source, therefore,
+to be represented by a stochastic process. Conversely, any stochastic
+process which produces a discrete sequence of symbols chosen from a finite
+set may be considered a discrete source. This will include such cases as:
+
+1. Natural written languages such as English, German, Chinese.
+...
+\end{quote}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Shannon's Babblers}
+
+  \begin{quote}
+   
+  4. Third-order approximation (trigram structure as in English).
+
+IN NO 1ST LAT WHEY CRATICT FROURE BIRS GROCID
+PONDENOME OF DEMONSTURES OF THE REPTAGIN IS
+REGOACTIONA OF CRE
+  \end{quote}
+
+  \begin{quote}
+5. First-Order Word Approximation. Rather than continue with tetragram,
+... , II-gram structure it is easier and better to jump at this
+point to word units. Here words are chosen independently but with
+their appropriate frequencies.
+
+REPRESENTING AND SPEEDILY IS AN GOOD APT OR
+COME CAN DIFFERENT NATURAL HERE HE THE A IN
+CAME THE TO OF TO EXPERT GRAY COME TO FURNISHES
+THE LINE MESSAGE HAD BE THESE.
+
+  \end{quote}
+
+  \begin{quote}
+    6. Second-Order Word Approximation. The word transition probabilities
+are correct but no further structure is included.
+
+THE HEAD AND IN FRONTAL ATTACK ON AN ENGLISH
+'RITER THAT THE CHARACTER OF THIS POINT IS
+THEREFORE ANOTHER METHOD FOR THE LETTERS
+THAT THE TIME OF WHO EVER TOLD THE PROBLEM
+FOR AN UNEXPECTED
+
+The resemblance to ordinary English text increases quite noticeably at
+each of the above steps.
+
+  \end{quote}
+\end{frame}
+
+
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=3-5]{iacs.pdf}
+}
+
+% \begin{frame}{Language Modeling Interpretation}
+
+%   [from talk]
+% \end{frame}
 
 \begin{frame}{Language Modeling}
   Crucially important for:
@@ -49,67 +237,104 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Speech Recognition }
 
-\end{frame}
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=17-20]{slides.pdf}
+}
 
-\begin{frame}{Machine Translation}
-
-\end{frame}
 
 \begin{frame}{Language Modeling Formally}
-  \textbf{Goal:} Estimate a distribution of a sentence
+  \textbf{Goal:} Compute the probability of a sentence,
 
   \begin{itemize}
   \item Factorization:
     \[ p(w_1, \ldots, w_n) = \prod_{t=1}^n p(w_t | w_1, \ldots, w_{t-1}) \]
   \end{itemize}
-
-  Estimate this probability distribution:
+k
+  Estimate the probability of the next word, conditioned on prefix,
   \[ p(w_t | w_1, \ldots, w_{t-1};\theta)\]
 \end{frame}
 
 \begin{frame}{Machine Learning Setup}
+
+  Multi-class prediction problem, 
+
   \[ (\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n) \]
   \begin{itemize}
   \item $\boldy_i$; the one-hot next word
   \item $\boldx_i$; representation of the prefix $(w_1, \ldots, w_{t-1})$
   \end{itemize}
+  \pause
+  \textbf{Challenges:}
+  \begin{itemize}
+  \item How do you represent input?
+  \item Smoothing is crucially important.
+  \item Output space is very large (next class)
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Metric}
-  So far, we have used \textit{accuracy} as a metric.
+\begin{frame}{Problem Metric}
+  Previously, used \textit{accuracy} as a metric.
+  
+  \air 
 
-  Language modeling uses test average negative log-likelihood (cross-entropy)
+  Language modeling uses of version  average negative
+  log-likelihood 
   \begin{itemize}
-    \item For Test data $\bar{w}_1, \ldots, \bar{w}_n$
-    \item $\frac{1}{n}\sum_{i=1}^n \log y_c$
+    \item For test data $\bar{w}_1, \ldots, \bar{w}_n$
+    \item \[NLL = -\frac{1}{n}\sum_{i=1}^n \log p(w_i | w_1, \ldots,w_{i-1})\]
   \end{itemize}
 
 
-  Actually report \textit{perplexity}
-  \[ \exp(\frac{1}{n}\sum_{i=1}^n \log y_c) \]
+  Actually report \textit{perplexity},
+  \[ perp = \exp(-\frac{1}{n}\sum_{i=1}^n \log p(w_i | w_1, \ldots,w_{i-1})) \]
+
+  Requires modeling full distribution as opposed to argmax (hinge-loss)
 \end{frame}
 
 \begin{frame}{Perplexity: Intuition}
   \begin{itemize}
   \item Effective uniform distribution size.
-  \item If words were uniform: $|\mcV| = 10000$
+    \air 
+  \item If words were uniform: $perp = |\mcV| = 10000$
+    \air 
+    
+  \item Using unigram : $perp \approx 400$
+    \air 
+
+  \item $\log_2 perp$ gives average number of bits needed per word.
+  \end{itemize}
+\end{frame}
+
+\section{NGram Models}
+
+\begin{frame}{n-gram Models}
+  In practice representation doesn't use all $(w_1, \ldots, w_{t-1})$
+
+  \[p(w_i | w_1, \ldots, w_{i-1}) \approx p(w_i | w_{i - n +1}, \ldots, w_{i-1}; \btheta) \]
+  
+  \begin{itemize}
+  \item   We call this an n-gram model.
+  \item   $w_{i - n +1}, \ldots, w_{i-1}$; the context
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Bigram Models}
+  Back to count-based multinomial estimation, 
   \begin{itemize}
   \item Feature set $\mcF$: previous words
   \item Input vector $\boldx$ is sparse
-  \item Count matrix $\boldF \in \reals^{\mcV \times \mcV} $
+  \item Count matrix $\boldF \in \reals^{\mcV \times \mcV}$ 
+  \item Counts come from training data:
   \end{itemize}
 
-  \[ F_{v, w}  =  \indicator(w_{i-1} = w, w_i = v)  \]
+  \[ F_{c, w}  = \sum_{i} \indicator(w_{i-1} = c, w_i = w)  \]
 
-  \[p(\boldy | \boldx;\theta) = \frac{F_{v, w}}{\sum_{v'} F_{v', w}} \]
+  \[p_{ML}(w_i | w_{i-1};\theta) = \frac{F_{c, w}}{F_{c, \bigcdot}} \]
 \end{frame}
+
 
 
 \begin{frame}{Trigram Models}
@@ -119,31 +344,67 @@
   \item Count matrix $\boldF \in \reals^{\mcV \times \mcV, \mcV} $
   \end{itemize}
 
-  \[ F_{u, v, w}  = \sum_{} \indicator(w_{i-2} = w, w_{i-1} = w, w_i = v)  \]
+  \[ F_{c, w}  = \sum_{i} \indicator( w_{i-2:i-1} = c, w_i = w)  \]
 
-  \[p(\boldy | \boldx;\theta) = \frac{F_{u, w, v}}{\sum_{w'', w'} F_{w'', w',v}} \]
-\end{frame}
+  \[p_{ML}(w_i | w_{i-2:i-1} =c ;\theta) = \frac{F_{c, w}}{F_{c, \bigcdot}} \]
 
-
-\begin{frame}{NGram Models}
-  It is common to go up to 5-grams
-
-  \[ F_{c, w}  =  \sum_{} \indicator(w_{i-n+1} \ldots w_{i-1} = c, w_{i} = w)  \]
-
-  \[ N_{c, w}  =  \indicator(F_{c,w} > 0)  \]
-
-
-  \begin{itemize}
-  \item Google n-grams goes up ... [link]
-  \end{itemize}
 \end{frame}
 
 \begin{frame}{Notation}
   \begin{itemize}
-  \item $N_{\cdot, w} = \sum_c N_{c,w} $
-  \item $N_{c, \cdot} = \sum_w N_{c,w} $
+  \item $F_{\bigcdot, w} = \sum_c F_{c,w} $
+  \item $F_{c, \bigcdot} = \sum_w F_{c,w} $
   \item $c_{2:}$; context without first word
-  \item $p_{ML}(w | c) = N_{w, c} / N_{c, \cdot}$
+  \item Maximum-likelihood, 
+    \[p_{ML}(w | c) = F_{c, w} / F_{c, \bigcdot}\]
+  \item Non-zero count words, for all $c,w$
+    \[N_{c, w}  =  \indicator(F_{c,w} > 0)  \]
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{NGram Models}
+  It is common to go up to 5-grams,
+
+  \[ F_{c, w}  =  \sum_{i} \indicator(w_{i-5+1} \ldots w_{i-1} = c, w_{i} = w)  \]
+
+  Matrix becomes very sparse at 5-grams. 
+\end{frame}
+
+\begin{frame}{Google 1T}
+
+  \begin{table}
+    \centering
+  \begin{tabular}{ll}
+    \toprule
+    Number of token  &1,024,908,267,229 \\
+    Number of sentences & 95,119,665,584 \\
+    Size compressed (counts only) & 24 GB \\  
+    \midrule
+    Number of unigrams & 13,588,391 \\
+    Number of bigrams & 314,843,401 \\ 
+    Number of trigrams & 977,069,902 \\ 
+    Number of fourgrams & 1,313,818,354 \\
+    Number of fivegrams&  1,176,470,663 \\
+    \bottomrule
+  \end{tabular}
+  \end{table}
+\end{frame}
+
+\section{Smoothing}
+
+\begin{frame}{NGram Models}
+  \begin{itemize}
+  \item Maximum likelihood models word terribly.
+    \air 
+
+  \item NGram models are  sparse, need to handle unseen cases.
+
+    \air
+    
+
+  \item Presentation follows work of Chen and Goodman (1999)
   \end{itemize}
 \end{frame}
 
@@ -151,6 +412,12 @@
   Laplace Smoothing
   \[\alpha \]
 \end{frame}
+
+\begin{frame}{Good-Turing Smoothing}
+  Laplace Smoothing
+  \[\alpha \]
+\end{frame}
+
 
 \begin{frame}{Interpolation (Jelinek-Mercer Smoothing)}
   \[ p_{interp}(w |  c) =  \lambda p_{ML}(w |  c) + (1 - \lambda) p_{interp}(w | c_{2:}) \]
@@ -163,12 +430,12 @@
 
 \begin{frame}{Interpolation (Witten-Bell)}
 
-  Defind $\lambda$ as a function of $w_{i-n+1} \ldots w_i$
+  Define $\lambda$ as a function of $w_{i-n+1} \ldots w_i$
 
-  \[(1 - \lambda) =  \frac{\displaystyle N_{c, \cdot}{\displaystyle N_{c, \cdot} + F_{c, w}}\]
+  \[(1 - \lambda) =  \frac{\displaystyle N_{c, \bigcdot}} {\displaystyle N_{c, \bigcdot} + F_{c, w}}\]
 
 
-  \[ p_{wb}(w | c) = \frac{\displaystyle F_{c, w} + N_{c, \cdot} \times p_{wb}(w| c_{2:})} {\displaystyle N_{c, \cdot}) + F_{c, \cdot}} \]
+  \[ p_{wb}(w | c) = \frac{\displaystyle F_{c, w} + N_{c, \bigcdot} \times p_{wb}(w| c_{2:})} {\displaystyle N_{c, \bigcdot}) + F_{c, \bigcdot}} \]
 
     Interpolation counts are a new events estimated as proportional to seeing a new word.
 \end{frame}
@@ -176,11 +443,11 @@
 \begin{frame}{Absolute Discounting}
   Similar form to interpolation
 
-  \[ p_{discount} =\frac{\max{0, F_{c,w} - D}}{F_{c, \cdot} +  (1 - \lambda) p_{discount}(w |  c_{2:} )  \]
+  \[ p_{discount} =\frac{\max{0, F_{c,w} - D}}{F_{c, \bigcdot}} +  (1 - \lambda) p_{discount}(w |  c_{2:} )  \]
 
   Where
 
-  \[(1-\lambda) = \frac{D}{F_{c, \cdot} N_{c,\cdot} \]
+  \[(1-\lambda) = \frac{D}{F_{c, \bigcdot}} N_{c,\bigcdot} \]
 \end{frame}
 
 \begin{frame}{Review: Marginalization}
@@ -191,14 +458,13 @@
   Idea: match interpolated marginals
   \[ \sum_{c_1} p_{KN}(c_1, c_{2:}, w) =  \sum_{c_1} p_{KN}(w |  c) p_{ML}(c)  = p_{ML}(c_{2:}, w)   \]
 
-  \[ \sum_{c_1} p_{KN}(w |  c) F_{c,\cdots}  = F_{c_{2:}w, \dots}  \]
+  \[ \sum_{c_1} p_{KN}(w |  c) F_{c,\bigcdot}  = F_{c_{2:}w, \bigcdot}  \]
 
   \begin{eqnarray*}
-    F_{c_{2:}w, \dot} &=& \sum_c F_{c,\cdots} [p_{KN}(w,c)]  \\
-    &=& \sum_c F_{c,\cdots} [\frac{\max{0, F_{c,w} - D}}{F_{c, \cdot} +  \frac{D}{F_{c, \cdot} N_{c,\cdot} p_{discount}(w |  c_{2:} )]  \\
-
-    &=& \sum_{c_1:N_{c_1 c_2, w} > 0}  F_{c,\cdots} \frac{F_{c,w} - D}{F_{c, \cdots}} + \sum_{c_1} \frac{D}{F_{c, \cdots}} N_{\cdot c_{2:}, \cdots} p_{KN}(w| c_{2:})
-    &=& F_{c_{2:}w, \cdot} - N_{\cdots c_{2:}, w}D + D p_{KN}(w| c_{2:}) N_{\cdots c_{2:}, \cdots}
+    F_{c_{2:}w, \bigcdot} &=& \sum_c F_{c,\bigcdot} [p_{KN}(w,c)]  \\
+    &=& \sum_c F_{c,\bigcdot} [\frac{\max{0, F_{c,w} - D}} {F_{c, \bigcdot}} +  \frac{D}{F_{c, \bigcdot}} N_{c,\bigcdot} p_{discount}(w |  c_{2:} )]  \\
+    &=& \sum_{c_1:N_{c_1 c_2, w} > 0}  F_{c,\bigcdot} \frac{F_{c,w} - D}{F_{c, \bigcdot}} + \sum_{c_1} \frac{D}{F_{c, \bigcdot}} N_{\bigcdot c_{2:}, \bigcdot} p_{KN}(w| c_{2:})\\
+    &=& F_{c_{2:}w, \bigcdot} - N_{\bigcdot c_{2:}, w}D + D p_{KN}(w| c_{2:}) N_{\bigcdot c_{2:}, \bigcdot}
   \end{eqnarray*}
 
 \end{frame}
@@ -207,12 +473,12 @@
   Final equation
 
   \begin{eqnarray*}
-    p_{KN}(w| c_{2:}) & = & N_{\cdots c_{2:}, w} /  N_{\cdots c_{2:}, \cdots}
+    p_{KN}(w| c_{2:}) & = & N_{\bigcdot c_{2:}, w} /  N_{\bigcdot c_{2:}, \bigcdot}
   \end{eqnarray*}
 
 \end{frame}
 
-\section{}
+\section{Language Models in Practice}
 
 \begin{frame}{Sparse: Efficiency Issues}
   Very quickly the count matrix
