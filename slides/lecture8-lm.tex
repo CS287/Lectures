@@ -10,7 +10,7 @@
 \newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
 \makeatother
 
-\title{Language Modeling 1}
+\title{Language Modeling 2}
 \date{}
 \author{CS287}
 \begin{document}
@@ -19,46 +19,6 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Review: C\&W Setup}
-  Let $\mcV$ be the vocabulary of English and let $s$
-  score any window of size $\dwin =5$, if we see the phrase
-
-  \begin{center}
-  [ the dog walks to the ]
-  \end{center}
-
-
-
-  It should score higher by $s$ than
-  \begin {center}
-  [ the dog \alert{house} to the ]
-
-   [ the dog \alert{cats} to the ]
-
-   [ the dog \alert{skips} to the ]
-
-   ...
-  \end{center}
-\end{frame}
-
-
-\begin{frame}{Review: Continuous Bag-of-Words (CBOW) }
-  \[\hat{\boldy} = \softmax((\frac{\sum_{i} \boldx_i^0 \boldW^0}{\dwin-1})\boldW^1)\]
-  \begin{itemize}
-
-  \item Attempt to predict the middle word
-    \begin{center}
-      [ \structure{the dog} \alert{walks} \structure{to the} ]
-    \end{center}
-  \end{itemize}
-
-  Example: CBOW
-  \[ \boldx = \frac{v(w_3) +  v(w_4) +   v(w_6) + v(w_7)}{\dwin-1}  \]
-  \[ \boldy = \delta(w_5) \]
-
-
-  $\boldW^1$ is no longer partitioned by row (order is lost)
-\end{frame}
 
 \begin{frame}{Review: Softmax Issues}
   Use a softmax to force a distribution,
@@ -76,12 +36,6 @@
 \end{frame}
 
 \begin{frame}{Quiz}
-  Consider the hierarchical softmax from the last class.
-
-  \begin{center}
-    \Tree [ $\ldots$ [ .\alert{3} \alert{dog} cat horse $\ldots$ ] $\ldots$ [ .5 car
-    truck motorcycle $\ldots$ ] ]
-  \end{center}
 
   We have trained a depth-two balanced soft-max tree.
   Give an algorithm and time-complexity for:
@@ -240,7 +194,7 @@ each of the above steps.
 
 {
 \setbeamercolor{background canvas}{bg=}
-\includepdf[pages=17-20]{slides.pdf}
+\includepdf[pages=17-20]{jobslides.pdf}
 }
 
 
@@ -352,9 +306,12 @@ k
 
 \begin{frame}{Notation}
   \begin{itemize}
-  \item $F_{\bigcdot, w} = \sum_c F_{c,w} $
-  \item $F_{c, \bigcdot} = \sum_w F_{c,w} $
-  \item $c_{2:}$; context without first word
+  \item $c = w_{i-n+1: i-1}$; context
+  \item $c' = w_{i-n+2: i-1}$; context without first word
+  \item $c''= w_{i-n+3: i-1}$; context without first two words
+  \item $[x]_+ = \max\{0, x\}$; positive part (ReLU) 
+  \item $F_{\bigcdot, w} = \sum_c F_{c,w} $; sum-over-dimension
+
   \item Maximum-likelihood, 
     \[p_{ML}(w | c) = F_{c, w} / F_{c, \bigcdot}\]
   \item Non-zero count words, for all $c,w$
@@ -408,104 +365,327 @@ k
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Additive Smoothing}
-  Laplace Smoothing
-  \[\alpha \]
+\begin{frame}{Count Modifications}
+  \begin{itemize}
+  \item Laplace Smoothing 
+
+  \[ \bar{F}_{c, w}  =F_{c, w}  + \alpha   \mathrm{\ for\ all \  } c, w\]
+
+  \item Good-Turing Smoothing (Good, 1953)
+    \[ \bar{F}_{c, w} =  (F_{c, w}  + 1) \frac{hist(F_{c, w}+1)}{hist(F_{c, w})}   \mathrm{\ for\ all \  } c, w\]
+  \end{itemize}
+    \begin{center}
+      \includegraphics[width=10cm]{../notebooks/hist}
+    \end{center}
+
 \end{frame}
 
-\begin{frame}{Good-Turing Smoothing}
-  Laplace Smoothing
-  \[\alpha \]
+\begin{frame}{Real Issues N-Gram Sparsity}
+  \begin{itemize}
+  \item Histogram of trigrams 
+  \end{itemize}
+    \begin{center}
+      \includegraphics[width=10cm]{../notebooks/nhist}
+    \end{center}
 \end{frame}
 
 
-\begin{frame}{Interpolation (Jelinek-Mercer Smoothing)}
-  \[ p_{interp}(w |  c) =  \lambda p_{ML}(w |  c) + (1 - \lambda) p_{interp}(w | c_{2:}) \]
+\begin{frame}{Idea 1: Interpolation }
+  For trigrams:
+
+  \[ p_{interp}(w |  c) = \lambda_1 p_{ML}(w | c) +  \lambda_2 p_{ML}(w | c') + \lambda_3  p_{ML}(w | c'') \]
+
+  \air
+
+  Ensure that $\lambda$s form convex combination
+  \[\sum_i \lambda_i = 1\]
+  \[\lambda_i \geq 0 \mathrm{\ for\  all \ i} \]
+
+\end{frame}
+
+
+
+\begin{frame}{Idea 1: Interpolation (Jelinek-Mercer Smoothing)}
+  Can write recursively,
+
+  \[ p_{interp}(w |  c) =  \lambda p_{ML}(w |  c) + (1 - \lambda) p_{interp}(w | c') \]
 
   Ensure that $\lambda$ form convex combination
-  \[\lambda \geq 0\]
+  \[0 \leq \lambda \leq 1\]
+
+  
 
 \end{frame}
 
+\begin{frame}{How to set parameters:  Validation Tuning}
+  \begin{itemize}
+  \item Treat $\lambda$ as hyper-parameters
+    \air 
+  \item Can estimate $\lambda$ using EM (or gradients directly) 
+    \air
+  \item Alternatively: Grid-search to held-out data. 
+    \air
+  \item Can add more parameters $\lambda(c, w)$  
+    
+  \item Language models are often stored with prob and backoff value ($\lambda$)
+  \end{itemize}
+\end{frame}
 
-\begin{frame}{Interpolation (Witten-Bell)}
+\begin{frame}{How to set parameters:  Witten-Bell}
 
-  Define $\lambda$ as a function of $w_{i-n+1} \ldots w_i$
+  Define $\lambda(c, w)$ as a function of $c, w$
 
   \[(1 - \lambda) =  \frac{\displaystyle N_{c, \bigcdot}} {\displaystyle N_{c, \bigcdot} + F_{c, w}}\]
 
+  \begin{itemize}
+  \item $N_{c, \bigcdot}$; Number of unique word types seen with context 
+  \end{itemize}
 
-  \[ p_{wb}(w | c) = \frac{\displaystyle F_{c, w} + N_{c, \bigcdot} \times p_{wb}(w| c_{2:})} {\displaystyle N_{c, \bigcdot}) + F_{c, \bigcdot}} \]
+  \[ p_{wb}(w | c) = \frac{\displaystyle F_{c, w} + N_{c, \bigcdot} \times p_{wb}(w| c')} {\displaystyle  F_{c, \bigcdot} + N_{c, \bigcdot}} \]
 
     Interpolation counts are a new events estimated as proportional to seeing a new word.
 \end{frame}
 
-\begin{frame}{Absolute Discounting}
+\begin{frame}{Idea 2: Absolute Discounting}
   Similar form to interpolation
 
-  \[ p_{discount} =\frac{\max{0, F_{c,w} - D}}{F_{c, \bigcdot}} +  (1 - \lambda) p_{discount}(w |  c_{2:} )  \]
+  \[ p_{abs}(w |  c) =  \lambda(w,c) p_{ML}(w |  c) + \eta(c) p_{abs}(w | c') \]
 
-  Where
+  Delete counts and redistribute:
+    \[ p_{abs} =\frac{[F_{c,w} - D]_{+}}{F_{c, \bigcdot}} +  \eta(c) p_{abs}(w |  c' )  \]
 
-  \[(1-\lambda) = \frac{D}{F_{c, \bigcdot}} N_{c,\bigcdot} \]
+  Need for a given $c$
+  \[\sum_{w} \lambda(w, c)p_1(w) + \eta(c)p_2(w) = \sum_{w} \lambda(w)p_1(w) + \eta(c) = 1\]
+
+
+  \textbf{In-class:} To ensure a valid distribution, what are $\lambda$  and $\eta$ with $D=1$?
+  
 \end{frame}
 
-\begin{frame}{Review: Marginalization}
+\begin{frame}{Answer}
+  \[\lambda(w) = \frac{[F_{c,w} - D]_{+}}{F_{c,w}} \]
+
+  \[\eta(w) = 1 - \sum_w \frac{[F_{c,w} - D]_{+}}{F_{c, \bigcdot}} = \sum_w \frac{F_{c, \bigcdot} - [F_{c,w} - D]_{+}}{F_{c, \bigcdot}} \]
+
+  Total counts minus counts discounted. 
+
+  \[ \eta(w)= \frac{D \times N_{c, \bigcdot}}{F_{c, \bigcdot}} \] 
+\end{frame}
+
+
+\begin{frame}{Lower-Order Smoothing Issue}
+  Consider the example: \texttt{San Francisco} and \texttt{Los Franciso}
+
+  Would like:
+
+  \begin{itemize}
+  \item $p(w_{i-1} = \mathrm{San}, w_i = \mathrm{Francisco})$ to be high
+  \item $p(w_{i-1} = \mathrm{Los}, w_i = \mathrm{Francisco})$ to be very low
+  \end{itemize}
+
+  However, interpolation alone doesn't ensure this. Why?
+
+  \pause
+
+  \[(1-\lambda) p(w_i = \mathrm{Francisco})\]
+  
+  Could be quite high, from seeing \texttt{San Francisco} many times.
 
 \end{frame}
 
 \begin{frame}{Kneser-Ney Smoothing}
-  Idea: match interpolated marginals
-  \[ \sum_{c_1} p_{KN}(c_1, c_{2:}, w) =  \sum_{c_1} p_{KN}(w |  c) p_{ML}(c)  = p_{ML}(c_{2:}, w)   \]
+  \begin{itemize}
+  \item Uses Absolute Discounting instead of ML
+    \air 
 
-  \[ \sum_{c_1} p_{KN}(w |  c) F_{c,\bigcdot}  = F_{c_{2:}w, \bigcdot}  \]
+  \item However want distribution to match ML on lower-order terms.
+    \air
 
-  \begin{eqnarray*}
-    F_{c_{2:}w, \bigcdot} &=& \sum_c F_{c,\bigcdot} [p_{KN}(w,c)]  \\
-    &=& \sum_c F_{c,\bigcdot} [\frac{\max{0, F_{c,w} - D}} {F_{c, \bigcdot}} +  \frac{D}{F_{c, \bigcdot}} N_{c,\bigcdot} p_{discount}(w |  c_{2:} )]  \\
-    &=& \sum_{c_1:N_{c_1 c_2, w} > 0}  F_{c,\bigcdot} \frac{F_{c,w} - D}{F_{c, \bigcdot}} + \sum_{c_1} \frac{D}{F_{c, \bigcdot}} N_{\bigcdot c_{2:}, \bigcdot} p_{KN}(w| c_{2:})\\
-    &=& F_{c_{2:}w, \bigcdot} - N_{\bigcdot c_{2:}, w}D + D p_{KN}(w| c_{2:}) N_{\bigcdot c_{2:}, \bigcdot}
-  \end{eqnarray*}
+  \item Ensure this by marginalizing out and matching lower-order distribution.
+    \air 
+
+  \item Uses a different function for the lower-order term KN'. 
+    \air 
+
+  \item Most commonly used smoothing technique (details follow).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Review: Chain-Rule and Marginalization}
+  Chain rule:
+  
+  \[ p(X, Y) = P(X| Y) P(Y) \] 
+
+  Marginalization:
+
+  \[ p(X, Y) = \sum_{z \in \mcZ} P(X, Y, Z=z) \] 
+
+  Marginal matching constraint. 
+  
+  
+  \[p_A(X, Y) \neq p_B(X, Y) \]
+
+  
+  \[\sum_y p_A(X, Y=y) = p_B(X) \]
+
+\end{frame}
+
+
+
+\begin{frame}{Kneser-Ney Smoothing}
+
+  Main Idea: match ML marginals for all $c'$
+
+  \[ \sum_{c_1} p_{KN}(c_1, c', w) =  \sum_{c_1} p_{KN}(w |  c) p_{ML}(c)  = p_{ML}(c', w)   \]
+
+  \[ \sum_{c_1} p_{KN}(w |  c) \frac{F_{c,\bigcdot}}{F_{\bigcdot, \bigcdot}}  = \frac{F_{c'w, \bigcdot}}{F_{\bigcdot, \bigcdot}}  \]
+
+\air 
+
+  \begin{center}
+    [ $c_1\ \ \ \ \ \ \ \ \ \  c'\ \ \ \ \ \ \ \  w$ ]
+  \end{center}
 
 \end{frame}
 
 \begin{frame}{Kneser-Ney Smoothing}
-  Final equation
+    \[ p_{KN} =\frac{[F_{c,w} - D]_{+}}{F_{c, \bigcdot}} +  \eta(c) p_{KN'}(w |  c' )  \]
 
-  \begin{eqnarray*}
-    p_{KN}(w| c_{2:}) & = & N_{\bigcdot c_{2:}, w} /  N_{\bigcdot c_{2:}, \bigcdot}
+
+    \begin{eqnarray*}
+    F_{c'w, \bigcdot} &=& \sum_{c_1} F_{c,\bigcdot} [p_{KN}(w|c)]  \\
+    &=& \sum_{c_1} F_{c,\bigcdot} [\frac{[F_{c,w} - D]_+} {F_{c, \bigcdot}} +  \frac{D}{F_{c, \bigcdot}} N_{c,\bigcdot} \times p_{KN'}(w |  c' )]  \\
+    &=& \sum_{c_1:N_{c, w} > 0}  F_{c,\bigcdot} \frac{F_{c,w} - D}{F_{c, \bigcdot}} + \sum_{c_1}D N_{c, \bigcdot} \times p_{KN'}(w| c')\\
+    &=& F_{c', w} - N_{\bigcdot c', w}D + D N_{\bigcdot c', \bigcdot} \times p_{KN'}(w| c') 
   \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Kneser-Ney Smoothing}
+  Final equation for unigram
+    \[p_{KN'}(w) & = & N_{\bigcdot, w} /  N_{\bigcdot, \bigcdot}\]
+
+
+  \begin{itemize}
+  \item Intuition: Prob of a unique bigrams ending in $w$.
+
+  \end{itemize}
+    \[p_{KN'}(w| c') & = & N_{\bigcdot c', w} /  N_{\bigcdot c', \bigcdot}\]
+  \begin{itemize}
+  \item Intuition: Prob of a unique ngram (with middle $c'$) ending in $w$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modified Kneser-Ney}
+  Set $D$ based on $F_{c, w}$ 
+  
+  \[D =
+    \begin{cases}
+      0 & F_{c, w} = 0 \\
+      D_1 & F_{c, w} = 1 \\
+      D_2 & F_{c, w} = 2 \\
+      D_{3+} & F_{c, w} \geq 3 \\
+    \end{cases}
+  \] 
+
+  \begin{itemize}
+  \item Modifications to the formula are in the paper
+  \end{itemize}
 
 \end{frame}
+
 
 \section{Language Models in Practice}
 
-\begin{frame}{Sparse: Efficiency Issues}
-  Very quickly the count matrix
+\begin{frame}{Language Model Issues}
+  \begin{enumerate}
+  \item LMs become very sparse. 
+    \begin{itemize}
+    \item Obviously cannot use matrices
+      ($|\mcV| \times|\mcV|\times|\mcV| > 10^{12} $)
+    \end{itemize}
+    \air
+  \item LMs are very big
+    \air 
+  \item Lookup speed is crucial
+  \end{enumerate}
+\end{frame}
 
-  Reverse trie data structure
+\begin{frame}{Trie Data structure}
+
+
+  \begin{center}
+    \scalebox{0.8}{
+    \Tree [ .ROOT [ .the [ .dog barks($c_1$) sleeps($c_2$) ] [ .cat runs($c_3$) ] mouse($c_4$) ] [ .a [ .dog runs($c_5$) ] [ .cat
+    meows($c_6$) ] mouse($c_7$) ] ]}
+  \end{center}
+
+
+  Issues?
+
+  % Very quickly the count matrix
+
+  % Reverse trie data structure
+  % \begin{itemize}
+  % \item SRILM
+  % \end{itemize}
+  % \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
+\end{frame}
+
+\begin{frame}{Reverse Trie Data structure}
+
+
+  \begin{center}
+    \Tree [ .ROOT [  .mouse($c$) the($c$) ] [  .barks($c$)  [ .dog($c$) the($c$) ] ]  [ .sleeps($c$) [ .dog($c$) the($c$) ] ]  [ .meows($c$) [ .cat($c$) a($c$) ] ]  [ .runs($c$) [ .dog($c$) a($c$) ] [ .cat($c$) the($c$) ]  ] ] ;
+  \end{center}
+
+  Used in several standard language modeling toolkits.
+  % Very quickly the count matrix
+
+  % Reverse trie data structure
+  % \begin{itemize}
+  % \item SRILM
+  % \end{itemize}
+  % \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
+\end{frame}
+
+\begin{frame}{Efficiency: Hash Tables}
+
   \begin{itemize}
-  \item SRILM
+  \item KenLM finds  it more efficient to directly hash ngrams
+    \air
+
+  \item All ngrams of a given weight are kept in a hash table.
+    \air 
+
+  \item Fast linear-probing hash tables make this work well. 
+    
   \end{itemize}
-  \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
 \end{frame}
 
-\begin{frame}{Efficiency: Hash }
-\end{frame}
 
-\begin{frame}{Efficiency: Reverse Tries }
-  Of course each is hashed
-
-  Reverse trie data structure
+\begin{frame}{Quantization }
   \begin{itemize}
-  \item SRILM, KenLM
+  \item Memory issues are often a concern
+    \air 
+  \item Probabilities are kept in log space 
+    \air 
+  \item KenLM quantizes from 32 bits to smaller (others use 8 bits)
+    \air
+  \item Quatization is done by sorting, binning, and averaging.
   \end{itemize}
-  \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
+
 \end{frame}
 
-\begin{frame}{Efficiency: Quantization }
+
+\begin{frame}{Finite State Automata}
+  \begin{center}
+    \includegraphics[width=7cm]{fsa}
+  \end{center}
+\end{frame}
 
 
+\begin{frame}{Conclusion}
+  
 \end{frame}
 
 
