@@ -19,6 +19,46 @@
   \titlepage
 \end{frame}
 
+\begin{frame}{Review: Windowed Setup}
+  Let $\mcV$ be the vocabulary of English and let $s$
+  score any window of size $\dwin =5$, if we see the phrase
+
+  \begin{center}
+  [ the dog walks to the ]
+  \end{center}
+
+
+
+  It should score higher by $s$ than
+  \begin {center}
+  [ the dog \alert{house} to the ]
+
+   [ the dog \alert{cats} to the ]
+
+   [ the dog \alert{skips} to the ]
+
+   ...
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{Review: Continuous Bag-of-Words (CBOW) }
+  \[\hat{\boldy} = \softmax((\frac{\sum_{i} \boldx_i^0 \boldW^0}{\dwin-1})\boldW^1)\]
+  \begin{itemize}
+
+  \item Attempt to predict the middle word
+    \begin{center}
+      [ \structure{the dog} \alert{walks} \structure{to the} ]
+    \end{center}
+  \end{itemize}
+
+  Example: CBOW
+  \[ \boldx = \frac{v(w_3) +  v(w_4) +   v(w_6) + v(w_7)}{\dwin-1}  \]
+  \[ \boldy = \delta(w_5) \]
+
+
+  $\boldW^1$ is no longer partitioned by row (order is lost)
+\end{frame}
 
 \begin{frame}{Review: Softmax Issues}
   Use a softmax to force a distribution,
