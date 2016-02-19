@@ -1,0 +1,286 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+\usepackage{tikz-qtree}
+
+\title{Language Modeling \\ + \\ Feed-Forward Networks 3}
+\date{}
+\author{Alexander Rush}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Quiz}
+  We talked briefly last class about using language models for smoothing. 
+  It has become a popular task in recent years to utilize language models to predict 
+  missing words, for example consider the Microsoft Research Sentence Completion Challenge.
+
+  \begin{center}
+    a tractor rode slow
+
+    a red tractor rode fast
+
+    the parrot flew fast
+
+    the parrot flew slow
+    
+    the tractor slowed down
+
+  \begin{center}
+    the \ red \_\_\_ ?
+
+    the \ red \_\_\_ flew fast?
+  \end{center}
+
+\end{frame}
+
+
+\begin{frame}
+  %   \begin{tabular}{lll}
+  %     the & red & 0.5\\
+  %     the & blue & 0.5\\
+  %     red & tractor &   0.8\\ 
+  %     red & parrot &   0.2\\
+  %     parrot & flew &   0.9 \\
+  %     tractor & flew &   0.1 \\
+  %     flew & high &   0.6 \\
+  %     flew & low &   0.4 \\
+  %   \end{tabular}
+  % \end{center}
+  
+\end{frame}
+
+\begin{frame}{Quiz}
+  Consider the hierarchical softmax from the last class.
+
+  Say we have trained a depth-two balanced soft-max tree.
+  Give an algorithm and time-complexity for:
+
+  \begin{itemize}
+  \item Computing the probability of a class?
+  \item Computing the optimal class decision?
+  \item Computing the full distribution over classes?
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{The Language Modeling }
+  [The dog walked to the \alert{blank}]
+\end{frame}
+
+\begin{frame}{Language Modelling Interpretation}
+  [from talk]
+\end{frame}
+
+\begin{frame}{Language Modeling}
+  Crucially important for:
+
+  \begin{itemize}
+  \item Speech Recognition
+  \item Machine Translation
+  \item Many deep learning applications
+    \begin{itemize}
+    \item Captioning
+    \item Dialogue
+    \item Summarization
+    \item $\dots$
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Speech Recognition }
+
+\end{frame}
+
+\begin{frame}{Machine Translation}
+
+\end{frame}
+
+\begin{frame}{Language Modeling Formally}
+  \textbf{Goal:} Estimate a distribution of a sentence
+
+  \begin{itemize}
+  \item Factorization:
+    \[ p(w_1, \ldots, w_n) = \prod_{t=1}^n p(w_t | w_1, \ldots, w_{t-1}) \]
+  \end{itemize}
+
+  Estimate this probability distribution:
+  \[ p(w_t | w_1, \ldots, w_{t-1};\theta)\]
+\end{frame}
+
+\begin{frame}{Machine Learning Setup}
+  \[ (\boldx_1, \boldy_1), \ldots, (\boldx_n, \boldy_n) \]
+  \begin{itemize}
+  \item $\boldy_i$; the one-hot next word
+  \item $\boldx_i$; representation of the prefix $(w_1, \ldots, w_{t-1})$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Metric}
+  So far, we have used \textit{accuracy} as a metric.
+
+  Language modeling uses test average negative log-likelihood (cross-entropy)
+  \begin{itemize}
+    \item For Test data $\bar{w}_1, \ldots, \bar{w}_n$
+    \item $\frac{1}{n}\sum_{i=1}^n \log y_c$
+  \end{itemize}
+
+
+  Actually report \textit{perplexity}
+  \[ \exp(\frac{1}{n}\sum_{i=1}^n \log y_c) \]
+\end{frame}
+
+\begin{frame}{Perplexity: Intuition}
+  \begin{itemize}
+  \item Effective uniform distribution size.
+  \item If words were uniform: $|\mcV| = 10000$
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bigram Models}
+  \begin{itemize}
+  \item Feature set $\mcF$: previous words
+  \item Input vector $\boldx$ is sparse
+  \item Count matrix $\boldF \in \reals^{\mcV \times \mcV} $
+  \end{itemize}
+
+  \[ F_{v, w}  =  \indicator(w_{i-1} = w, w_i = v)  \]
+
+  \[p(\boldy | \boldx;\theta) = \frac{F_{v, w}}{\sum_{v'} F_{v', w}} \]
+\end{frame}
+
+
+\begin{frame}{Trigram Models}
+  \begin{itemize}
+  \item Feature set $\mcF$: previous two words (conjunction)
+  \item Input vector $\boldx$ is sparse
+  \item Count matrix $\boldF \in \reals^{\mcV \times \mcV, \mcV} $
+  \end{itemize}
+
+  \[ F_{u, v, w}  = \sum_{} \indicator(w_{i-2} = w, w_{i-1} = w, w_i = v)  \]
+
+  \[p(\boldy | \boldx;\theta) = \frac{F_{u, w, v}}{\sum_{w'', w'} F_{w'', w',v}} \]
+\end{frame}
+
+
+\begin{frame}{NGram Models}
+  It is common to go up to 5-grams
+
+  \[ F_{c, w}  =  \sum_{} \indicator(w_{i-n+1} \ldots w_{i-1} = c, w_{i} = w)  \]
+
+  \[ N_{c, w}  =  \indicator(F_{c,w} > 0)  \]
+
+
+  \begin{itemize}
+  \item Google n-grams goes up ... [link]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Notation}
+  \begin{itemize}
+  \item $N_{\cdot, w} = \sum_c N_{c,w} $
+  \item $N_{c, \cdot} = \sum_w N_{c,w} $
+  \item $c_{2:}$; context without first word
+  \item $p_{ML}(w | c) = N_{w, c} / N_{c, \cdot}$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Additive Smoothing}
+  Laplace Smoothing
+  \[\alpha \]
+\end{frame}
+
+\begin{frame}{Interpolation (Jelinek-Mercer Smoothing)}
+  \[ p_{interp}(w |  c) =  \lambda p_{ML}(w |  c) + (1 - \lambda) p_{interp}(w | c_{2:}) \]
+
+  Ensure that $\lambda$ form convex combination
+  \[\lambda \geq 0\]
+
+\end{frame}
+
+
+\begin{frame}{Interpolation (Witten-Bell)}
+
+  Defind $\lambda$ as a function of $w_{i-n+1} \ldots w_i$
+
+  \[(1 - \lambda) =  \frac{\displaystyle N_{c, \cdot}{\displaystyle N_{c, \cdot} + F_{c, w}}\]
+
+
+  \[ p_{wb}(w | c) = \frac{\displaystyle F_{c, w} + N_{c, \cdot} \times p_{wb}(w| c_{2:})} {\displaystyle N_{c, \cdot}) + F_{c, \cdot}} \]
+
+    Interpolation counts are a new events estimated as proportional to seeing a new word.
+\end{frame}
+
+\begin{frame}{Absolute Discounting}
+  Similar form to interpolation
+
+  \[ p_{discount} =\frac{\max{0, F_{c,w} - D}}{F_{c, \cdot} +  (1 - \lambda) p_{discount}(w |  c_{2:} )  \]
+
+  Where
+
+  \[(1-\lambda) = \frac{D}{F_{c, \cdot} N_{c,\cdot} \]
+\end{frame}
+
+\begin{frame}{Review: Marginalization}
+
+\end{frame}
+
+\begin{frame}{Kneser-Ney Smoothing}
+  Idea: match interpolated marginals
+  \[ \sum_{c_1} p_{KN}(c_1, c_{2:}, w) =  \sum_{c_1} p_{KN}(w |  c) p_{ML}(c)  = p_{ML}(c_{2:}, w)   \]
+
+  \[ \sum_{c_1} p_{KN}(w |  c) F_{c,\cdots}  = F_{c_{2:}w, \dots}  \]
+
+  \begin{eqnarray*}
+    F_{c_{2:}w, \dot} &=& \sum_c F_{c,\cdots} [p_{KN}(w,c)]  \\
+    &=& \sum_c F_{c,\cdots} [\frac{\max{0, F_{c,w} - D}}{F_{c, \cdot} +  \frac{D}{F_{c, \cdot} N_{c,\cdot} p_{discount}(w |  c_{2:} )]  \\
+
+    &=& \sum_{c_1:N_{c_1 c_2, w} > 0}  F_{c,\cdots} \frac{F_{c,w} - D}{F_{c, \cdots}} + \sum_{c_1} \frac{D}{F_{c, \cdots}} N_{\cdot c_{2:}, \cdots} p_{KN}(w| c_{2:})
+    &=& F_{c_{2:}w, \cdot} - N_{\cdots c_{2:}, w}D + D p_{KN}(w| c_{2:}) N_{\cdots c_{2:}, \cdots}
+  \end{eqnarray*}
+
+\end{frame}
+
+\begin{frame}{Kneser-Ney Smoothing}
+  Final equation
+
+  \begin{eqnarray*}
+    p_{KN}(w| c_{2:}) & = & N_{\cdots c_{2:}, w} /  N_{\cdots c_{2:}, \cdots}
+  \end{eqnarray*}
+
+\end{frame}
+
+\section{}
+
+\begin{frame}{Sparse: Efficiency Issues}
+  Very quickly the count matrix
+
+  Reverse trie data structure
+  \begin{itemize}
+  \item SRILM
+  \end{itemize}
+  \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
+\end{frame}
+
+\begin{frame}{Efficiency: Hash }
+\end{frame}
+
+\begin{frame}{Efficiency: Reverse Tries }
+  Of course each is hashed
+
+  Reverse trie data structure
+  \begin{itemize}
+  \item SRILM, KenLM
+  \end{itemize}
+  \Tree [ .ROOT .runs()  [  .dog()  .the() ]   ] ;
+\end{frame}
+
+\begin{frame}{Efficiency: Quantization }
+
+
+\end{frame}
+
+
+\end{document}
