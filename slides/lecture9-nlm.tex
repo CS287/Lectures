@@ -4,7 +4,7 @@
 
 \title{Language Modeling \\ + \\ Feed-Forward Networks 3}
 \date{}
-\author{Alexander Rush}
+\author{CS 287}
 
 \usepackage{stackengine}
 \stackMath
@@ -32,7 +32,7 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Review: Machine Learning Setup}
+\begin{frame}{Review: LM ML Setup}
 
   Multi-class prediction problem, 
 
@@ -41,7 +41,7 @@
   \item $\boldy_i$; the one-hot next word
   \item $\boldx_i$; representation of the prefix $(w_1, \ldots, w_{t-1})$
   \end{itemize}
-  \pause
+
   \textbf{Challenges:}
   \begin{itemize}
   \item How do you represent input?
@@ -69,7 +69,7 @@
   Requires modeling full distribution as opposed to argmax (hinge-loss)
 \end{frame}
 
-\begin{frame}{Idea 1: Interpolation (Jelinek-Mercer Smoothing)}
+\begin{frame}{Review: Interpolation (Jelinek-Mercer Smoothing)}
   Can write recursively,
 
   \[ p_{interp}(w |  c) =  \lambda p_{ML}(w |  c) + (1 - \lambda) p_{interp}(w | c') \]
@@ -82,43 +82,68 @@
 
 
 \begin{frame}{Quiz}
-  We talked briefly last class about using language models for smoothing. 
-  It has become a popular task in recent years to utilize language models to predict 
-  missing words, for example consider the Microsoft Research Sentence Completion Challenge.
+  % We talked briefly last class about using language models for smoothing. 
+  % It has become a popular task in recent years to utilize language models to predict 
+  % missing words, for example consider the Microsoft Research Sentence Completion Challenge.
+  Assume we have seen the following training sentences, 
 
-  \begin{center}
-    a tractor rode slow
+  \begin{itemize}
+  \item     a tractor drove slow
+  \item     the red tractor drove fast
+  \item     the parrot flew fast
 
-    a red tractor rode fast
-
-    the parrot flew fast
-
-    the parrot flew slow
+  \item the parrot flew slow
     
-    the tractor slowed down
+    \item the tractor slowed down
+
+  \end{itemize}
 
 
-    the  red \_\_\_ ?
+  Compute $p_{ML}$ for bigrams and use them to estimate whether \textit{parrot} or \textit{tractor}  fit better in the following contexts.
 
-    the  red \_\_\_ flew fast?
-  \end{center}
+
+  \begin{enumerate}
+    \item the  red \_\_\_ ?
+    \item the  \_\_\_ ?
+
+    \item the  \_\_\_ drove?
+  \end{enumerate}
 
 \end{frame}
 
 
 
-\begin{frame}
-  %   \begin{tabular}{lll}
-  %     the & red & 0.5\\
-  %     the & blue & 0.5\\
-  %     red & tractor &   0.8\\ 
-  %     red & parrot &   0.2\\
-  %     parrot & flew &   0.9 \\
-  %     tractor & flew &   0.1 \\
-  %     flew & high &   0.6 \\
-  %     flew & low &   0.4 \\
-  %   \end{tabular}
-  % \end{center}
+\begin{frame}[allowframebreaks]{Answer}
+  \begin{table}
+    \centering
+    \begin{tabular}{lll}
+      \toprule
+      \midrule
+      a & tractor & 1\\
+      a & red & $\frac{1}{2}$\\
+      \midrule
+      the & red & $\frac{1}{4}$\\
+      the & parrot & $\frac{1}{2}$\\
+      the & tractor &$\frac{1}{4}$ \\
+      \midrule
+      red & tractor & 1 \\
+      \midrule
+      tractor & drove & $\frac{2}{3}$ \\
+      tractor & slowed & $\frac{1}{3}$ \\
+      \midrule
+      parrot & flew & 1 \\
+      $\ldots$ & & \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+
+  \begin{itemize}
+  \item the red tractor 
+  \item the parrot 
+  \item the tractor drove 
+  \end{itemize}
+  
+
 \end{frame}
 
 
@@ -129,17 +154,17 @@
   \item Estimate this directly as a neural network.
     \air 
 
-  \item Two types of models, neural network and bilinear. 
+  \item Two types of models, neural network and log-bilinear. 
     \air 
 
-  \item Efficiency methods for estimation.
+  \item Efficient methods for approximated estimation.
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Intuition: NGram Issues}
   
-  In training we see, 
+  In training we might see, 
 
   \begin{center}
     the arizona corporations commission \alert{authorized}
@@ -157,6 +182,7 @@
     \item Not really. No count overlap.
     \end{itemize}
     \air 
+    \pause 
   \item Does backoff help here? 
     \begin{itemize}
     \item Maybe, if we have seen organization.
@@ -166,62 +192,108 @@
 \end{frame}
 
 
-\begin{frame}{Class-Based Language Models}
-  
-\end{frame}
-
-\section{Neural Language Models}
-
-\begin{frame}{Recall: Word Embeddings}
+\begin{frame}{Goal}
   \begin{itemize}
-  \item Embeddings allow us to utilize similar words
-  \end{itemize}
+  \item Learn representations that share properties between words.
 
-  arizona
-  \begin{tabular}{ll}
-  texas& 0.932968706025 \\
-  florida & 0.932696958878\\
-  kansas&0.914805968271\\
-  colorado&0.904197441085\\
-  minnesota&0.863925347525\\
-  carolina&0.862697751337\\
-  utah& 0.861915722889\\
-  miami&0.842350326527\\
-  oregon&0.842065064748\\
-  \end{tabular}
+    \air
+  \item Particularly helpful for unseen contexts.
 
-  corporations
-  \begin{tabular}{ll}
-  firms& 0.894882639809\\
-  companies&0.86738377358\\
-  businesses&0.859315950927\\
-  corporate&0.821590295322\\
-  enterprises&0.818504805202\\
-  investing&0.765133327454\\
-  institutions&0.76372338938\\
-  subsidiaries&0.762939166391\\
-  lobbyists&0.759909805468\\
-  \end{tabular}
-\end{frame}
 
-\begin{frame}{Issues}
+   \air 
 
-  Although... in training we see, 
+  \item Not a silver bullet, e.g. proper nouns
+
+
 
   \begin{center}
     the eagles play the arizona \alert{diamondbacks}
   \end{center}
 
-  And at test we might see, 
+  Whereas at test we might see, 
 
   \begin{center}
-    the eagles play the colorado  \alert{}
+    the eagles play the colorado  \alert{\_\_\_}
   \end{center}  
+  (We will discuss this issue more for in MT)
+  \end{itemize}
 \end{frame}
+
+
+
+\begin{frame}{Baseline: Class-Based Language Models}
+  \begin{itemize}
+  \item Groups words into classes based on word-context.
+  \begin{center}
+    \Tree [ $\ldots$ [ .3 dog cat horse $\ldots$ ] $\ldots$ [ .5 car
+    truck motorcycle $\ldots$ ] ]
+  \end{center}
+  \item Various factorization methods for estimating with count-based approaches.
+    \air 
+  \item However, assumes a hard-clustering, often estimated separately.
+  \end{itemize}
+\end{frame}
+
+
+
+\section{Neural Language Models}
+
+\begin{frame}{Recall: Word Embeddings}
+  \begin{itemize}
+  \item Embeddings give multi-dimensional representation of words. 
+
+    \item Ex: Closest by cosine similarity
+
+      \begin{small}
+        \begin{center}
+          arizona
+          \begin{tabular}{ll}
+            texas& 0.932968706025 \\
+            florida & 0.932696958878\\
+            kansas&0.914805968271\\
+            colorado&0.904197441085\\
+            minnesota&0.863925347525\\
+            carolina&0.862697751337\\
+            utah& 0.861915722889\\
+            miami&0.842350326527\\
+            oregon&0.842065064748\\
+          \end{tabular}
+        \end{center}
+      \end{small}
+    \item Gives a multi-clustering over words. 
+  \end{itemize}
+  % corporations
+  % \begin{tabular}{ll}
+  % firms& 0.894882639809\\
+  % companies&0.86738377358\\
+  % businesses&0.859315950927\\
+  % corporate&0.821590295322\\
+  % enterprises&0.818504805202\\
+  % investing&0.765133327454\\
+  % institutions&0.76372338938\\
+  % subsidiaries&0.762939166391\\
+  % lobbyists&0.759909805468\\
+  % \end{tabular}
+\end{frame}
+
 
 \begin{frame}{Feed-Forward Neural NNLM (Bengio, 2003)}
   \begin{itemize}
-  \item $\boldx$ is an embedded representation
+
+  \item $w_{i-n+1},\ldots w_{i-1}$ are input embedding representations
+    \air 
+
+  \item $w_i$ is an output embedded representation
+    \air
+
+  \item Model simultaneously learns,
+    \begin{itemize}
+    \item input word relations
+      \air 
+    \item output word relations
+      \air 
+    \item conjunctions of input words (through NLM, no n-gram features)
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -235,7 +307,7 @@
 
   \[ \boldx = [v(f_1)\  v(f_2) \  \ldots \  v(f_{\dwin})]  \]
 
-  Example: Tagging
+  Example: NNLM ($\dwin = 5$)
   \[ [\textcolor{blue}{w_3\ w_4\ w_5\ w_6\ w_7}]\ \textcolor{red}{w_8} \]
   \[ \boldx = [v(w_3)\  v(w_4) \  v(w_5) \ v(w_6) \ v(w_7)]  \]
 
@@ -251,11 +323,15 @@
 \begin{frame}{A Neural Probabilistic Language Model (Bengio, 2003)}  
   One hidden layer multi-layer perceptron architecture,
 
-  \[NN_{MLP1}(\boldx) =  \tanh(\boldx\boldW^1 + \boldb^1)W^2 + \boldb^2\]
+  \[NN_{MLP1}(\boldx) =  \tanh(\boldx\boldW^1 + \boldb^1)\boldW^2 + \boldb^2\]
   
   Neural network architecture on top of concat.
 
   \[\hat{\boldy} = \softmax(NN_{MLP1}(\boldx)) \] 
+  \iar 
+
+  Best model uses $\din=30, \dhid =100$.
+
 \end{frame}
 
 \begin{frame}{A Neural Probabilistic Language Model }  
@@ -277,10 +353,12 @@
 
 
 
-\begin{frame}{A Neural Probabilistic Language Model (Bengio, 2003)}  
+\begin{frame}{A Neural Probabilistic Language Model }  
   \begin{center}
-    \includegraphics[width=7cm]{bengioresults}
+    \includegraphics[width=9cm]{bengioresults}
   \end{center}
+
+  Dashed-lines show the optional direct connections, $C = v$.
 \end{frame}
 
 \begin{frame}{Parameters}
@@ -290,41 +368,74 @@
     
   \item In-Class: How many parameters does it have? How does this compare to Kneser-Ney smoothing?
   \end{itemize}
+\end{frame}
 
+\begin{frame}{Historical Note}
+  \begin{itemize}
+  \item Bengio et al notes that many of these aspects predate the work
+    \air 
+  \item Furthermore proposes many of the ideas that Collobert et al. and word2vec implemnt and scale 
+    \air 
+  \item Around this time, very few NLP papers on  NN, most-cited papers are about conditional random fields (CRFs). 
+  \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Log-Bilinear Language Model ()}
+\begin{frame}{Log-Bilinear Language Model }
 
-  \[\hat{\boldy} = \softmax((\boldx)\boldW^1 + \boldb)\]
+  \[\hat{\boldy} = \softmax(\boldx\boldW^1 + \boldb)\]
 
   \begin{itemize}
-  \item Remove the tanh layer, but maintain ordering.
+  \item Remove the tanh layer.
     \air 
 
   \item Dense $\boldx$ concatenated word-embeddings
+
+    \air 
+
+  \item Can be faster to use, and in some cases simpler.
   \end{itemize}
 \end{frame}
 
 
 
-\begin{frame}{Neural Language Modeling}
-  NGram Models
-  \begin{itemize}
-  \item Fast to train 
-  \end{itemize}
+\begin{frame}{Comparison}
+  Both count-based models and feed-forward NNLMs are Markovian language models, 
 
-  Neural Models
+  Comparison:
   \begin{itemize}
-  \item Make Markov assumption
-  \item Slower to train
-  \item
+  \item Training Speed: ngrams are much faster (more coming)
+  \item Usage Speed: ngrams very fast, NN can be fast with some tricks. 
+  \item Memory: NN models can be much smaller (but there are big ones)
+  \item Accuracy: Comparable for small data, NN does better with more.
   \end{itemize}
-\end{frame}
-
-\begin{frame}{NGram Models}
   
+  Advantages of NN model
+  \begin{itemize}
+  \item Can be trained end-to-end.
+    \air 
+  \item Does not require smoothing methods.
+  \end{itemize}
+
+  % \alert{NGram Models}
+  % \begin{itemize}
+  % \item Fast to train
+  % \item Can 
+  % \end{itemize}
+
+  % \structure{Neural Models}
+  % \begin{itemize}
+  % \item Slower to train
+  % \item
+  % \end{itemize}
 \end{frame}
+
+\begin{frame}{Translation Performance ( and Blunsom, 2015)}
+  \begin{center}
+    \includegraphics[width=8cm]{blunsomgraph}
+  \end{center}
+\end{frame}
+
 
 \section{Noise Contrastive Estimation}
 
@@ -345,27 +456,32 @@
 
 
 
-\begin{frame}{Unnormalized Network}
-  Recall the score defined as, 
-  \[ \boldz = \tanh(\boldx \boldW^1)\boldW^2 + \boldb \] 
+\begin{frame}{Unnormalized Scores}
+  Recall the score defined as (dropping bias) 
+  \[ \boldz = \tanh(\boldx \boldW^1)\boldW^2  \] 
 
-  Unnormalized score of each word. 
+  Unnormalized score of each word before soft-max, 
 
-  \[ z_i = \tanh(\boldx \boldW^1)\boldW^2_{*,i} + b_i \] 
+  \[ z_j = \tanh(\boldx \boldW^1)\boldW^2_{*,j}  \] 
+  for any  $j \in \{1, \ldots \dout\}$
+  \air 
 
-  Can be computed efficiently $O(1)$ versus $O(|\mcV|)$. 
+  Note: can be computed efficiently $O(1)$ versus $O(\dout)$. 
 \end{frame}
 
 
-\begin{frame}{Coherence Estimation }
+\begin{frame}{Coherence }
   \begin{itemize}
+  \item Saw similar idea earlier for ranking embedding. 
+    \air 
+
   \item \textbf{Idea:} Learn to distinguish coherent n-grams from 
     corruption. 
     \air 
  
-  \item Similar idea to ranking embedding, but no score function. 
 
-  \item Want to differentiate,
+    \air
+  \item Want to discriminate correct next words from other choices.
 
     \begin{center}
       [ the dog \structure{walks} ]
@@ -373,7 +489,7 @@
     
     
     
-    It should score higher than,
+
     \begin {center}
       [ the dog \alert{house}  ]
       
@@ -385,63 +501,148 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{}
-  Imagine we had this dataset 
-  \[ (\boldx_1, \boldy_1),\ldots, (\boldx_n, \boldy_n), \]
+\begin{frame}{Warm-Up}
+  Imagine we have a new dataset, 
+  \[ ((\boldx_1, \boldy_1), \boldd_1),\ldots, ((\boldx_n, \boldy_n), \boldd_n), \]
   
-  Where $\boldy$ was 
-
-  \[ \mathcal{L}(\theta) = \sum_{i} L_{cross}(\boldy, \hat{\boldy}) \] 
-
-\end{frame}
-
-\begin{frame}{Recall: Binary Classification}
-  \[ \mathcal{L}(\theta) = \sum_{} L_{cross}() \]   
-\end{frame}
-
-
-
-\begin{frame}{NCE 1}
-  Random variable $D$
-
-  $D=1$ with prob $\frac{1}{K+1}$
-
-  $D=0$ with prob $\frac{K}{K+1}$
+  \begin{itemize}
+  \item $\boldx$; representation of context  $w_{i-n+1}, \ldots w_{i-1}$ 
+  \item $\boldy$; a possible $w_i$
+  \item $d$; 1 if $\boldy$ is correct, 0 otherwise
+  \end{itemize}
   
-  If $D=1$ then generate a true word, otherwise if $D=0$ generate from noise distribution. 
-\end{frame}
+  Objective is based on predicted $\hat{\d}$:
 
-\begin{frame}
-  \[P(D=1 | \boldx, \boldy) =  \frac{P(X|D, Y) P(X| Y)}{\sum_{d} P(X|D) P(X) } =  \frac{P(X|D) P(X)}{P(X|D)P(x) +  P(X|D) P(x) }\] 
+  \[ \mathcal{L}(\theta) = \sum_{i} L_{crossentropy}(d_i, \hat{d}_i) \] 
 
-  \[  \frac{1/{k+1} p(X)}{1/{k+1} p(X) + (k)/(k+1) P(n_i) } = \frac{p(X)}{p(X) + (k) P(n_i) } \]
-
-  \[ \sigma(z_w - \log(k P(w))) \]
 \end{frame}
 
 
-\begin{frame}{NCE 2}
-  \[ \mathcal{L}(\theta) = \sum_{i} \log P(D=1| X_i, Y) + \sum_{k=1}^{K} P(D=0|X_i, = )  \] 
+\begin{frame}{Warm-Up: Binary Classification}
+  How do we score $(\boldx_i, \boldy_i = \bolddelta(c))$? 
+\air 
+
+Could use unnormalized score,
+  \[ z_c = \tanh(\boldx \boldW^1)\boldW^2_{*,c}  \] 
+
+
+  Becomes softmax regression/non-linear logistic regression,
+
+  \[\hat{d} = \sigma(z_c)\]
+
+  \begin{itemize}
+  \item Much faster
+  \item  But does not help us train LM.
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Implementation}
   
-  \[ \mathcal{L}(\theta) = \sum_{i} \log \sigma(z_w - \log(k P(w)))  + \sum_{k=1}^{K} (1- \sigma(z_w - \log(k P(w))))  \] 
+  Standard MLP language model, (only takes in $\boldx$) 
+
+  \[\boldx \Rightarrow \boldW^1 \Rightarrow \tanh \Rightarrow  \boldW^2 \Rightarrow \softmax\]
+
+
+
+  Computing binary  (takes in $\boldx$ and $\boldy$) 
+  \[\hat{d} = \sigma(z_c)\]
+
+ \[\boldx \Rightarrow \boldW^1 \Rightarrow \tanh \Rightarrow
+ \begin{matrix}
+   \cdot \\ 
+   \boldW^2_{*, w} \mathrm{(Lookup)}
+ \end{matrix}
+\Rightarrow \sigma\]
+\end{frame}
+
+
+
+\begin{frame}{Noise Contrastive Estimation 1}
+  Probabilistic model,
+  \begin{itemize}
+  \item Introduce random variable $D$
+  \item If $D=1$ produce true sample
+  \item If $D=0$ produce sample from a noise distribution.
+  \item Hyperparameter $K$ is ratio of noise
+  \end{itemize}
+
+
+  \[p(D=1) =   \frac{1}{K+1}\]
+
+  \[p(D=0) = \frac{K}{K+1}\]
+   
+\end{frame}
+
+\begin{frame}{Noise Contrastive Estimation 2}
+
+  For a given $\boldx, \boldy$, 
+  \begin{eqnarray*}
+  p(D=1 | \boldx, \boldy) &=&  \frac{p(\boldy|D=1, \boldx) p(D=1 | \boldx)}{\sum_{d} p(\ \boldy|D=d, \boldx ) p(D=d | \boldx) } \\
+  &=&  \frac{p( \boldy|D=1, \boldx) p(D=1 | \boldx)}{p(\boldx|D=0)p(D=0 | \boldx) +  p(\boldy|D=1,\boldx)  p(D=1 | \boldx) }
+  \end{eqnarray*}
+  Plug-in the noise distribution and hyperparameters,
+  \begin{eqnarray*}
+    p(D=1 | \boldx, \boldy) &=& \frac{\frac{1}{K+1} p(\boldy|D=1, \boldx)}{\frac{1}{K+1} p(\boldy|D=1, \boldx) + \frac{K}{K+1} p(\boldy|D=0, \boldx) }\\
+    &=& \frac{p(\boldy|D=1, \boldx)}{p(\boldy|D=1, \boldx) + K p(\boldy|D=1, \boldx) } \\
+    &=& \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx))) \\  
+  \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Noise Contrastive Estimation 3}
+  \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
+
+  \begin{itemize}
+  \item $\log p(\boldy=c|D=1, \boldx)$; becomes $z_c$ (as above)
+    \air
+  \item $\log p(\boldy=c|D=0, \boldx)$; noise distribution 
+    \air 
+  \item In practice, people use unigram for noise
+    \air 
+
+  \item (Can precompute samples and noise scores)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Noise Contrastive Estimation 4}
+
+  Full objective, 
+
+  \begin{itemize}
+  \item   $s_{i,k}$ are $K$ samples for each position $i$   
+  \end{itemize}
+
+  
+  \begin{eqnarray*}
+\mathcal{L}(\theta) &=& \sum_{i} \log p(D=1| \boldx_i, \boldy_i) + \sum_{k=1}^{K} \log p(D=0|\boldx_i, Y=s_{i,k})  \\
+   &=& \sum_{i} \log \sigma(\hat{z}_c - \log(K p_{ML}(c))) \\
+ &+&   \sum_{k=1}^{K} \log (1- \sigma(\hat{z}_{s_{i,k}} - \log(K p_{ML}(s_{i,k}))))  
+ \end{eqnarray*}
+ \begin{itemize}
+ \item Paper shows that this yields a consistent estimation of the true LM distribution 
+ \end{itemize}
 \end{frame}
 
 \begin{frame}{Implementation}
-  How do you efficiently compute $z_w$? 
+  \begin{itemize}
+  \item How do you efficiently compute $z_c$?
 
-  Need a lookup table for output embeddings! (not linear) and dot product.
+    Need a lookup table for output embeddings! (not linear) and dot
+    product.
 
-  How do you efficiently handle $p(w)$ 
+  \item How do you efficiently handle $p_{ML}(c)$
   
-  Also can be done with lookuptable and add.
+    Also can be done with lookuptable and add.
 
-  How do you handle sampling? 
+  \item How do you handle sampling?
 
-  Can precompute large number of samples (not example specific).
+    Can precompute large number of samples (not example specific).
 
-  How do you handle loss?
+    \item How do you handle loss?
 
-  Simply BinaryNLL Objective.
+    Simply BinaryNLL Objective.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Implementation}
@@ -452,7 +653,7 @@
 
 
 
-  Computing $\sigma(z_w - \log(k P(w)))$,
+  Computing $\sigma(z_c - \log(K p_{ML}(c)))$,
  \[\boldx \Rightarrow \boldW^1 \Rightarrow \tanh \Rightarrow
  \begin{matrix}
    \cdot \\ 
@@ -460,7 +661,7 @@
  \end{matrix}
  \Rightarrow  \begin{matrix}
    - \\ 
-   K p(w) \mathrm{(Lookup)}
+   K p_{ML}(c) \mathrm{(Lookup)}
  \end{matrix}
 \Rightarrow \sigma\]
 
@@ -472,29 +673,45 @@
   % \Tree [ .LookupTable [ .Linear [ .tanh [ .DotProduct(with w) [ .Subtract (log P(w))  .Sigma ]     ]  ]  ] ] ;   
 
   (Efficiency, compute first three layers only once for $K+1$)
-
+  \air 
+  
 \end{frame}
 
-
-\begin{frame}{Noise Distribution}
-  What noise distribution should you use.
-
-  Unigram estimations.
-\end{frame}
-
-
-\begin{frame}{Use as an LM}
+\begin{frame}{Using in Practice}
+  
+  Several options for test time,
   \begin{itemize}
-  \item Unlike HSM learns full $\boldW^2$ 
+  \item Use full softmatx with learned parameters.
     \air 
+  \item Compute subset of scores and renormalize (homework)
+.
+\air 
 
-  \item Can run $\softmax(tanh(\boldx \boldW^1) + \boldW^2)$ at test time. 
-
-  \item Instead of 1 multiclass, we do 1+K binary classifications
-
-
+\item Can sometimes just use treat unormalized params as being normalized (self-normalization)
   \end{itemize}
+
+
 \end{frame}
+
+% \begin{frame}{Noise Distribution}
+%   What noise distribution should you use.
+
+%   Unigram estimations.
+% \end{frame}
+
+
+% \begin{frame}{Use as an LM}
+%   \begin{itemize}
+%   \item Unlike HSM learns full $\boldW^2$ 
+%     \air 
+
+%   \item Can run $\softmax(tanh(\boldx \boldW^1) + \boldW^2)$ at test time. 
+
+%   \item Instead of 1 multiclass, we do 1+K binary classifications
+
+
+%   \end{itemize}
+% \end{frame}
 
 % \% begin{frame}{Comparison With }
 %   \begin{itemize}
