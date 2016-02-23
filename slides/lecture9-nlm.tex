@@ -120,7 +120,6 @@
       \toprule
       \midrule
       a & tractor & 1\\
-      a & red & $\frac{1}{2}$\\
       \midrule
       the & red & $\frac{1}{4}$\\
       the & parrot & $\frac{1}{2}$\\
@@ -137,6 +136,7 @@
     \end{tabular}
   \end{table}
 
+\newpage
   \begin{itemize}
   \item the red tractor 
   \item the parrot 
@@ -194,7 +194,7 @@
 
 \begin{frame}{Goal}
   \begin{itemize}
-  \item Learn representations that share properties between words.
+  \item Learn representations that share properties between similar words.
 
     \air
   \item Particularly helpful for unseen contexts.
@@ -288,9 +288,9 @@
 
   \item Model simultaneously learns,
     \begin{itemize}
-    \item input word relations
+    \item input word representations
       \air 
-    \item output word relations
+    \item output word representations
       \air 
     \item conjunctions of input words (through NLM, no n-gram features)
     \end{itemize}
@@ -328,10 +328,10 @@
   Neural network architecture on top of concat.
 
   \[\hat{\boldy} = \softmax(NN_{MLP1}(\boldx)) \] 
-  \iar 
-
+%  \iar 
+%
   Best model uses $\din=30, \dhid =100$.
-
+%
 \end{frame}
 
 \begin{frame}{A Neural Probabilistic Language Model }  
@@ -349,6 +349,7 @@
   \begin{center}
     \includegraphics[width=7cm]{bengio}
   \end{center}
+  Dashed-lines show the optional direct connections, $C = v$.
 \end{frame}
 
 
@@ -357,8 +358,6 @@
   \begin{center}
     \includegraphics[width=9cm]{bengioresults}
   \end{center}
-
-  Dashed-lines show the optional direct connections, $C = v$.
 \end{frame}
 
 \begin{frame}{Parameters}
@@ -374,25 +373,31 @@
   \begin{itemize}
   \item Bengio et al notes that many of these aspects predate the work
     \air 
-  \item Furthermore proposes many of the ideas that Collobert et al. and word2vec implemnt and scale 
+  \item Furthermore proposes many of the ideas that Collobert et al. and word2vec implement and scale 
     \air 
   \item Around this time, very few NLP papers on  NN, most-cited papers are about conditional random fields (CRFs). 
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{Log-Bilinear Language Model }
+\begin{frame}{Log-Bilinear Language Model (Mnih \& Hinton, 2007)}
+
+Slightly different input representation. Now let:
+
+\[ \boldx = \sum_{i=1}^{\dwin} v(f_i) \boldC_i \]
+
+\begin{itemize}
+\item Instead of concatenating, weight each $v(f_i)$ by position-specific weight matrix $\boldC_i$.
+\end{itemize}
+
+Then use:
 
   \[\hat{\boldy} = \softmax(\boldx\boldW^1 + \boldb)\]
 
   \begin{itemize}
-  \item Remove the tanh layer.
-    \air 
-
-  \item Dense $\boldx$ concatenated word-embeddings
-
-    \air 
-
+  \item Note no tanh layer.
+  %  \air 
+  \item $\boldW^1$ can use input embeddings too, or not (Mnih and Teh, 2012)
   \item Can be faster to use, and in some cases simpler.
   \end{itemize}
 \end{frame}
@@ -502,19 +507,18 @@
 \end{frame}
 
 \begin{frame}{Warm-Up}
-  Imagine we have a new dataset, 
+ Imagine we have a new dataset, 
   \[ ((\boldx_1, \boldy_1), \boldd_1),\ldots, ((\boldx_n, \boldy_n), \boldd_n), \]
-  
+ 
   \begin{itemize}
   \item $\boldx$; representation of context  $w_{i-n+1}, \ldots w_{i-1}$ 
   \item $\boldy$; a possible $w_i$
   \item $d$; 1 if $\boldy$ is correct, 0 otherwise
   \end{itemize}
   
-  Objective is based on predicted $\hat{\d}$:
+  Objective is based on predicted $\hat{d}$:
 
   \[ \mathcal{L}(\theta) = \sum_{i} L_{crossentropy}(d_i, \hat{d}_i) \] 
-
 \end{frame}
 
 
@@ -585,42 +589,100 @@ Could use unnormalized score,
   Plug-in the noise distribution and hyperparameters,
   \begin{eqnarray*}
     p(D=1 | \boldx, \boldy) &=& \frac{\frac{1}{K+1} p(\boldy|D=1, \boldx)}{\frac{1}{K+1} p(\boldy|D=1, \boldx) + \frac{K}{K+1} p(\boldy|D=0, \boldx) }\\
-    &=& \frac{p(\boldy|D=1, \boldx)}{p(\boldy|D=1, \boldx) + K p(\boldy|D=1, \boldx) } \\
+    &=& \frac{p(\boldy|D=1, \boldx)}{p(\boldy|D=1, \boldx) + K p(\boldy|D=0, \boldx) } \\
     &=& \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx))) \\  
   \end{eqnarray*}
 \end{frame}
 
+
 \begin{frame}{Noise Contrastive Estimation 3}
-  \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
+ With \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
+ 
+ we the training objective for a corpus that has $K$ noise samples $s_{i,k}$ per example is:
+ 
+   \begin{align*}
+\mathcal{L}(\theta) &= \sum_{i} \log p(D=1| \boldx_i, \boldy_i) + \sum_{k=1}^{K} \log p(D=0|\boldx_i, Y=s_{i,k})  \\
+&= \sum_{i} \log \sigma\left(\log p(\boldy_i|D=1, \boldx_i) - \log(K p(\boldy_i|D=0, \boldx_i))\right) \\
+& + \sum_{k=1}^{K} \log \left(1 - \sigma\left(\log p(s_{i,k}|D=1, \boldx_i) - \log(K p(s_{i,k}|D=0, \boldx_i))\right)\right)
+\end{align*}
+%   &=& \sum_{i} \log \sigma(\hat{z}_c - \log(K p_{ML}(c))) \\
+% &+&   \sum_{k=1}^{K} \log (1- \sigma(\hat{z}_{s_{i,k}} - \log(K p_{ML}(s_{i,k}))))  
+% \end{eqnarray*}
 
   \begin{itemize}
-  \item $\log p(\boldy=c|D=1, \boldx)$; becomes $z_c$ (as above)
-    \air
-  \item $\log p(\boldy=c|D=0, \boldx)$; noise distribution 
-    \air 
-  \item In practice, people use unigram for noise
-    \air 
-
-  \item (Can precompute samples and noise scores)
+%  \item   $s_{i,k}$ are $K$ samples for each position $i$   
+%  \end{itemize}
+  
+%  \begin{itemize}
+%  \item $\log p(\boldy=c|D=1, \boldx)$; becomes $z_c$ (as above)
+%    \air
+%  \item $\log p(\boldy=c|D=0, \boldx)$; noise distribution 
+%    \air 
+  \item In practice, sample $s_{i,k}$ from unigram distribution 
+%    \air 
+%
+%  \item (Can precompute samples and noise scores)
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Noise Contrastive Estimation 4}
+But we still have a problem: $\mathcal{L}$ defined in terms of normalized distributions $\log p(\boldy|D=1, \boldx)$
 
-  Full objective, 
+\textbf{Solution:} 
+\begin{itemize}
+\item instead of explicitly normalizing, estimate $Z({\boldx})$, normalizing constant of each context $\boldx$, \textit{as a parameter} (Gutmann \& Hyv{\"a}rinen, 2010)
+\item  Mnih and Teh (2012) show that fixing $Z({\boldx})=1$ for all contexts works just as well
+\item So we can replace $\log p(\boldy = \bolddelta(c)|D=1, \boldx)$ with $z_c$, as computed by our network
+\end{itemize}
 
-  \begin{itemize}
-  \item   $s_{i,k}$ are $K$ samples for each position $i$   
-  \end{itemize}
+%  \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
+%
+%  \begin{itemize}
+%  \item $\log p(\boldy=c|D=1, \boldx)$; becomes $z_c$ (as above)
+%    \air
+%  \item $\log p(\boldy=c|D=0, \boldx)$; noise distribution 
+%    \air 
+%  \item In practice, people use unigram for noise
+%    \air 
+%
+%  \item (Can precompute samples and noise scores)
+%  \end{itemize}
+\end{frame}
 
+
+%\begin{frame}{Noise Contrastive Estimation 3}
+%  \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
+%
+%  \begin{itemize}
+%  \item $\log p(\boldy=c|D=1, \boldx)$; becomes $z_c$ (as above)
+%    \air
+%  \item $\log p(\boldy=c|D=0, \boldx)$; noise distribution 
+%    \air 
+%  \item In practice, people use unigram for noise
+%    \air 
+%
+%  \item (Can precompute samples and noise scores)
+%  \end{itemize}
+%\end{frame}
+
+\begin{frame}{Noise Contrastive Estimation 5}
+%
+%  Full objective, 
+%
+%  \begin{itemize}
+%  \item   $s_{i,k}$ are $K$ samples for each position $i$   
+%  \end{itemize}
+So we now have
   
   \begin{eqnarray*}
-\mathcal{L}(\theta) &=& \sum_{i} \log p(D=1| \boldx_i, \boldy_i) + \sum_{k=1}^{K} \log p(D=0|\boldx_i, Y=s_{i,k})  \\
-   &=& \sum_{i} \log \sigma(\hat{z}_c - \log(K p_{ML}(c))) \\
- &+&   \sum_{k=1}^{K} \log (1- \sigma(\hat{z}_{s_{i,k}} - \log(K p_{ML}(s_{i,k}))))  
+\mathcal{L}(\theta)
+   &=& \sum_{i} \log \sigma(z_{c_i} - \log(K p_{ML}(c_i))) \\
+ &+&   \sum_{k=1}^{K} \log (1- \sigma(z_{s_{i,k}} - \log(K p_{ML}(s_{i,k}))))  
  \end{eqnarray*}
+ 
  \begin{itemize}
- \item Paper shows that this yields a consistent estimation of the true LM distribution 
+ \item Mnih and Teh (2012) show that gradient of $\mathcal{L}$ approaches gradient of true language model's log-likelihood objective as $k \rightarrow \infty$.
+% this yields a consistent estimation of the true LM distribution 
  \end{itemize}
 \end{frame}
 
@@ -628,8 +690,7 @@ Could use unnormalized score,
   \begin{itemize}
   \item How do you efficiently compute $z_c$?
 
-    Need a lookup table for output embeddings! (not linear) and dot
-    product.
+    Need a lookup table (and dot-product) for output embeddings! (Not full matrix-vector product).
 
   \item How do you efficiently handle $p_{ML}(c)$
   
@@ -681,7 +742,7 @@ Could use unnormalized score,
   
   Several options for test time,
   \begin{itemize}
-  \item Use full softmatx with learned parameters.
+  \item Use full softmax with learned parameters.
     \air 
   \item Compute subset of scores and renormalize (homework)
 .
