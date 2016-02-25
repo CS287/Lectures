@@ -33,6 +33,86 @@
   \titlepage
 \end{frame}
 
+\begin{frame}{Review: NGram Issues}
+  
+  In training we might see, 
+
+  \begin{center}
+    the arizona corporations commission \alert{authorized}
+  \end{center}
+
+  But at test we see, 
+  \begin{center}
+    the colorado businesses organization \alert{\_\_\_}
+  \end{center}
+  \pause 
+  
+  \begin{itemize}
+  \item Does this training example help here?
+    \begin{itemize}
+    \item Not really. No count overlap.
+    \end{itemize}
+    \air 
+    \pause 
+  \item Does backoff help here? 
+    \begin{itemize}
+    \item Maybe, if we have seen organization.
+    \item Mostly get nothing from the earlier words.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Review: A Neural Probabilistic Language Model }  
+  Optional, direct connection layers,
+
+  \[NN_{DMLP1}(\boldx) =  [\tanh(\boldx\boldW^1 + \boldb^1), \boldx] W^2 + \boldb^2\]
+
+  \begin{itemize}
+  \item $\boldW^1 \in \reals^{\din \times \dhid}, \boldb^1 \in \reals^{1 \times \dhid}$; first affine transformation
+  \item $\boldW^2 \in \reals^{(\dhid + \din)  \times \dout}, \boldb^2 \in \reals^{1 \times \dout}$; second affine transformation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Review: A Neural Probabilistic Language Model (Bengio, 2003)}  
+  \begin{center}
+    \includegraphics[width=7cm]{bengio}
+  \end{center}
+  Dashed-lines show the optional direct connections, $C = v$.
+\end{frame}
+
+
+\begin{frame}{Review: Comparison}
+  Both count-based models and feed-forward NNLMs are Markovian language models, 
+
+  Comparison:
+  \begin{itemize}
+  \item Training Speed: ngrams are much faster (more coming)
+  \item Usage Speed: ngrams very fast, NN can be fast with some tricks. 
+  \item Memory: NN models can be much smaller (but there are big ones)
+  \item Accuracy: Comparable for small data, NN does better with more.
+  \end{itemize}
+  
+  Advantages of NN model
+  \begin{itemize}
+  \item Can be trained end-to-end.
+    \air 
+  \item Does not require smoothing methods.
+  \end{itemize}
+
+  % \alert{NGram Models}
+  % \begin{itemize}
+  % \item Fast to train
+  % \item Can 
+  % \end{itemize}
+
+  % \structure{Neural Models}
+  % \begin{itemize}
+  % \item Slower to train
+  % \item
+  % \end{itemize}
+\end{frame}
+
 
 \begin{frame}{Quiz}
 
@@ -42,23 +122,16 @@ or \texttt{united states of america}.
 
 \air 
 
-Give a high-level explanation of why this might occur compared to an n-gram 
-model. Describe a variant of the Bengio model that is able to incorporate extra parameters 
+\begin{itemize}
+\item Give a high-level explanation of why this might occur compared to an n-gram 
+model.
+\item  Describe a variant of the Bengio model that is able to incorporate extra parameters 
 to allow for rare cases that should have high probability.  
 
-\end{frame}
 
-\begin{frame}{Answer}
-  
- 
-  Dense + Sparse with important conjunction features. 
-
-\end{frame}
 
 \section{Text Classification Review}
 
-\begin{frame}[allowframebreaks]{Answer}
-\end{frame}
 
 \begin{frame}{Sentiment}
   \structure{Good Sentences}
@@ -154,7 +227,7 @@ to allow for rare cases that should have high probability.
 
   Example: Movie review input, 
   \begin{center}
-    \[\boldx &=& v(\texttt{word:A}) + v(\texttt{word:sentimental}) + v(\texttt{word:mess})\]
+    \[\boldx = v(\texttt{word:A}) + v(\texttt{word:sentimental}) + v(\texttt{word:mess})\]
     \[ \boldx^\top = \begin{bmatrix} 0.2 \\ \vdots \\ 1.2 \\ -0.5 \\ \end{bmatrix} + \begin{bmatrix} 0.8 \\ \vdots \\ 1.0\\ -1.0 \\ \end{bmatrix} +
      \begin{bmatrix} 0.1 \\ \vdots \\ 9.2 \\ -2.0 \\ \end{bmatrix} 
     =  \begin{bmatrix} 1.1 \\ \vdots \\ 11.4 \\ -3.5 \\ \end{bmatrix} 
@@ -316,6 +389,12 @@ to allow for rare cases that should have high probability.
   \end{itemize}
 \end{frame}
 
+\begin{frame}{Classification Results}
+
+  \begin{center}
+    \includegraphics[width=12cm]{kimres}
+  \end{center}
+\end{frame}
 
 \begin{frame}{Convolutional Vocabulary}
   \begin{itemize}
@@ -331,15 +410,28 @@ to allow for rare cases that should have high probability.
     \air 
 
   \item \textbf{random}, \textbf{static}, \textbf{non-static}; embedding layer setup
+    \air
+  \item \textbf{temporal convolution}, \textbf{time-delay convolution}; names for one-dimensional convolutions
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Classification Results}
+\begin{frame}{Why is it called a convolution?}
 
-  \begin{center}
-    \includegraphics[width=12cm]{kimres}
-  \end{center}
+  \begin{itemize}
+  \item Let $\boldx$ and $\boldy$ be in $\reals^n$ and $\reals^m$ 
+  \end{itemize}
+  
+  \[[\boldx \ast \boldy]_i = \sum_{j=1}^m   x_{i-j} y_j\]
+  
+  \begin{itemize}
+  \item Circular, $i-k$ wraps around. 
+    \air 
+  \item For NN, include padding
+  \end{itemize}
+
+  
 \end{frame}
+
 
 \section{Applications}
 
@@ -425,7 +517,13 @@ to allow for rare cases that should have high probability.
   
 \end{frame}
 
-\begin{frame}{Visual Convolution}
+\begin{frame}{Visualization (Zeiler and Fergus, 2013)}
+  \begin{center}
+    \includegraphics[height=\textheight]{zf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Visualization (Zeiler and Fergus, 2013)}
   \begin{center}
     \includegraphics[height=\textheight]{filters}
   \end{center}
