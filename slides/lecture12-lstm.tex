@@ -116,8 +116,9 @@
 \begin{frame}{Answer}
   Multiple applications of Chain rule, combine relu cases.
   \begin{eqnarray*}
-    \frac{\partial L}{\partial s_{1,i}} &=& \sum_{j_2} \ldots \sum_{j_5} \frac{\partial s_{5,j_5}}{\partial s_{4,j_4}} \frac{\partial L}{\partial s_{5,j_5}}\\
-    &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(s_{2, j_2} > 0\land \ldots  \land s_{5, j_5} > 0) W^s_{i,j_2} \ldots W^s_{j_4,j_5}  \frac{\partial L}{\partial s_{5, j}}  \\ 
+    \frac{\partial L}{\partial s_{1,j_1}} &=& \sum_{j_2} \ldots \sum_{j_5} \frac{\partial s_{5,j_5}}{\partial s_{4,j_4}} \frac{\partial L}{\partial s_{5,j_5}}\\
+    &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(s_{2, j_2} > 0\land \ldots  \land s_{5, j_5} > 0) W^s_{j_1,j_2} \ldots W^s_{j_4,j_5}  \frac{\partial L}{\partial s_{5, j_5}}  \\ 
+    &=& \sum_{j_2 \ldots j_5} \prod_{k=2}^5 \indicator(s_{k, j_k} > 0)  W^s_{j_{k-1},j_k}  \frac{\partial L}{\partial s_{5, j_5}}  \\ 
   \end{eqnarray*}
 \end{frame}
 
@@ -143,7 +144,7 @@
     \air
 
   \item For instance consider quiz with  hardtanh
-    \[ \sum_{j_2} \ldots \sum_{j_5} \indicator((0< s_{2, j_2} < 1)\land \ldots  \land (0<s_{5, j} < 1)) W^s_{i,j_2} \ldots W^s_{j_4,j_5}   \frac{\partial L}{\partial s_{5, j}} \]
+    \[      \sum_{j_2 \ldots j_5} \prod_{k=2}^5 \indicator(1 > s_{k, j_k} > 0)  W^s_{j_{k-1},j_k}  \frac{\partial L}{\partial s_{5, j_5}}    \]
 
     \air
   \item The indicator term causes a tendency towards \textit{vanishing gradients}.
@@ -152,6 +153,35 @@
   \item If this occurs, model cannot learn long-term dependencies.
  
   \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{LSTM (Hochreiter and Schmidhuber, 1997)}
+  \begin{center}
+    \includegraphics[width=\textwidth]{LSTM3-chain}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \begin{eqnarray*}
+    R(\bold \bolds_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+    \boldc_i &=& \boldj \odot \boldi  + \bold f \odot \bold c_{i-1}    \\
+    \boldh_i &=& \tanh(\boldc_i) \alert{\odot \boldo}\\ 
+    \boldi &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+    \boldj &=& \sigma(\boldx \boldW^{xj} + \boldh_{i-1}\boldW^{hj} + \boldb^j) \\
+    \boldf &=& \sigma(\boldx \boldW^{xf} + \boldh_{i-1}\boldW^{hf} + \boldb^f) \\
+    \boldo &=& \tanh(\boldx \boldW^{xo} + \boldh_{i-1}\boldW^{ho} + \boldb^o) \\
+  \end{eqnarray*}
+  \begin{itemize}
+  \item $\boldf$; forget gate
+  \item $\boldi$; input gate
+  \item $\boldc$; cell state
+  \item $\boldh$; hidden state
+  \item $\boldo$; output gate (not very important)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   
 \end{frame}
 
@@ -184,15 +214,30 @@
 \end{frame}
 
 \begin{frame}{Exercise}
-  What Happens to the Gradient?
+  Original model has same gradient issue as with RNN.
 
-  \[ \frac{\partial L}{\partial h_{1,i}} &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(h_{2, j_2} > 0\land \ldots  \land h_{5, j_5} > 0) W_{i,j_2} \ldots W_{j_4,j_5}  \frac{\partial L}{\partial h_{5, j}}  \\ 
+  \[ \frac{\partial L}{\partial h_{n-1,j_{n-1}} }   =  \sum_{j_n}  \indicator(h_{n, j_n} > 0) W_{j_{n-1},j_n}  \frac{\partial L}{\partial h_{n, j_n}}     \]
+
+
+  Exercise: What happens to the gradient of $n-1$ with skip-connections ?
+\end{frame}
+
+
+\begin{frame}{Exercise}
+  We now have the average of two terms. One with no saturation condition.
+  \air 
+  
+  \begin{eqnarray*}
+     \frac{\partial L}{\partial h_{n-1,j_{n-1}} } & = & \frac{1}{2} (\sum_{j_n}   \indicator(h_{n, j_n} > 0) W_{j_{n-1},j_n} \frac{\partial L}{\partial h_{n, j_n}}) + \frac{1}{2} ( h_{n-1, j_{n-1}} \frac{\partial L}{\partial h_{n, j_{n-1}}})  \\ 
+  \end{eqnarray*}
+
+ 
 
 \end{frame}
 
 \begin{frame}{Thought Experiment: Dynamic Skip-Connections}
   \begin{eqnarray*}
-    NN_{sl1}(\boldx) &=& (1-t) \relu(\boldx \boldW^1 + \boldb^1) + t \boldx \\
+    NN_{sl2}(\boldx) &=& (1-t) \relu(\boldx \boldW^1 + \boldb^1) + t \boldx \\
     t &=& \sigma(\boldx \boldW^t + b^t) \\
     \boldW^t &\in& \reals^{\din \times 1} 
   \end{eqnarray*}
@@ -209,18 +254,233 @@
         \end{tikzpicture}
       }
     \end{center}
+\end{frame}
 
+\begin{frame}{Thought Experiment: Dynamic Skip-Connections}
+  \begin{eqnarray*}
+    NN_{sl2}(\boldx) &=& (1-t) \relu(\boldx \boldW^1 + \boldb^1) + t \boldx \\
+    t &=& \sigma(\boldx \boldW^t + b^t) \\
+    \boldW^t &\in& \reals^{\dhid \times 1} 
+  \end{eqnarray*}
+
+
+  The $t$ values are saved on the forward pass.
+  \begin{eqnarray*}
+     \frac{\partial L}{\partial h_{n-1,j_{n-1}} }  =  &(1-t)& (\sum_{j_n}   \indicator(h_{n, j_n} > 0) W_{j_{n-1},j_n} \frac{\partial L}{\partial h_{n, j_n}}) \\
+    + &t& ( h_{n-1, j_{n-1}} \frac{\partial L}{\partial h_{n, j_{n-1}}})  \\ 
+  \end{eqnarray*}
+\end{frame}
+
+
+\begin{frame}{Thought Experiment: Dynamic Skip-Connections}
+  \begin{itemize}
+  \item Note: $\boldW^t$ is also receiving gradients through the sigmoid!
+    \air
+  \item Learn how to trade-off skipping versus deep layers.
+    \air
+  \item (Backprop is fun.)
+  \end{itemize}
+  \begin{eqnarray*}
+    NN_{sl2}(\boldx) &=& (1-t) \relu(\boldx \boldW^1 + \boldb^1) + t \boldx \\
+    t &=& \sigma(\boldx \boldW^t + b^t) \\
+    \boldW^t &\in& \reals^{\dhid \times 1} 
+  \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Highway Network (Srivastava et al., 2015)}
+  \begin{eqnarray*}
+    NN_{highway}(\boldx) &=& (1-\boldt) \odot \tilde{\boldh} + \boldt \odot \boldx \\
+    \tilde{\boldh} &=& \relu(\boldx \boldW^1 + \boldb^1) \\
+    \boldt &=& \sigma(\boldx \boldW^t + \boldb^t) \\
+    \boldW^t &\in& \reals^{\dhid \times \dhid} \\
+    \boldb^t &\in& \reals^{1 \times \dhid} \\
+  \end{eqnarray*}
+  \begin{itemize}
+  \item $\tilde{\boldh}$; \textit{transform} (e.g. standard MLP layer)
+  \item $\boldt$; \textit{carry} (dimension-specific dynamic skipping)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Highway Gradients}
+    The $\boldt$ values are saved on the forward pass.
+  \begin{eqnarray*}
+     \frac{\partial L}{\partial h_{n-1,j_{n-1}} }  =  && (\sum_{j_n} (1-t_{j_n})  \indicator(h_{n, j_n} > 0) W_{j_{n-1},j_n} \frac{\partial L}{\partial h_{n, j_n}}) \\
+    + &t_{j_{n-1}}& ( h_{n-1, j_{n-1}} \frac{\partial L}{\partial h_{n, j_{n-1}}})  \\ 
+  \end{eqnarray*}
+\end{frame}
+
+
+\begin{frame}{Gating}
+  \begin{itemize}
+  \item This is known as the \textit{gating} operation
+    \[ \boldt \odot \boldx \]
+    \air 
+
+  \item Allows vector $\boldt$ to mask or gate $\boldx$.
+    \air
+
+  \item True gating would have $\boldt \in \{0,1\}^{\dhid}$
+
+    \air 
+  \item Approximate with the sigmoid,
+    \[\boldt = \sigma( \boldW^t \boldx \boldb) \] 
+  \end{itemize}
 \end{frame}
 
 \section{GRU}
 
-\begin{frame}
+\begin{frame}{Back To RNNs}
+  \begin{itemize}
+  \item Acceptor RNNs are deep networks with shared weights.
+    \air 
+
+  \item Can replace Elman layer with modified highway layer. 
+
+    \begin{eqnarray*}
+      R(\bolds_{i-1}, \boldx_i) &=& (1-\boldt) \odot \tilde{\boldh} + \boldt \odot \bolds_{i-1} \\
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^x + \bolds_{i-1} \boldW^s + \boldb)  \\
+      \boldt &=& \sigma(\boldx \boldW^{xt} + \bolds_{i-1}\boldW^{st} + \boldb^t) \\
+      \boldW^{xt}, \boldW^{x} &\in& \reals^{\din \times \dhid} \\
+      \boldW^{st}, \boldW^{s} &\in& \reals^{\dhid \times \dhid} \\
+      \boldb^t, \boldb &\in& \reals^{1 \times \dhid} \\
+    \end{eqnarray*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Dynamic Connections for RNN}
+  \begin{center}
+    \begin{tikzpicture}
+      \Tree [ .$\bolds_n$ [ .$\ldots$ [ .\node(sd){$\bolds_4$}; [ .\node(sc){$\bolds_3$}; [ .\node(sb){$\bolds_2$}; [ .\node(sa){$\bolds_1$}; \node(sz){$\bolds_0$}; $\boldx_1$ ]
+      $\boldx_2$ ] $\boldx_3$ ] $\boldx_4$ ] $\ldots$ ] $\boldx_n$ ];
+      \draw (sz) edge[dashed, bend left] (sb);
+      \draw (sa) edge[dashed, bend left] (sc);
+      \draw (sb) edge[dashed, bend left] (sd);
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Final Idea: Stopping flow}
+  \begin{itemize}
+  \item For many tasks, it is useful to halt propagation.
+    \air
+  \item Can do this by applying a reset/forget gate. 
+    \air 
+
+    \begin{eqnarray*}
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^x + (\boldr \odot \bolds_{i-1})  \boldW^s + \boldb)  \\
+      \boldr &=& \sigma(\boldx \boldW^{xr} + \bolds_{i-1}\boldW^{sr} + \boldb^r) \\
+    \end{eqnarray*}
+  \item Example: Language Modeling
+    
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Gated Recurrent Unit (GRU) (Cho et al 2014)}
+    \begin{eqnarray*}
+      R(\bolds_{i-1}, \boldx_i) &=& (1-\boldt) \odot \tilde{\boldh} + \boldt \odot \bolds_{i-1} \\
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^x + (\boldr \odot \bolds_{i-1})  \boldW^s + \boldb)  \\
+      \boldr &=& \sigma(\boldx \boldW^{xr} + \bolds_{i-1}\boldW^{sr} + \boldb^r) \\
+      \boldt &=& \sigma(\boldx \boldW^{xt} + \bolds_{i-1}\boldW^{st} + \boldb^t) \\
+      \boldW^{xt}, \boldW^{xr}, \boldW^{x} &\in& \reals^{\din \times \dhid} \\
+      \boldW^{st}, \boldW^{sr}, \boldW^{s} &\in& \reals^{\dhid \times \dhid} \\
+      \boldb^t, \boldb &\in& \reals^{1 \times \dhid} \\
+    \end{eqnarray*}
+
+    \begin{itemize}
+    \item $\boldt$; dynamic skip-connections
+    \item $\boldr$; reset gating
+    \item $\bolds$; hidden state
+    \item $\tilde{\boldh}$; gated MLP
+    \end{itemize}
+\end{frame}
+
+\section{LSTM}
+
+\begin{frame}{LSTM}
   
 \end{frame}
 
-\begin{frame}{LSTMs}
-  
+\begin{frame}{LSTMs Development}
+    \begin{eqnarray*}
+      R(\bolds_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+      \alert{\boldh_i} &=& \tanh(\boldc_i) \\ 
+      \boldc_i &=& (1-\boldt) \odot \tilde{\boldh}  + \boldt \odot \bold c_{i-1}    \\
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+      \boldt &=& \sigma(\boldx \boldW^{xt} + \boldh_{i-1}\boldW^{ht} + \boldb^t) \\
+    \end{eqnarray*}
+  The state $\bolds_i$ is made of 2 components :
+  \begin{itemize}
+  \item $\boldc_i$; cell
+  \item $\boldh_i$; hidden
+  \end{itemize}
+
 \end{frame}
+
+\begin{frame}{LSTM Development: Input and Forget Gates}
+    \begin{eqnarray*}
+      R(\boldc_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+      \boldh_i &=& \tanh(\boldc_i) \\ 
+      \boldc_i &=& \alert{\boldj \odot \tilde{\boldh}  + \boldf \odot \bold c_{i-1} } \\
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+      \boldj &=& \sigma(\boldx \boldW^{xj} + \boldh_{i-1}\boldW^{hj} + \boldb^j) \\
+      \boldf &=& \sigma(\boldx \boldW^{xf} + \boldh_{i-1}\boldW^{hf} + \boldb^f) \\
+    \end{eqnarray*}
+
+    No longer a convex combination.
+    \begin{itemize}
+    \item $\boldc_i$; cell
+    \item $\boldh_i$; hidden
+    \item $\boldj$; input gate
+    \item $\boldf$; forget gate
+    \end{itemize}
+\end{frame}
+
+% \begin{frame}{Long Short-Term Memory (without output)}
+%     \begin{eqnarray*}
+%       R(\bold \bolds_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+%       \boldc_i &=& \boldj \odot \boldi  + \bold f \odot \bold c_{i-1}    \\
+%       \boldh_i = \tanh(\boldc_i) %\odot \boldo
+%       \boldi &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+%       \boldj &=& \sigma(\boldx \boldW^{xj} + \boldh_{i-1}\boldW^{hj} + \boldb^j) \\
+%       \boldf &=& \sigma(\boldx \boldW^{xf} + \boldh_{i-1}\boldW^{hf} + \boldb^f) \\
+%       % \boldo &=& \tanh(\boldx \boldW^{xo} + \boldh_{i-1}\boldW^{ho} + \boldb^o) \\
+%     \end{eqnarray*}
+%     \begin{itemize}
+%     \item $\boldf$; forget gate
+%     \item $\boldi$; input gate
+%     \item $\boldo$; output gate
+%     \item $\boldc$; cell state
+%     \item $\boldh$; hidden state
+%     \end{itemize}
+% \end{frame}
+
+
+\begin{frame}{Long Short-Term Memory}
+    \begin{eqnarray*}
+      R(\bold \bolds_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+      \boldc_i &=& \boldj \odot \boldi  + \bold f \odot \bold c_{i-1}    \\
+      \boldh_i &=& \tanh(\boldc_i) \alert{\odot \boldo}\\ 
+      \boldi &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+      \boldj &=& \sigma(\boldx \boldW^{xj} + \boldh_{i-1}\boldW^{hj} + \boldb^j) \\
+      \boldf &=& \sigma(\boldx \boldW^{xf} + \boldh_{i-1}\boldW^{hf} + \boldb^f) \\
+      \boldo &=& \tanh(\boldx \boldW^{xo} + \boldh_{i-1}\boldW^{ho} + \boldb^o) \\
+    \end{eqnarray*}
+    \begin{itemize}
+    \item $\boldf$; forget gate
+    \item $\boldi$; input gate
+    \item $\boldc$; cell state
+    \item $\boldh$; hidden state
+    \item $\boldo$; output gate (not very important)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=\textwidth]{LSTM3-chain}
+  \end{center}
+
+\end{frame}
+
 
 
 \end{document}
