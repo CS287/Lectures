@@ -117,7 +117,7 @@
   Multiple applications of Chain rule, combine relu cases.
   \begin{eqnarray*}
     \frac{\partial L}{\partial s_{1,i}} &=& \sum_{j_2} \ldots \sum_{j_5} \frac{\partial s_{5,j_5}}{\partial s_{4,j_4}} \frac{\partial L}{\partial s_{5,j_5}}\\
-    &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(s_{2, j_2} > 0\land \ldots  \land s_{5, j} > 0) W^s_{i,j_2} \ldots W^s_{j_4,j_5}  \ldots  \frac{\partial L}{\partial s_{5, j}}  \\ 
+    &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(s_{2, j_2} > 0\land \ldots  \land s_{5, j_5} > 0) W^s_{i,j_2} \ldots W^s_{j_4,j_5}  \frac{\partial L}{\partial s_{5, j}}  \\ 
   \end{eqnarray*}
 \end{frame}
 
@@ -153,6 +153,63 @@
  
   \end{itemize}
   
+\end{frame}
+
+\section{Highway Networks}
+
+\begin{frame}{Deep Networks}
+  \begin{itemize}
+  \item This same issue occurs in deep MLPs.
+  \end{itemize}
+  \[NN_{layer}(\boldx) = \relu(\boldx \boldW^1 + \boldb^1)  \]
+      \begin{center}
+      \scalebox{0.7}{\Tree [ .$\boldh_n$ [ .$\boldh_{n-1}$ [ .$\ldots$  [ .$\boldh_2$ [ .$\boldh_1$ $\boldx$ ] ] ]  ]  ] }
+    \end{center}
+\end{frame}
+
+\begin{frame}{Thought Experiment: Additive Skip-Connections}
+  \[NN_{sl1}(\boldx) = \frac{1}{2} \relu(\boldx \boldW^1 + \boldb^1) + \frac{1}{2} \boldx \]
+      \begin{center}
+      \scalebox{0.7}{
+        \begin{tikzpicture}
+          \Tree [ .\node{$\boldh_n$}; [ .\node{$\boldh_{n-1}$}; [
+          .$\ldots$ [ .\node(hc){$\boldh_3$}; [ .\node(hb){$\boldh_2$}; [
+          .\node(ha){$\boldh_1$}; \node(x){$\boldx$}; ] ] ] ] ] ]
+          \draw (x) edge[bend left] (hb);
+          \draw (ha) edge[bend right] (hc);
+        \end{tikzpicture}
+      }
+    \end{center}
+  
+\end{frame}
+
+\begin{frame}{Exercise}
+  What Happens to the Gradient?
+
+  \[ \frac{\partial L}{\partial h_{1,i}} &=& \sum_{j_2} \ldots \sum_{j_5} \indicator(h_{2, j_2} > 0\land \ldots  \land h_{5, j_5} > 0) W_{i,j_2} \ldots W_{j_4,j_5}  \frac{\partial L}{\partial h_{5, j}}  \\ 
+
+\end{frame}
+
+\begin{frame}{Thought Experiment: Dynamic Skip-Connections}
+  \begin{eqnarray*}
+    NN_{sl1}(\boldx) &=& (1-t) \relu(\boldx \boldW^1 + \boldb^1) + t \boldx \\
+    t &=& \sigma(\boldx \boldW^t + b^t) \\
+    \boldW^t &\in& \reals^{\din \times 1} 
+  \end{eqnarray*}
+
+
+      \begin{center}
+      \scalebox{0.7}{
+        \begin{tikzpicture}
+          \Tree [ .\node{$\boldh_n$}; [ .\node{$\boldh_{n-1}$}; [
+          .$\ldots$ [ .\node(hc){$\boldh_3$}; [ .\node(hb){$\boldh_2$}; [
+          .\node(ha){$\boldh_1$}; \node(x){$\boldx$}; ] ] ] ] ] ]
+          \draw (x) edge[bend left] (hb);
+          \draw (ha) edge[bend right] (hc);
+        \end{tikzpicture}
+      }
+    \end{center}
+
 \end{frame}
 
 \section{GRU}
