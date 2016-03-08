@@ -168,12 +168,12 @@
 \end{frame}
 
 \begin{frame}{Problem 1: Named-Entity Recognition}
-  \textbf{Goal:} Identify explicitly named entities in text.
+  \begin{description}
+  \item[Goal] Identify explicitly named entities in text.
+  \item[Input] Sentence 
+  \item[Output] Mentions of identified entities and their type. 
+  \end{description}  
 
-  \begin{itemize}
-  \item Input: Sentence
-  \item Output: Mentions of identified entities and their type. 
-  \end{itemize}
 \end{frame}
 
 \begin{frame}{Named-Entity Recognition}
@@ -197,10 +197,10 @@
 
 \begin{frame}{BIO Tagging}
   \begin{description}
-  \item[B-TYPE (Begin New)] Stop current mention and begin new mention
+  \item[B-TYPE] Stop current mention and begin new mention
     \air 
-  \item[I-TYPE (Inside] Continue adding to current mention
-  \item[O (Outside)] Not a mention.
+  \item[I-TYPE] Continue adding to current mention
+  \item[O ] Not part of a mention.
   \end{description}
 \end{frame}
 
@@ -219,13 +219,13 @@
 \end{frame}
 
 \begin{frame}{Problem 2: Entity Linking}
-  \textbf{Goal:} Identify explicit entities and link to a standard
-  central database. 
+  \begin{description}
+  \item[Goal] Identify explicit entities and link to a standard
+  central database.
+  \item[Input] Sentence or Document
+  \item[Output] Mentions and pointer to a central source.
+  \end{description}  
 
-  \begin{itemize}
-  \item Input: Sentence or Document
-  \item Output: Mentions and pointer to a central source.
-  \end{itemize}
 \end{frame}
 
 
@@ -279,11 +279,11 @@
 % \end{frame}
 
 \begin{frame}{Problem 3: Semantic Role Labeling}
-  \textbf{Goal:} Ident
-  \begin{itemize}
-  \item Input: Sentence
-  \item Output: Identify verb, its type, its arguments, and their types
-  \end{itemize}
+  \begin{description}
+  \item[Goal] Mark the semantic roles of sentence elements
+  \item[Input] Sentence
+  \item[Output] Identify verb, its type, its arguments, and their types
+  \end{description}  
 \end{frame}
 
 \begin{frame}{Language Applications: Semantic Role Labeling }
@@ -344,12 +344,11 @@
 \end{frame}
 
 \begin{frame}{Factoid Question Answering}
-  \textbf{Goal:} Map question to an answer from a  knowledge base
-
-  \begin{itemize}
-  \item Input: Question and Knowledge 
-  \item Output: Answer
-  \end{itemize}
+  \begin{description}
+  \item[Goal]Map question to an answer from a  knowledge base 
+  \item[Input] Question and knowledge-base source
+  \item[Output] Answer
+  \end{description}  
 \end{frame}
 
 \begin{frame}[fragile]{WebQuestions}
@@ -362,18 +361,18 @@
 \end{frame}
 
 \begin{frame}{Freetext Knowledge Sources}
-  \textbf{Goal:} Map question to an answer described in text.
 
-  \begin{itemize}
-  \item Input: Question and Text Source (textbooks)
-  \item Output: Answer
-  \end{itemize}
+  \begin{description}
+  \item[Goal]Map question to an answer described in text.
+  \item[Input] Question and Text Source (textbooks)
+  \item[Output] Answer
+  \end{description}
 \end{frame}
 
 
 \begin{frame}{Biological Processes (Berant et al, 2013)}
   \begin{center}
-    \includegraphics[width=6cm]{water}
+    \includegraphics[width=10cm]{water}
   \end{center}
 \end{frame}
 
@@ -382,13 +381,11 @@
 % \end{frame}
 
 \begin{frame}{Non-Factoid}
-  \textbf{Goal:} Map question to an answer described in casual text.
-
-  \begin{itemize}
-  \item Input: Question and Text Source (narratives)
-  \item Output: Answer
-  \end{itemize}
-  
+  \begin{description}
+  \item[Goal]Map question to an answer described in casual text.
+  \item[Input] Question, multiple choices, and text source (narratives)
+  \item[Output] Answer
+  \end{description}  
 \end{frame}
 
 \begin{frame}{MCTest}
@@ -440,12 +437,12 @@
 \section{Document Understanding}
 
 \begin{frame}{Discourse Parsing}
-  \textbf{Goal:} Determine the discourse relation between adjacent sentences
+  \begin{description}
+  \item[Goal] Determine the discourse relation between adjacent sentences
+  \item[Input] Two sentences 
+  \item[Output] One of a predefined set of relationship, e.g. compare, contrast expand.
+  \end{description}  
 
-  \begin{itemize}
-  \item Input: Two sentences
-  \item Output: One of a predefined set of relationship, e.g. compare, contrast expand.
-  \end{itemize}  
 \end{frame}
 
 \begin{frame}{Implicit Discourse Connectives}
@@ -475,12 +472,12 @@
 \end{frame}
 
 \begin{frame}{Summarization}
-  \textbf{Goal:} Produce a shorter version of the input.
+  \begin{description}
+  \item[Goal] Produce a shorter version of the input.
+  \item[Input] Document
+  \item[Output] Extracted sentences representing the document.
+  \end{description}  
 
-  \begin{itemize}
-  \item Input: Document
-  \item Output: Extracted sentences representing the document.
-  \end{itemize}  
 \end{frame}
 
 \begin{frame}[fragile]{Document Summarization (DUC 2003)}
@@ -508,6 +505,15 @@ is considered imminent.
 
 \end{frame}
 
+\begin{frame}{Sentence Summarization}
+  \begin{description}
+  \item[Goal] Shorter version of the original sentence.
+  \item[Input] Sentence
+  \item[Output] Shortened sentence (possibly with different words).
+  \end{description}  
+\end{frame}
+
+
 \begin{frame}{Summarization Result}
 
   \begin{itemize}
@@ -531,7 +537,7 @@ ates River, threatens its water supply.
 \end{frame}
 
 
-\begin{frame}{Sentence Summarization/ Compression}
+\begin{frame}{Sentence Summarization and Compression}
   \begin{center}
     \textbf{Source}
   \end{center}
@@ -566,12 +572,11 @@ ates River, threatens its water supply.
 \end{frame}
 
 \begin{frame}{Coreference}
-  \textbf{Goal:} Produce a shorter version of the input.
-
-  \begin{itemize}
-  \item Input: Document
-  \item Output: Extracted sentences representing the document.
-  \end{itemize}  
+  \begin{description}
+  \item[Goal] Cluster mentions based on their underlying entity.
+  \item[Input] Document
+  \item[Output] Clusters of coreferent mentions.
+  \end{description}  
 \end{frame}
 
 
