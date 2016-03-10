@@ -2,7 +2,7 @@
 \usepackage{../common_slides}
 \usepackage{tikz-qtree}
 \usepackage{pdfpages}
-
+% \usepackage{enumitem}
 
 \title{A Tour of Natural Language Applications}
 \date{}
@@ -13,10 +13,90 @@
   \titlepage
 \end{frame}
 
-
-\begin{frame}{Review:}
-  
+\begin{frame}{AlphaGo}
+  \begin{center}
+    \includegraphics[height=0.7\textheight]{alphago}
+  \end{center}
 \end{frame}
+
+\begin{frame}{Review: LSTM (Hochreiter and Schmidhuber, 1997)}
+  \begin{center}
+    \includegraphics[width=\textwidth]{LSTM3-chain}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Review: Highway Network (Srivastava et al., 2015)}
+  \begin{itemize}
+  \item Now add a combination at each dimension.
+  \item $\odot$ is point-wise multiplication. 
+  \end{itemize}
+  \begin{eqnarray*}
+    NN_{highway}(\boldx) &=& (1-\boldt) \odot \tilde{\boldh} + \boldt \odot \boldx \\
+    \tilde{\boldh} &=& \relu(\boldx \boldW^1 + \boldb^1) \\
+    \boldt &=& \sigma(\boldx \boldW^t + \boldb^t) \\
+    \boldW^t, \boldW^1 &\in& \reals^{\dhid \times \dhid} \\
+    \boldb^t, \boldb^1 &\in& \reals^{1 \times \dhid} 
+  \end{eqnarray*}
+  \begin{itemize}
+  \item $\tilde{\boldh}$; \textit{transform} (e.g. standard MLP layer)
+  \item $\boldt$; \textit{carry} (dimension-specific dynamic skipping)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Review: Gated Recurrent Unit (GRU) (Cho et al 2014)}
+    \begin{eqnarray*}
+      R(\bolds_{i-1}, \boldx_i) &=& (1-\boldt) \odot \tilde{\boldh} + \boldt \odot \bolds_{i-1} \\
+      \tilde{\boldh} &=& \tanh(\boldx \boldW^x + (\boldr \odot \bolds_{i-1})  \boldW^s + \boldb)  \\
+      \boldr &=& \sigma(\boldx \boldW^{xr} + \bolds_{i-1}\boldW^{sr} + \boldb^r) \\
+      \boldt &=& \sigma(\boldx \boldW^{xt} + \bolds_{i-1}\boldW^{st} + \boldb^t) \\
+      \boldW^{xt}, \boldW^{xr}, \boldW^{x} &\in& \reals^{\din \times \dhid} \\
+      \boldW^{st}, \boldW^{sr}, \boldW^{s} &\in& \reals^{\dhid \times \dhid} \\
+      \boldb^t, \boldb &\in& \reals^{1 \times \dhid} \\
+    \end{eqnarray*}
+
+    \begin{itemize}
+    \item $\boldt$; dynamic skip-connections
+    \item $\boldr$; reset gating
+    \item $\bolds$; hidden state
+    \item $\tilde{\boldh}$; gated MLP
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Review: Long Short-Term Memory}
+  Finally, another output gate is applied to $\boldh$
+    \begin{eqnarray*}
+      R(\bold \bolds_{i-1}, \boldx_i) &=& [\boldc_i, \boldh_i]  \\
+      \boldc_i &=& \boldj \odot \boldi  + \bold f \odot \bold c_{i-1}    \\
+      \boldh_i &=& \tanh(\boldc_i) \alert{\odot \boldo}\\ 
+      \boldi &=& \tanh(\boldx \boldW^{xi} + \boldh_{i-1}\boldW^{hi} + \boldb^i) \\
+      \boldj &=& \sigma(\boldx \boldW^{xj} + \boldh_{i-1}\boldW^{hj} + \boldb^j) \\
+      \boldf &=& \sigma(\boldx \boldW^{xf} + \boldh_{i-1}\boldW^{hf} + \boldb^f) \\
+      \boldo &=& \sigma(\boldx \boldW^{xo} + \boldh_{i-1}\boldW^{ho} + \boldb^o) \\
+    \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{Review: The Promise of RNNs}
+  \begin{itemize}
+  \item Learn the long-range interactions of language from data.
+    \air 
+
+  \item Example: classify true and false statements:
+    \pause 
+
+  \item \textbf{Example:}
+    \air 
+
+    \structure{\texttt{Eliot house is the coolest}}
+    \air 
+    
+    \alert{\texttt{Mather does not look like a prison.}}
+    \air 
+    
+  \item Works well if you control for \textit{exploding} or \textit{vanishing} gradients.
+  \end{itemize}
+\end{frame}
+
 
 \begin{frame}{Quiz}
   Last class we discussed the issue of 
@@ -38,16 +118,12 @@
   How would you implement these in a system like Torch?  
 \end{frame}
 
-\begin{frame}{Answer}
-  
-\end{frame}
-
 \begin{frame}{Today's Lecture}
   \begin{itemize}
-  \item High-level picture of natural language challenges.
+  \item High-level picture of select natural language challenges.
     \air
 
-  \item (Not a representative sample)
+  \item Caveat: Not a representative sample of NLP.
     
     \air
 
@@ -55,23 +131,24 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Caveats and Recommendations}
+\begin{frame}{Recommendations}
   \begin{itemize}
-  \item Sometimes data is private, speak to us about getting it. 
+  \item Sometimes datasets are private, speak to us about getting them. 
     \air
 
-  \item Many of these applications are changing quite quickly.
+  \item The state-of-the-art on these problems is changing quite quickly.
     \air 
     
   \item Getting Started: 
+    \air 
     \begin{itemize}
     \item Make sure you understand the problem and the metric.
       \air
     \item Read papers on the topic.
       \air
     \item Experiment first with count-based or linear models
-      \air 
-    \item 
+      \air
+    \item Reimplement other systems
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -89,6 +166,7 @@
   \item Question Answering
     \begin{itemize}
     \item Knowledge Graph (factoid)
+    \item Knowledge Processing (non-factoid)
     \item Comprehension (non-factoid)
     \end{itemize}
   \item Document Understanding
@@ -109,10 +187,10 @@
   \item Machine Translation
   \end{itemize}
   \air
-  Requires more detailed [future lectures].
+  Require more details [future lectures]
 
   \air 
-  Other possible projects (if you bring expertise),
+  Other possible topics (bring-your-own domain knowledge)
   \begin{itemize}
   \item Music Processing
   \item Vision
@@ -130,20 +208,21 @@
 
 \begin{frame}{Information Extraction}
   \textbf{Goal:} Map text to structured information.
-  
+  \air 
+
   \textbf{Applications:} 
   \begin{itemize}
-  \item Knowledge-base Construction
+  \item Knowledge-base construction
     \air 
-  \item Quantitative Research
+  \item Quantitative research from freetext
     \air 
-  \item Identifying Relationships
+  \item Identifying relationships 
   \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Terminology (ACE 2008 task)}
-  \begin{description}
+  \begin{description} \itemsep 20pt
     
   \item[Entity] the underlying semantic actor.
     \begin{itemize}
@@ -168,22 +247,25 @@
 \end{frame}
 
 \begin{frame}{Problem 1: Named-Entity Recognition}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Identify explicitly named entities in text.
-  \item[Input] Sentence 
+  \item[Input] Sentence to be tagged. 
   \item[Output] Mentions of identified entities and their type. 
   \end{description}  
 
 \end{frame}
 
 \begin{frame}{Named-Entity Recognition}
-  U.N. official Ekeus heads for Baghdad. 
+  \textbf{Input:} \texttt{U.N. official Ekeus heads for Baghdad. }
   \air
-
-  [ORG \alert{U.N.} ] official [PER \structure{Ekeus} ] heads for [LOC \alert{Baghdad} ] .  
+  
+  \textbf{Gold:} \texttt{ [ORG \alert{U.N.} ] official [PER \structure{Ekeus} ] heads for [LOC \alert{Baghdad} ] .  } 
 \end{frame}
 
 \begin{frame}[fragile]{Standard Dataformat (CoNLL 2003)}
+  \begin{center}
+    
+
 \begin{verbatim}
    U.N.         NNP  I-NP  I-ORG 
    official     NN   I-NP  O 
@@ -193,18 +275,24 @@
    Baghdad      NNP  I-NP  I-LOC 
    .            .    O     O 
 \end{verbatim}
+  \end{center}
 \end{frame}
 
 \begin{frame}{BIO Tagging}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[B-TYPE] Stop current mention and begin new mention
     \air 
   \item[I-TYPE] Continue adding to current mention
   \item[O ] Not part of a mention.
   \end{description}
+  \pause
+  
+  \textbf{Example:} 
+
+  \texttt{ [PER \alert{George Bush} ]  [LOC \structure{U.S.} ] president is traveling to [LOC \alert{Baghdad} ] .  } 
 \end{frame}
 
-\begin{frame}{ACETag Set}
+\begin{frame}{Example Tag Set}
   \begin{itemize}
   \item Loc
   \item Org
@@ -219,7 +307,7 @@
 \end{frame}
 
 \begin{frame}{Problem 2: Entity Linking}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Identify explicit entities and link to a standard
   central database.
   \item[Input] Sentence or Document
@@ -229,7 +317,7 @@
 \end{frame}
 
 
-\begin{frame}{Wikification }
+\begin{frame}{Entity Linking: Wikification (TAC 2014)}
   \begin{itemize}
   \item Uses Wikipedia as canonical source.
 
@@ -242,7 +330,7 @@
 \end{frame}
 
 
-\begin{frame}{Wikification (from tutorial of Roth et al)}
+\begin{frame}{Wikification (Roth et al, 2014)}
   \begin{center}
     \includegraphics[width=\textwidth]{wikification}
   \end{center}
@@ -259,14 +347,15 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Medical Extraction}
+\begin{frame}{Medical Term Extraction}
 
   \begin{enumerate}
-  \item The rhythm appears to be atrial fibrillation.  
-  \item The left atrium is moderately dilated.  
-  \item 53 year old man s/p fall from ladder.
+  \item The rhythm appears to be [ \alert{atrial fibrillation} ].  
+  \item The [ \alert{left atrium} ] is moderately [ \alert{dilated} ] .  
+  \item 53 year old man s/p [ \alert{fall from ladder} ].
   \end{enumerate}
 
+  Linked terms:
   \begin{itemize}
   \item atrial fibrillation - C0004238; UMLS preferred term ``atrial fibrillation''
   \item left atrium...dilated - C0344720; UMLS preferred term ``left atrial dilatation''
@@ -279,7 +368,7 @@
 % \end{frame}
 
 \begin{frame}{Problem 3: Semantic Role Labeling}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Mark the semantic roles of sentence elements
   \item[Input] Sentence
   \item[Output] Identify verb, its type, its arguments, and their types
@@ -331,8 +420,11 @@
     \air 
 
     \texttt{what high school did president bill clinton attend?}
+    
     versus 
+    
     \texttt{how many rivers in texas are longer than the red?}
+    \air 
 
   \item Various methods for solving:
     \begin{itemize}
@@ -344,25 +436,32 @@
 \end{frame}
 
 \begin{frame}{Factoid Question Answering}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal]Map question to an answer from a  knowledge base 
   \item[Input] Question and knowledge-base source
   \item[Output] Answer
   \end{description}  
 \end{frame}
 
-\begin{frame}[fragile]{WebQuestions}
-\begin{verbatim}
-    {``url'': ``http://www.freebase.com/view/en/bill_clinton'', ``targetValue'': ``(list (description \"Hot Springs High School\"))'', ``utterance'': ``what high school did president bill clinton attend?''},                    
-  {``url'': ``http://www.freebase.com/view/en/russia'', ``targetValue'': ``(list (description \"Constitutional republic\"))'', ``utterance'': ``what form of government does russia have today?''},                              
-  {``url'': ``http://www.freebase.com/view/en/taylor_lautner'', ``targetValue'': ``(list (description Abduction) (description Eclipse) (description \"Valentine's Day\") (description \"The Twilight Saga: Breaking Dawn -  
-    Part 1\") (description \"New Moon\"))'', ``utterance'': ``what movies does taylor lautner play in?''},
-\end{verbatim}
+\begin{frame}[fragile]{WebQuestions (Berant )} 
+\textbf{Questions:}
+\begin{itemize}
+\item what high school did president bill clinton attend?
+\item what form of government does russia have today?
+\item what movies does taylor lautner play in?
+\end{itemize}
+
+\textbf{Answers:}
+\begin{itemize}
+\item Hot Springs High School \url{http://www.freebase.com/view/en/bill_clinton}
+\item Constitutional republic \url{http://www.freebase.com/view/en/russia}
+\item  Eclipse, Valentine's Day, The Twilight Saga: Breaking Dawn -   Part 1, New Moon \url{http://www.freebase.com/view/en/taylor_lautner}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Freetext Knowledge Sources}
 
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal]Map question to an answer described in text.
   \item[Input] Question and Text Source (textbooks)
   \item[Output] Answer
@@ -381,14 +480,14 @@
 % \end{frame}
 
 \begin{frame}{Non-Factoid}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal]Map question to an answer described in casual text.
   \item[Input] Question, multiple choices, and text source (narratives)
   \item[Output] Answer
   \end{description}  
 \end{frame}
 
-\begin{frame}{MCTest}
+\begin{frame}{MCTest (Richardson et al, 2013)}
   James the Turtle was always getting in trouble. Sometimes he'd reach into the freezer and empty out all the food. Other times he'd sled on the deck and get a splinter. His aunt Jane tried as hard as she could to keep him out of trouble, but he was sneaky and got into lots of trouble behind her back.
 
   One day, James thought he would go into town and see what kind of trouble he could get into. He went to the grocery store and pulled all the pudding off the shelves and ate two jars. Then he walked to the fast food restaurant and ordered 15 bags of fries. He didn't pay, and instead headed home.
@@ -437,7 +536,7 @@
 \section{Document Understanding}
 
 \begin{frame}{Discourse Parsing}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Determine the discourse relation between adjacent sentences
   \item[Input] Two sentences 
   \item[Output] One of a predefined set of relationship, e.g. compare, contrast expand.
@@ -445,34 +544,32 @@
 
 \end{frame}
 
-\begin{frame}{Implicit Discourse Connectives}
+\begin{frame}{Implicit Discourse Connectives (PDTB)}
+  \texbf{Questions:}
   \begin{itemize}
-  \item Financial planners often urge investors to diversify and to
-    hold a smattering of international securities. And many emerging
+  \item \alert{Financial planners often urge investors to diversify and to
+    hold a smattering of international securities.} \structure{And many emerging
     markets have outpaced more mature markets, such as the U.S. and
-    Japan.  (Expansion.Conjunction – wsj 0034) 
-  \item And many emerging
-    markets have outpaced more mature markets, such as the U.S. and
-    Japan. Country funds offer an easy way to get a taste of foreign
-    stocks without the hard research of seeking out individual
-    companies.  (EntRel – wsj 0034) 
-  \item Country funds offer an easy
+    Japan.}
+  \item \alert{Country funds offer an easy
     way to get a taste of foreign stocks without the hard research of
-    seeking out individual companies. But it doesn’t take much to get
-    burned.  (Comparison.Contrast – wsj 0034) 
-  \item But it doesn’t take
-    much to get burned. Implicit = FOR EXAMPLE Political and currency
-    gyrations can whipsaw the funds.
-    (Expansion.Restatement.Specification – wsj 0034) 
-  \item Political and
-    currency gyrations can whipsaw the funds. AltLex [Another
-    concern]: The funds’ share prices tend to swing more than the
-    broader market.  (Expansion.Conjunction – wsj 0034)
+    seeking out individual companies.} \structure{ But it doesn’t take much to get
+    burned.  }
+  \item \alert{But it doesn’t take
+    much to get burned.} \structure{FOR EXAMPLE Political and currency
+    gyrations can whipsaw the funds.}
+  \end{itemize}
+
+  \texbf{Answers:}
+  \begin{itemize}
+  \item Expansion.Conjunction 
+  \item Comparison.Contrast 
+  \item Expansion.Restatement.Specification
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Summarization}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Produce a shorter version of the input.
   \item[Input] Document
   \item[Output] Extracted sentences representing the document.
@@ -502,11 +599,33 @@ in Damascus.
 positions, according to news reports, but no outbreak of fighting
 is considered imminent.
 
-
 \end{frame}
 
+% \begin{frame}{Summarization Result}
+
+%   \begin{itemize}
+%   \item 
+
+%   Tensions between Turkey and Syria have reached a point causing the top Turkish military commander to say 
+% they have reached "a state of undeclared war".                                                          
+
+%   \item Turkey accuses Syria of supporting Kurdish rebels in Turkey, a charge denied by Syria.
+
+%   \item Syria is angry over Turkey's closer ties to Israel and alleges that Turkey, by building dams on the Euphr
+% ates River, threatens its water supply.
+                                                                 
+%   \item Egypt's President Mubarak has visited Saudi Arabia and Damascus and plans to continue to Ankara hoping to
+%  defuse the crisis. 
+                                                                                     
+%   \item Israel claims "no part" in the tension. 
+
+%   \item  Turkey has attacked Kurdish bases in Iraq and threatens those in Syria.
+%   \end{itemize}
+% \end{frame}
+
+
 \begin{frame}{Sentence Summarization}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Shorter version of the original sentence.
   \item[Input] Sentence
   \item[Output] Shortened sentence (possibly with different words).
@@ -514,27 +633,6 @@ is considered imminent.
 \end{frame}
 
 
-\begin{frame}{Summarization Result}
-
-  \begin{itemize}
-  \item 
-
-  Tensions between Turkey and Syria have reached a point causing the top Turkish military commander to say 
-they have reached "a state of undeclared war".                                                          
-
-  \item Turkey accuses Syria of supporting Kurdish rebels in Turkey, a charge denied by Syria.
-
-  \item Syria is angry over Turkey's closer ties to Israel and alleges that Turkey, by building dams on the Euphr
-ates River, threatens its water supply.
-                                                                 
-  \item Egypt's President Mubarak has visited Saudi Arabia and Damascus and plans to continue to Ankara hoping to
- defuse the crisis. 
-                                                                                     
-  \item Israel claims "no part" in the tension. 
-
-  \item  Turkey has attacked Kurdish bases in Iraq and threatens those in Syria.
-  \end{itemize}
-\end{frame}
 
 
 \begin{frame}{Sentence Summarization and Compression}
@@ -570,9 +668,13 @@ ates River, threatens its water supply.
 % \item<5-> \alert<5>{Tense}
 \end{itemize}
 \end{frame}
+\begin{frame}
+  \includegraphics[width=\linewidth]{ap}
+\end{frame}
+
 
 \begin{frame}{Coreference}
-  \begin{description}
+  \begin{description} \itemsep 20pt
   \item[Goal] Cluster mentions based on their underlying entity.
   \item[Input] Document
   \item[Output] Clusters of coreferent mentions.
@@ -580,9 +682,6 @@ ates River, threatens its water supply.
 \end{frame}
 
 
-\begin{frame}
-  \includegraphics[width=\linewidth]{ap}
-\end{frame}
 
 
 {
