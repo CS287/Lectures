@@ -411,7 +411,10 @@ each of the above steps.
   \item Natural extension of naive Bayes to sequences.
     \air 
   \item Allows us to efficiently solve argmax,
-    \[ \argmax_{\hat{\boldy} \in \mcY} f(\boldx, \hat{\boldy}; \theta)\]
+    \[ \argmax_{c_1 \in \mcC, \ldots, c_n\in \mcC} f(\boldx, c_1, \ldots, c_n; \theta)\]
+    \air 
+
+  \item Classical model, not really used as-is in practice (but important to understand)
   \end{itemize}
 \end{frame}
 
