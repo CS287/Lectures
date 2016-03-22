@@ -16,7 +16,19 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Review: LM Terminology}
+\begin{frame}{OED Word of the Year}
+  \begin{center}
+    \includegraphics[width=3cm]{tears}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{shortlist}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Homework: LM Terminology}
   \begin{itemize}
   \item Maximum-likelihood Estimation (MLE)
     \begin{itemize}
@@ -36,7 +48,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Review: Reverse Trie Data structure}
+\begin{frame}{Homework: Reverse Trie Data structure}
 
 
   \begin{center}
@@ -44,6 +56,12 @@
   \end{center}
 
   Used in several standard language modeling toolkits.
+\end{frame}
+
+\begin{frame}{Homework: Results (Mikolov et al, 2011) }
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{rnnmikolov}
+  \end{center}
 \end{frame}
 
 
@@ -149,6 +167,13 @@ each of the above steps.
   \end{center}
 \end{frame}
 
+\begin{frame}{}
+  \begin{center}
+    \includegraphics[height=0.8\textheight]{hillary}
+  \end{center}
+\end{frame}
+
+
 \begin{frame}{Diversity in Babbling}
   \begin{itemize}
   \item Taking the greedy solution can lead to boring output.
@@ -247,15 +272,7 @@ each of the above steps.
   greedy babbler?
 \end{frame}
 
-\section{Sequence Models}
-
-\begin{frame}
-  
-\end{frame}
-
-\begin{frame}
-  
-\end{frame}
+\section{Structured Models}
 
 \begin{frame}{So Far: Multiclass Classification}
   Every problem:
@@ -276,6 +293,8 @@ each of the above steps.
 
 \begin{frame}{Predicting Structure}
   What if we want to predict:
+  \air 
+
   \begin{itemize}
   \item Parse trees
     \air 
@@ -284,7 +303,12 @@ each of the above steps.
     \air 
 
   \item Semantic Roles
+    \air
+
+  \item Translations
   \end{itemize}
+
+  These are all combinatorial structures
 \end{frame}
 
 \begin{frame}{Example: BIO Tagging}
@@ -356,22 +380,27 @@ each of the above steps.
 \begin{frame}{Predicting Structure}
   Instead we will try to maximize over the sequence,
   \[ \argmax_{c_1 \in \mcC, \ldots, c_n\in \mcC} f(\boldx, c_1, \ldots, c_n; \theta)\]
-\end{frame}
 
-
-\begin{frame}{What is the function $f$}
   \begin{itemize}
-  \item Allow many different functions.
+  \item Note: This is a \structure{test-time} optimization, different from training.
+    \air
+
+  \item We will discuss many different scoring functions $f$.
   \end{itemize}
 \end{frame}
+
 
 \begin{frame}{Encoding Output}
   We will assume that,
   \begin{itemize}
   \item Assume true output is a sequence,
     \[ \boldy_1, \ldots \boldy_n\] 
-    \air
-  \item Each is a sparse one-hot vector
+
+  \item Each is a sparse one-hot vector $\boldy_1 = c_1, \ldots \boldy_n = c_n$ 
+    \air 
+
+  \item Training data consists of labeled sequences
+    \[(\boldx_{1:n}^{(1)}, \boldy_{1:n}^{(1)}), \ldots (\boldx_{1:n}^{(J)}, \boldy_{1:n}^{(J)})\].
   \end{itemize}
 \end{frame}
 
@@ -436,19 +465,16 @@ each of the above steps.
   \item Aim will be to maximize this,
     \[ \argmax_{c_1 \in \mcC, \ldots, c_n\in \mcC} f(\boldx, c_1, \ldots, c_n; \theta)\]
   \end{itemize}
-
-  \begin{eqnarray*}
-  
-  \end{eqnarray*}
-  
+ 
 \end{frame}
 
 \begin{frame}{Hidden Markov Model}
   \begin{eqnarray*}
-    f(\boldx, c_1, \ldots, c_n; \theta) &=& \\ p(\boldy_1=\delta(c_1), \ldots, \boldy_n=\delta(c_n), \boldx_1, \ldots, \boldx_n)  \\
-    &=& \prod_{i=1}^n p(\boldx_i | \boldx_1, \ldots \boldx_{i-1}, \boldy_1, \ldots, \boldy_n) p(\boldy_i=\delta(c_i) | \boldy_1=\delta(c_1) \ldots \boldy_{i-1}=\delta(c_{i-1})) \\
-    &\approx& \prod_{i=1}^n p(\boldx_i | \boldy_i = \delta(c_i)) p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1}), \boldx_1, \ldots, \boldx_n) \\
-    &\approx& \prod_{i=1}^n p(\boldx_i | \boldy_i = \delta(c_i)) p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1})) \\
+    f(\boldx, c_{1:n}) &=&  p(\boldy_1=\delta(c_1), \ldots, \boldy_n=\delta(c_n), \boldx_{1:n}) \\
+                       &=& p(\boldx_{1:n} | \boldy_{1:n}) p(\boldy_{1:n}) \\ \pause
+                       &=& \prod_{i=1}^n p(\boldx_i | \boldx_{1:i-1}, \boldy_{1:n}) p(\boldy_i=\delta(c_i) | \boldy_1=\delta(c_1) \ldots \boldy_{i-1}=\delta(c_{i-1})) \\ \pause
+                       &\approx& \prod_{i=1}^n p(\boldx_i | \boldx_{1:i-1}, \boldy_{1:n}) p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1})) \\ \pause
+                       &\approx& \prod_{i=1}^n p(\boldx_i | \boldy_i = \delta(c_i)) p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1}))
   \end{eqnarray*}
 \end{frame}
 
@@ -495,6 +521,21 @@ each of the above steps.
   \end{itemize}
 \end{frame}
 
+\begin{frame}{Maximum Likelihood Estimation}
+  \begin{itemize}
+  \item Sequences are assumed given. 
+
+    \air 
+  \item Therefore we can fit in the standard way 
+  \[ \mathcal{L}(\theta) =  - \sum_{ j=1}^J \sum_{i=1}^n \log p(\boldx^{(j)}_i | \boldy^{(j)}_i; \theta) + \log p(\boldy^{(j)}_i | \boldy^{(j)}_{i-1}; \theta) \] 
+  \air 
+
+\item Note: training is very similar to multiclass.
+  
+  \end{itemize}
+
+\end{frame}
+
 \begin{frame}{Multinomial Hidden Markov Model}
   (Should look familiar)
   \begin{itemize}
@@ -505,7 +546,7 @@ each of the above steps.
     \begin{itemize}
       \item Let $T_{c',c}$ be the counts of class $c'$ preceding class $c$.
 
-      \item \[p(\boldy_i = \bolddelta(c_i) | \boldy_{i-1} = \bolddelta(c_{i-1})) = \frac{T_{c', c}}{T_{\cdot,c}} \]
+      \item \[p(\boldy_i = \bolddelta(c_i) | \boldy_{i-1} = \bolddelta(c_{i-1})) = \frac{T_{c', c}}{T_{c',\cdot}} \]
     \end{itemize}
     \pause
 
@@ -520,7 +561,7 @@ each of the above steps.
 
 
 
-\begin{frame}{Example: Named-Entity Recognition}  
+\begin{frame}[fragile]{Example: Named-Entity Recognition}  
 \begin{verbatim}
    U.N.         NNP  I-NP  I-ORG 
    official     NN   I-NP  O 
@@ -538,9 +579,43 @@ each of the above steps.
   \item $T$ is constructed by iterating over column
     \air
   \item Standard multinomial MLE issues apply (smoothing, rare-words)
-    air 
-  \item Can extend $F$ to multiple features as in naive Bayes 
   \end{itemize}
+\end{frame}
+
+\begin{frame}{Feature HMM}
+  Can extend $F$ to multiple features as in naive Bayes 
+\begin{center}  
+  \begin{tikzpicture}
+    \node (Ea) [obs] {$\boldx_{1,1}$}; 
+    \node (Eaa) [obs, right=of Ea] {$\boldx_{1,2}$}; 
+    \node (Xa) [latent,above =of Ea] {$\boldy_1$}; 
+
+    \node (Eb) [obs, right = of Eaa ] {$\boldx_{2,1}$}; 
+    \node (Ebb) [obs, right = of Eb ] {$\boldx_{2,2}$}; 
+    \node (Xb) [latent,above =of Eb] {$\boldy_2$}; 
+
+    \node (Ec) [obs, right = of Ebb] {$\boldx_{3,1}$}; 
+    \node (Ecc) [obs, right = of Ec] {$\boldx_{3,2}$}; 
+    \node (Xc) [latent,above =of Ec] {$\boldy_3$}; 
+    \node (Xd) [right =of Xc] {$\ldots$}; 
+    \node (Xe) [latent,right =of Xd] {$\boldy_n$}; 
+    \node (Ee) [obs,below =of Xe] {$\boldx_{n,1}$}; 
+    \node (Eee) [obs,right =of Ee] {$\boldx_{n,2}$}; 
+
+    \edge {Xa} {Xb} ; %
+    \edge {Xb} {Xc} ; %
+    \edge {Xa} {Ea} ; %
+    \edge {Xa} {Eaa} ; %
+    \edge {Xb} {Ebb} ; %
+    \edge {Xb} {Eb} ; %
+    \edge {Xc} {Ec} ; %
+    \edge {Xc} {Ecc} ; %
+    \edge {Xc} {Xd} ; %
+    \edge {Xd} {Xe} ; %
+    \edge {Xe} {Ee} ; %
+    \edge {Xe} {Eee} ; %
+  \end{tikzpicture}
+\end{center}  
 \end{frame}
 
 \begin{frame}{Versus Multiclass}
@@ -561,7 +636,10 @@ each of the above steps.
   \begin{itemize}
   \item Just as with multiclass, we can instead fit the conditional probability.
     \air 
+  \item (In fact, we can also fit a neural network model) 
+    \air 
 
+  \item However we will see that this approach has some issues.
   \end{itemize}
 \end{frame}
 
@@ -611,9 +689,9 @@ each of the above steps.
 
 \begin{frame}{Discriminative Markov Model}
   \begin{eqnarray*}
-    f(\boldx, c_1, \ldots, c_n; \theta) &=& \\ p(\boldy_1=\delta(c_1), \ldots, \boldy_n=\delta(c_n) | \boldx_1, \ldots, \boldx_n)  \\
-    &=& \prod_{i=1}^n p(\boldy_i=\delta(c_i) | \boldy_1=\delta(c_1) \ldots \boldy_{i-1}=\delta(c_{i-1}), \boldx_1, \ldots, \boldx_n) \\
-    &\approx& \prod_{i=1}^n p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1}) , \boldx_1, \ldots, \boldx_n) \\
+    f(\boldx, c_1, \ldots, c_n; \theta) &=&  p(\boldy_1=\delta(c_1), \ldots, \boldy_n=\delta(c_n) | \boldx_{1:n})  \\ \pause
+    &=& \prod_{i=1}^n p(\boldy_i=\delta(c_i) | \boldy_1=\delta(c_1) \ldots \boldy_{i-1}=\delta(c_{i-1}), \boldx_{1:n}) \\ \pause
+    &\approx& \prod_{i=1}^n p(\boldy_i=\delta(c_i) | \boldy_{i-1}=\delta(c_{i-1}) , \boldx_{1:n}) \\
   \end{eqnarray*}
 \end{frame}
 
@@ -637,11 +715,11 @@ each of the above steps.
     \edge {Xa} {Xb} ; %
     \edge {Xb} {Xc} ; %
     % \edge {Xa} {Ea} ; %
-    \edge {Xb} {Eb} ; %
+    % \edge {Xb} {Eb} ; %
     % \edge {Xc} {Ec} ; %
     \edge {Xc} {Xd} ; %
-    % \edge {Xd} {Xe} ; %
-    \edge {Xe} {Ee} ; %
+    \edge {Xd} {Xe} ; %
+    % \edge {Xe} {Ee} ; %
   \end{tikzpicture}
 \end{center}  
 \end{frame}
@@ -686,7 +764,7 @@ each of the above steps.
   \begin{itemize}
   \item Assume that we have $c_1, \ldots c_{i-1}$.
     \air 
-  \item Following previous notation let $\hat{boldy}_i$ be distribution at this point.
+  \item Following previous notation let $\hat{\boldy}_i$ be distribution at this point.
     \air 
 
   \item How do we predict $c_i$? What is it a function of?
@@ -694,34 +772,55 @@ each of the above steps.
 \end{frame}
 
 \begin{frame}{Answers}
-  Becomes just a standard linear model
+  Becomes just a standard linear model, if we take $c_{i-1}$ as an argument
 
   \begin{itemize}
   \item HMM
-    \[ \hat{boldy}_i = \softmax(\log(p(\boldy_i| \boldy_{i-1} = \delta(c_{i-1}))) + \log(p(\boldy_i| \boldx_i) )  \] 
+    \[ \hat{\boldy}_i(c_{i-1}) = \softmax(\log p(\boldy_i| \boldy_{i-1} = \delta(c_{i-1})) + \log p(\boldy_i| \boldx_i) )  \] 
 
     \air 
   \item MEMM
-    \[ \hat{boldy}_i = \softmax(feat(\boldx, c_{i-1}) \boldW + \bold b)  \] 
+    \[ \hat{\boldy}_i(c_{i-1}) = \softmax(feat(\boldx, c_{i-1}) \boldW + \bold b)  \] 
     \air 
-  \item \[ \hat{boldy}_i(c_{i-1}) \] 
+  \item We will see that any parameterize function of $c_{i-1}$ works \[ \hat{\boldy}_i(c_{i-1}) \] 
   \end{itemize}
 \end{frame}
 
-\begin{frame}{}
+
+\begin{frame}{Next Time}
   \begin{itemize}
-  \item Assume that we don't have $c_1, \ldots c_{i-1}$.
+  \item How to compute predictions on a full sequence.
+    \air
+  \item Approximations for sequence prediction.
     \air 
-  \item How do we predict $p(\boldy_i = \delta(c_i) | \boldx_1, \ldots, \boldx_i)$? 
+  \item Further algorithms.
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Answer: Recursion}
-  \begin{itemize}
-  \item Base case: Compute $\hat{\boldy}_1$ 
+% \begin{frame}{Without the Prefix}
+%   \begin{itemize}
+%   \item Assume that we don't have $c_1, \ldots c_{i-1}$.
+%     \air 
+%   \item How do we predict $p(\boldy_i = \delta(c_i) | \boldx_1, \ldots, \boldx_i)$? 
+%   \end{itemize}
+%   \pause
+%   \air
 
-  \item Inductive case: Compute $\hat{\boldy}_i = \sum_{c_{i-1}} \hat{\boldy}_i(c_{i-1}) * \hat{\boldy}_{i-1, c_{i-1}}$ 
-  \end{itemize}
-\end{frame}
+%   \textbf{Algorithm}
+
+%   \begin{itemize}
+%   \item Base case: Compute $p(\boldy_1 | \boldx_{1:n})$ (as above)
+%     \air 
+%   \item Inductive case: Compute $p(\boldy_i | \boldy_{1},\ldots, \boldy_{i-1}, \boldx_{1:n})$ 
+%     \begin{itemize}
+%     \item First for all $c_{i-1}$ compute $\hat{\boldy}_i(c_{i-1})$
+%       \air 
+%     \item Then  $p(\boldy_i  | \boldy_{1},\ldots, \boldy_{i-1}={c_i-1}, \boldx_{1:n})  | \boldy_{1},\ldots, \boldy_{i-2}, \boldx_{1:n})  \hat{\boldy}_i(c_{i-1}) $ 
+%       \air
+%     \item Finally sum them all up.
+%     \end{itemize}
+
+%   \end{itemize}
+% \end{frame}
 
 \end{document}
