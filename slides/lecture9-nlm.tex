@@ -330,7 +330,7 @@
   \[\hat{\boldy} = \softmax(NN_{MLP1}(\boldx)) \] 
 %  \iar 
 %
-  Best model uses $\din=30, \dhid =100$.
+  Best model uses $\din=30 \times \dwin, \dhid =100$.
 %
 \end{frame}
 
@@ -447,9 +447,9 @@ Then use:
 \begin{frame}{Review: Softmax Issues}
   Use a softmax to force a distribution,
 
-  \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{c\in \mcC } \exp(z_c)}  \]
+  \[\softmax(\boldz) = \frac{\exp(\boldz)}{\displaystyle \sum_{w\in \mcC } \exp(z_w)}  \]
 
-  \[\log \softmax(\boldz) = \boldz - \log \sum_{c\in \mcC} \exp(z_c)  \]
+  \[\log \softmax(\boldz) = \boldz - \log \sum_{w\in \mcC} \exp(z_w)  \]
 
   \begin{itemize}
   \item \textbf{Issue:} class $\mcC$ is huge.
@@ -523,16 +523,16 @@ Then use:
 
 
 \begin{frame}{Warm-Up: Binary Classification}
-  How do we score $(\boldx_i, \boldy_i = \bolddelta(c))$? 
+  How do we score $(\boldx_i, \boldy_i = \bolddelta(w))$? 
 \air 
 
 Could use unnormalized score,
-  \[ z_c = \tanh(\boldx \boldW^1)\boldW^2_{*,c}  \] 
+  \[ z_w = \tanh(\boldx \boldW^1)\boldW^2_{*,c}  \] 
 
 
   Becomes softmax regression/non-linear logistic regression,
 
-  \[\hat{d} = \sigma(z_c)\]
+  \[\hat{d} = \sigma(z_w)\]
 
   \begin{itemize}
   \item Much faster
@@ -551,7 +551,7 @@ Could use unnormalized score,
 
 
   Computing binary  (takes in $\boldx$ and $\boldy$) 
-  \[\hat{d} = \sigma(z_c)\]
+  \[\hat{d} = \sigma(z_w)\]
 
  \[\boldx \Rightarrow \boldW^1 \Rightarrow \tanh \Rightarrow
  \begin{matrix}
@@ -632,7 +632,7 @@ But we still have a problem: $\mathcal{L}$ defined in terms of normalized distri
 \begin{itemize}
 \item instead of explicitly normalizing, estimate $Z({\boldx})$, normalizing constant of each context $\boldx$, \textit{as a parameter} (Gutmann \& Hyv{\"a}rinen, 2010)
 \item  Mnih and Teh (2012) show that fixing $Z({\boldx})=1$ for all contexts works just as well
-\item So we can replace $\log p(\boldy = \bolddelta(c)|D=1, \boldx)$ with $z_c$, as computed by our network
+\item So we can replace $\log p(\boldy = \bolddelta(w)|D=1, \boldx)$ with $z_w$, as computed by our network
 \end{itemize}
 
 %  \[p(D=1 | \boldx, \boldy) = \sigma(\log p(\boldy|D=1, \boldx) - \log(K p(\boldy|D=0, \boldx)))\]
@@ -676,7 +676,7 @@ So we now have
   
   \begin{eqnarray*}
 \mathcal{L}(\theta)
-   &=& \sum_{i} \log \sigma(z_{c_i} - \log(K p_{ML}(c_i))) \\
+   &=& \sum_{i} \log \sigma(z_{w_i} - \log(K p_{ML}(w_i))) \\
  &+&   \sum_{k=1}^{K} \log (1- \sigma(z_{s_{i,k}} - \log(K p_{ML}(s_{i,k}))))  
  \end{eqnarray*}
  
@@ -688,13 +688,13 @@ So we now have
 
 \begin{frame}{Implementation}
   \begin{itemize}
-  \item How do you efficiently compute $z_c$?
+  \item How do you efficiently compute $z_w$?
 
     Need a lookup table (and dot-product) for output embeddings! (Not full matrix-vector product).
 
-  \item How do you efficiently handle $p_{ML}(c)$
+  \item How do you efficiently handle $\log p_{ML}(w)$
   
-    Also can be done with lookuptable and add.
+    Can be precomputed or placed in a lookuptable .
 
   \item How do you handle sampling?
 
@@ -714,7 +714,7 @@ So we now have
 
 
 
-  Computing $\sigma(z_c - \log(K p_{ML}(c)))$,
+  Computing $\sigma(z_w - \log(K p_{ML}(w)))$,
  \[\boldx \Rightarrow \boldW^1 \Rightarrow \tanh \Rightarrow
  \begin{matrix}
    \cdot \\ 
@@ -722,7 +722,7 @@ So we now have
  \end{matrix}
  \Rightarrow  \begin{matrix}
    - \\ 
-   K p_{ML}(c) \mathrm{(Lookup)}
+   \log K p_{ML}(w) \mathrm{(input)}
  \end{matrix}
 \Rightarrow \sigma\]
 
