@@ -1,0 +1,357 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{pdfpages}
+
+\usetikzlibrary{matrix}
+% \usepackage{enumitem}
+
+\title{Sequence Models 4}
+\date{}
+\author{CS 287}
+
+\def\Lattice{
+    \matrix (network)
+    [matrix of nodes,
+    nodes in empty cells,
+    ampersand replacement=\&,
+    column sep={1cm},
+    row sep={0.1cm},
+    nodes={outer sep=0pt,circle,minimum size=0.5cm, minimum width=1.3cm,draw, rectangle} ]
+    {
+     O \& O \& O \& O \& O\\
+     I-PER \& I-PER \& I-PER \& I-PER \& I-PER \\ 
+     I-ORG \& I-ORG \& I-ORG \& I-ORG \& I-ORG \\ 
+     I-LOC \& I-LOC \& I-LOC \& I-LOC \& I-LOC \\ 
+     |[draw=none]| \\
+     |[draw=none]| Mayor \& |[draw=none]| DeBlasio \& |[draw=none]| from \& |[draw=none]| New  \& |[draw=none]| York  \\  
+};
+}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{}
+  
+\end{frame}
+
+\begin{frame}{Marginals}
+  Assume we \textbf{are not} given $c_{1:i-1}$ and $c_{i+1:n}$.
+  \begin{tikzpicture}
+    \Lattice
+    % \draw[red] (network-2-1.north west) rectangle  (network-2-1.south east);
+    % \draw[red] (network-2-2.north west) rectangle  (network-2-2.south east);
+    % \draw[red] (network-4-4.north west) rectangle  (network-4-4.south east);
+    % \draw[red] (network-4-5.north west) rectangle  (network-4-5.south east);
+  \end{tikpicture}
+
+  What is the best completed sequence, i.e. 
+ 
+  \[ \argmax_{c_i} \sum_{c_{1:i-1}:c_{i+1:n}} p(\bold{y}_i = \delta(c_i),  \boldy_{1:i-1} = \delta(c_{1:i-1}), \boldy_{i+1:n} = \delta(c_{i+1:n})| \boldx ) \] 
+\end{frame}
+
+\begin{frame}{Quiz}
+  Last class we looked at discriminative sequence models 
+  $p(\boldy | \boldx)$. Consider now a generative model (such as 
+  an HMM), where we model $p(\boldy, \boldx)$. 
+
+  Unlike a discriminative model, we can use to compute the probability of a specific $\boldx$ by marginalizing out $\boldy$, $p(\boldx) = \sum_{c_{1:n}} p(\boldy = \delta(c_{1:n}), \boldx)$. 
+
+
+  \begin{itemize}
+  \item How do you compute this?
+    \air
+  \item What value should this same algorithm give you in the discriminative case?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Answer}
+  \[p(\boldx) = \sum_{c_{1:n}} p(\boldy = \delta(c_{1:n}), \boldx)\]
+
+  Return value here. 
+
+  \begin{algorithmic}
+    \Procedure{Forward}{}
+    \State{$\alpha \in \reals^{\{0,\ldots, n\} \times \mcC}$ initialized to $-\infty$ }
+    \State{$\alpha[0, \langle s \rangle] = 0$}
+    \For{$i = 1$ to $n$ }
+    \For{$c_{i} \in \mcC$}
+    \State{$\alpha[i, c_i] = \sum_{c_{i-1}} 
+     \alpha[i-1, c_{i-1}] * \hat{\boldy}(c_{i-1})_{c_i}        
+       $}
+    \EndFor{}
+    \EndFor{}
+    \State{\Return{$\sum_{c_n\in\mcC} \alpha[n, c_n]$}}
+    \EndProcedure{}
+  \end{algorithmic}
+
+  \begin{itemize}
+  \item In the discriminative case, sums to $1$ (nice unit test)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Today's Lecture}
+  
+\end{frame}
+
+\begin{frame}{Model Choices}
+  \begin{itemize}
+
+  \item Generative versus Discriminative Model
+  \item Local versus Global (Sequence) Prediction
+  \item Probabilistic versus Non-probabilistic Objective
+  \item Markov versus Non-Markov
+  \item Linear versus Non-Linear Model
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Model Choices}
+  Local, discriminative  Models, (examples)
+  \begin{tabular}{l|ll}
+    Normalization & Markov & Non-Markov \\ 
+    Linear &  MEMM & ME with Global Features \\ 
+    Non-Linear & NNLM &  RNN \\ 
+  \end{tabular}
+\end{frame}
+
+
+
+\begin{frame}{Model Choices}
+  Linear, Markov Models
+  \begin{tabular}{l|ll}
+    Normalization & Local & Global \\ 
+    Generative &  HMM & \alert<2>{MRF} \\ 
+    Discriminative & MEMM &  \alert<2>{CRF} \\ 
+    \midrule
+    Non-Prob & N/A & Structured Perceptron/SVM \\ 
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Benefits of Local Models}
+  \begin{itemize}
+  \item Relatively easy to train (multi-class)
+  \item Same decoding algorithms (Viterbi, forward, backward)
+  \item 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Issue: Label Bias Problem}
+  \begin{itemize}
+  \item Class of models is limited by the parameterization.
+    \air 
+    \
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Label Bias Example}
+  \begin{itemize}
+  \item 
+  \end{itemize}
+\end{frame}
+
+\section{Conditional Random Fields}
+
+\begin{frame}{Issues with Multiclass for Sequences }
+  \begin{itemize}
+  \item Say there are $\mcT$ tags and sequence length is $n$
+    \air 
+
+  \item There are $\dout = O(\mcT^n)$ sequences! 
+    \air 
+  \item Just naively computing the softmax is exponential in length. 
+    \air 
+
+  \item Even if you could compute the softmax, $\boldW \in \reals^{\din \times \dout}$ would 
+    be impossible to train.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Conditional Random Field Markov Model}
+  \begin{itemize}
+  \item Model has local, unnormalized features
+
+    \[\log \hat{\boldy}(c_{i-1})_{c_i} = feat(\boldx, c_{i-1}) \boldW + \boldb\]
+    or 
+
+    \[ \hat{\boldy}(c_{i-1})_{c_i} = \exp(feat(\boldx, c_{i-1}) \boldW + \boldb)\]
+
+    
+
+  \item Used to compute probability of sequences
+    \[ p(\boldy | \boldx ) =  \softmax(\mathrm{all sequences})    \] 
+
+  \item Objective is based on global NLL of this sequence distribution
+   
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Distribution over Sequences}
+
+  How do we compute the probability of sequences?
+
+    \[ p(\boldy | \boldx ) =  \softmax(\mathrm{all sequences})    \] 
+
+  Consider a given $c_{1:n}$, 
+
+  \begin{eqnarray*}
+    p(\boldy=\delta(c_{1:n}) | \boldx ) &=& \displaystyle \frac{\exp(\sum_{i=1}^n (feat(\boldx, c_{i-1}) \boldW + \boldb)_{c_i})}{\sum_{c'_{1:n}} \exp(\sum_{i=1}^n (feat(\boldx, c'_{i-1}) \boldW + \boldb)_{c'_i}) }  \\       
+    &=& \frac{\prod_{i=1}^n \hat{\boldy}(c_{i-1})_{c_i}} { \sum_{c'_{1:n}} \prod_{i=1}^n \hat{\boldy}(c'_{i-1})_{c'_i} }
+  \end{eqnarray*}
+    
+ end{frame}
+
+
+ \begin{frame}{Computing the Softmax}
+   Want to compute:
+   \[ \frac{\prod_{i=1}^n \hat{\boldy}(c_{i-1})_{c_i}} { \sum_{c'_{1:n}} \prod_{i=1}^n \hat{\boldy}(c'_{i-1})_{c'_i} }\] 
+
+   \begin{itemize}
+   \item $\prod_{i=1}^n \hat{\boldy}(c_{i-1})_{c_i}$; easy to compute
+     \air 
+   \item $Z = \sum_{c'_{1:n}} \prod_{i=1}^n \hat{\boldy}(c'_{i-1})_{c'_i}$; can use the forward algorithm.
+   \end{itemize}
+
+   Softmax goes from $O(|\mcC|^n)$ to $O(|\mcC|^2)$.  
+ \end{frame}
+
+
+ \begin{frame}{Computing Marginals}
+   Want to compute:
+   \[ p(\boldy_i | \boldx) = \sum_{c_{1:i-1}, c_{i+1:n}} p(\boldy | \boldx)  = \frac{(\sum_{c_{1:i-1}} \prod_{j=1}^{i-1} \boldy(c_{j-1})_{c_j} ) (\sum_{c_{i+1:n}} \prod_{j=i+1}^{n} \boldy(c_{j-1})_{c_j} )   }{Z}  \] 
+
+   \begin{itemize}
+   \item $(\sum_{c_{1:i-1}} \prod_{j=1}^{i-1} \boldy(c_{j-1})_{c_j} )$; forward algorithm
+     \air 
+   \item $(\sum_{c_{i+1:n}} \prod_{j=i+1}^{n} \boldy(c_{j-1})_{c_j} )$; backward algorithm
+   \item $Z = \sum_{c'_{1:n}} \prod_{i=1}^n \hat{\boldy}(c'_{i-1})_{c'_i}$; use the forward algorithm.
+   \end{itemize}
+ \end{frame}
+
+
+ \section{Training}
+
+ \begin{frame}{How do you fit these models?}
+   \begin{itemize}
+   \item Same objective as for MEMMs.
+     
+     \air
+
+   \item Minimize sequence NLL,
+     \[ \mathcal{L}(\theta) =  - \sum_{ j=1}^J  \log p(\boldy^{(j)} | \boldx^{(j)}; \theta) \]
+ 
+     \air 
+
+   \item However, much different gradients.
+
+   \end{itemize}
+
+ \end{frame}
+
+
+ \begin{frame}{Recall: Log-likelihood and softmax partials}
+     \[ \mathcal{L}(\theta) =  - \sum_{ j=1}^J  \log p(\boldy^{(j)} | \boldx^{(j)}; \theta) \]
+
+     \begin{itemize}
+     \item 
+
+     Partials of $L(\boldy, \hat{\boldy})$ for all $j \in \{1, \ldots, \dout\}$ and $y_c = 1$
+
+     \[ \frac{\partial L(\boldy, \hat{\boldy})}{\partial \hat{y}_j} = \begin{cases}-\frac{1} {\hat{y}_j} & j = c\\ 0 & o.w. \end{cases}  \]
+
+     \item 
+    Partials of $\hat{\boldy} = \softmax(\boldz)$
+
+  \[ \frac{\partial \hat{y}_j }{\partial z_i} =
+    \begin{cases}
+      \hat{y}_i (1 - \hat{y}_i) & i = j\\
+      - \hat{y}_i \hat{y}_j & i \neq j \\
+    \end{cases} \]
+
+  \item Partials
+  \[ \frac{\partial L(\boldy, \hat{\boldy}) }{\partial z_i} =
+    \begin{cases}
+     -(1 - p(\boldy = \delta(i))) & i = c\\
+      p(\boldy = \delta(i))  & i \neq c \\
+    \end{cases} \]
+
+  \end{itemize}
+ \end{frame}
+
+ \begin{frame}{What is happening here?}
+  \[ \frac{\partial L(\boldy, \hat{\boldy}) }{\partial z_i} =
+    \begin{cases}
+     -(1 - \hat{y}_i) & i = c\\
+      \hat{y}_i  & i \neq c \\
+    \end{cases} \]
+
+   \begin{itemize}
+   \item $\boldz \in \reals^{|\mcC|^n} $; update for each sequence.
+   \item $\hat{boldy}_i(c_{i-1})_{c_{i})$; are the parameters. 
+   \end{itemize}
+
+
+  \[ \frac{\partial z_{c'} }{\partial \hat{boldy}_i(c_{i-1})_{c_{i})} =
+    \begin{cases}
+     1 & (c_{i-1}, c_i) \in c'\\
+     0  & o.w. \\
+    \end{cases} \]
+ \end{frame}
+
+ \begin{frame}{Final Gradients}
+
+
+  \[ \frac{\partial L }{\partial \hat{boldy}_i(c_{i-1})_{c_{i})} =
+    \sum_{c'} \frac{\partial z_{c'} }{\partial \hat{boldy}_i(c_{i-1})_{c_{i})} \frac{\partial L(\boldy, \hat{\boldy}) }{\partial z_{c'}} = 
+    \sum_{c'_{1:i-1}, c'_{i+1:n}}  \frac{\partial L(\boldy, \hat{\boldy}) }{\partial z_{c'}} = 
+    \sum_{c'_{1:i-1}, c'_{i+1:n}}  p(\boldy = c'  | \boldx) -  2 p(\boldy = c  | \boldx) 
+   \]
+   \begin{itemize}
+   \item First term, marginals of the CRF. 
+
+     \air 
+   \item Second term, probability of the goal sequence. $p(\boldy = c  | \boldx)$ 
+   \end{itemize}
+ \end{frame}
+
+
+ \begin{frame}{Full Algorithm}
+   \begin{itemize}
+   \item Compute forward algorithm
+   \item Compute $Z$
+   \item Compute backward algorithm. 
+   \item Compute the edge marginals. 
+   \item Compute backprop gradients to each $\hat{\bold{y}(c_i)}$. 
+   \end{itemize}
+
+ \end{frame}
+
+\begin{frame}{Model Choices}
+  Discriminative, Markov Models
+  \begin{tabular}{l|ll}
+    Normalization & Local & Global \\ 
+    Linear & MEMM &  \alert<2>{CRF} \\ 
+    Non-Linear & NN-MM &  \alert<2>{NN-CRF} \\ 
+  \end{tabular}
+\end{frame}
+
+\begin{frame}
+  
+\end{frame}
+
+ \begin{frame}{Neural Network-CRF}
+   
+ \end{frame}
+
+ \section{Generative Models with Global Normalization}
+
+ \begin{frame}
+   
+ \end{frame}
+
+\end{document}
