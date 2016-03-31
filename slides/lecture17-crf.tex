@@ -596,27 +596,33 @@
    
    Define 
    \[ p(\boldy | \boldx; \theta) = \hat{\boldy} = \softmax(\boldz) \]
+   
    \air 
 
-   Where $\boldz \in \reals^{|\mcC|^n}$ was the score of each sequence, i.e. $z_{c_{1:n}}$
+   Where $\boldz \in \reals^{|\mcC|^n}$ was the score of each sequence, i.e. $z_{c'_{1:n}}$
+   \air 
+
+   And let $c_{1:n}$ be correct sequence
+
+   
  \end{frame}
 
 
  \begin{frame}{What is happening here?}
    \begin{itemize}
-   \item Partials for all sequences $i \in \mcC^n$,
-   \[ \frac{\partial L }{\partial z_{i}} =
+   \item Partials for all sequences $d_{1:n} \in \mcC^n$,
+   \[ \frac{\partial L }{\partial z_{d_{1:n}}} =
      \begin{cases}
-       -(1 - \hat{y}_i) & i = c_{1:n}\\
-       \hat{y}_i  & i \neq c_{1:n} \\
+       -(1 - \hat{y}_i) & d_{1:n} = c_{1:n}\\
+       \hat{y}_i  & d_{1:n} \neq c_{1:n} \\
      \end{cases} \]
 
    \item 
      Partials for all edges
 
-     \[ \frac{\partial z_{c_{1:n}} }{\partial\log \hat{y}(c'_{i-1})_{c'_{i}}} =
+     \[ \frac{\partial z_{d_{1:n}} }{\partial\log \hat{y}(c'_{i-1})_{c'_{i}}} =
          \begin{cases}
-           1 & c'_{i-1} = c_{i=1} \land c'_{i} = c_{i}\\
+           1 & c'_{i-1} = d_{i=1} \land c'_{i} = d_{i}\\
            0  & o.w. \\
          \end{cases} \]
      \end{itemize}
@@ -624,10 +630,10 @@
      
  \begin{frame}{Final Gradients}
    \begin{eqnarray*}
-    \frac{\partial L}{\partial \log \hat{y}_i(c_{i-1})_{c_{i}}} &=&
-    \sum_{c'} \frac{\partial z_{c'} }{\partial \log \hat{y}_i(c_{i-1})_{c_{i}}} \frac{\partial L(\boldy, \hat{\boldy}) } {\partial z_{c'}}  \\
-     &=& \sum_{c'_{1:i-1}, c'_{i+1:n}}  \frac{\partial L(\boldy, \hat{\boldy}) }{\partial z_{c'}}  \\
-    &=& \sum_{c'_{1:i-1}, c'_{i+1:n}}  p(\boldy = c'  | \boldx)
+    \frac{\partial L}{\partial \log \hat{y}_i(c'_{i-1})_{c'_{i}}} &=&
+    \sum_{d_{1:n}} \frac{\partial z_{d_{1:n}} }{\partial \log \hat{y}_i(c'_{i-2})_{c'_{i}}} \frac{\partial L } {\partial z_{d_{1:n}}}  \\
+     &=& \sum_{c'_{1:i-2}, c'_{i+1:n}}  \frac{\partial L }{\partial z_{c'_{1:n}}}  \\
+    &=& p(\boldy_{i-1} = c'_{i-1}, \boldy_{i} = c'_{i}  | \boldx) - \indicator(c'_{i-1} = c_{i-1} \land c'_{i} = c_i)
    \end{eqnarray*}
 
    \begin{itemize}
@@ -635,29 +641,59 @@
 
      \air 
 
-   \item Second term, probability of the goal sequence. $p(\boldy = c  | \boldx)$ 
+   \item Second term, indicator of whether edge is in gold.
    \end{itemize}
  \end{frame}
 
 
- \begin{frame}{Full Algorithm}
+ \begin{frame}{CRF Training Algorithm}
    \begin{itemize}
    \item Compute forward algorithm
-   \item Compute $Z$
-   \item Compute backward algorithm. 
-   \item Compute the edge marginals. 
-   \item Compute backprop gradients to each $\hat{\bold{y}(c_i)}$. 
+     \air
+   \item Compute partition
+     \air
+   \item Compute backward algorithm
+     \air
+   \item Compute the edge marginals
+     \air
+   \item Compute and backprop gradients to each $\log \hat{\bold{y}(c_i)}$. 
    \end{itemize}
 
  \end{frame}
+
+\begin{frame}{Label Bias Example with Sequence Scores}
+  \begin{tikzpicture}
+    \LatticeB
+    \draw[blue] (network-1-1.east) -- node[above,fill=white]{0.0}  (network-3-2.west);
+    \draw[blue] (network-3-2.east) -- node[above,fill=white]{2.0} (network-3-3.west);
+    \draw[blue] (network-3-3.east) -- node[above,fill=white]{1.0} (network-1-4.west);
+    \draw[blue] (network-1-4.east) -- node[above,fill=white]{1.0} (network-1-5.west);
+    \draw[red] (network-1-1.east) -- node[below,fill=white]{0.0}  (network-4-2.west);
+    \draw[red] (network-4-2.east) -- node[below,fill=white]{-100}  (network-4-3.west);
+    \draw[red] (network-4-3.east) -- node[below,fill=white]{2}  (network-1-4.west);
+    \draw[red] (network-1-4.east) --node[below,fill=white]{2}  (network-1-5.west);
+  \end{tikzpicture}
+  \begin{itemize}
+
+  \end{itemize}
+\end{frame}
+
+
 
 \begin{frame}{Model Choices}
   Discriminative, Markov Models
-  \begin{tabular}{l|ll}
-    Normalization & Local & Global \\ 
-    Linear & MEMM &  \alert<2>{CRF} \\ 
-    Non-Linear & NN-MM &  \alert<2>{NN-CRF} \\ 
-  \end{tabular}
+  \air 
+
+  \begin{center}
+    \begin{tabular}{llcc}
+      \toprule
+      Normalization && Local & Global \\ 
+      \midrule
+      Linear && MEMM &  CRF \\ 
+      Non-Linear && NN-MM &  NN-CRF \\ 
+      \bottomrule
+    \end{tabular}
+  \end{center}
 \end{frame}
 
 % \begin{frame}
@@ -668,7 +704,7 @@
    
 %  \end{frame}
 
- \section{Generative Models with Global Normalization}
+ % \section{Generative Models with Global Normalization}
 
  % \begin{frame}
    
