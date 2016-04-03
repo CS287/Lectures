@@ -1,0 +1,284 @@
+\documentclass{beamer}
+\usepackage{../common_slides}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{pdfpages}
+
+\usetikzlibrary{matrix}
+% \usepackage{enumitem}
+
+\title{Machine Translation 1}
+\date{}
+\author{CS 287}
+
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  
+\end{frame}
+
+\begin{frame}
+  
+\end{frame}
+
+\begin{frame}{Quiz: CRF}
+  If we have a conditional
+\end{frame}
+
+\begin{frame}{Answer}
+  
+\end{frame}
+
+\begin{frame}{Today's Lecture}
+  \begin{itemize}
+  \item History of Translation
+  \item Statistical Machine Translation 
+    \air 
+
+  \item Simplified Translation Models
+    \air
+ 
+  \item Search for Translation
+  \end{itemize}
+
+  Next Class: Neural Machine Translation
+\end{frame}
+
+\section{Translation History}
+
+\begin{frame}{Datasets for Machine Translation}
+  
+\end{frame}
+
+\begin{frame}{Hansard's Corpus}
+  
+\end{frame}
+
+\begin{frame}{Warren Weaver's View of Translation}
+ 
+\end{frame}
+
+\begin{frame}
+  Slapped the green witch.
+\end{frame}
+
+\begin{frame}{Shannon Noisy Channel Model}
+  
+\end{frame}
+
+\begin{frame}{Encoder-Decoder}
+  \begin{itemize}
+  \item Idea
+  \item Encoder
+  \item Decoder 
+  \end{itemize}
+\end{frame}
+
+\section{Noisy-Channel Model}
+
+\begin{frame}{Thought Experiment: One-to-One Ordered MT }
+  What if the two languages just involved word to word 
+  translation?
+
+  \begin{itemize}
+  \item $\boldx  = [ w^s_1\ w^s_2\ w^s_3\ldots w^s_n $] 
+  \item $\boldy =  [w^t_1\ w^t_2\ w^t_3\ldots w^t_n $] 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Noisy-Channel Model}
+  \[ p(\boldy | \boldx) \propto p(\boldy) p(\boldx | \boldy) \] 
+\end{frame}
+
+\begin{frame}{Translation}
+  \begin{enumerate}
+  \item Language Model ($p(\boldy)$) 
+  \item Translation Model ($p(\boldx | \boldy)$) 
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Example: Hidden Markov Model}
+\begin{center}  
+  \begin{tikzpicture}
+    \node (Ea) [obs] {$\boldx_1$}; 
+    \node (Xa) [latent,above =of Ea] {$\boldy_1$};
+
+    \node (Eb) [obs, right = of Ea ] {$\boldx_2$}; 
+    \node (Xb) [latent,above =of Eb] {$\boldy_2$}; 
+
+    \node (Ec) [obs, right = of Eb] {$\boldx_3$}; 
+    \node (Xc) [latent,above =of Ec] {$\boldy_3$}; 
+    \node (Xd) [right =of Xc] {$\ldots$}; 
+    \node (Xe) [latent,right =of Xd] {$\boldy_n$}; 
+    \node (Ee) [obs,below =of Xe] {$\boldx_n$}; 
+
+    \edge {Xa} {Xb} ; %
+    \edge {Xb} {Xc} ; %
+    \edge {Xa} {Ea} ; %
+    \edge {Xb} {Eb} ; %
+    \edge {Xc} {Ec} ; %
+    \edge {Xc} {Xd} ; %
+    \edge {Xd} {Xe} ; %
+    \edge {Xe} {Ee} ; %
+  \end{tikzpicture}
+\end{center}  
+\end{frame}
+
+
+\begin{frame}{Example: Hidden Markov Model}
+  \[ p(\boldy_i | \boldy_{i-1}) \] 
+\end{frame}
+
+\begin{frame}{Language Model}
+  \[ p(\boldy) = \prod_{i=1} p(w^{t}_i | w^{t}_{i-n+1}, \ldots, w^{t}_{i-1})  \] 
+\end{frame}
+
+
+\begin{frame}{Language Model}
+  \[ p(\boldy) = \prod_{i=1} p(w^{t}_i | w^{t}_{i-n+1}, \ldots, w^{t}_{i-1})  \] 
+\end{frame}
+
+
+\begin{frame}{How might you estimate this?}  
+  \[ p(\boldy) \]
+
+  \begin{itemize}
+  \item Language model. Standard forms of Markov model estimation
+  \item Could use n-gram model or NNLM 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Translation Model}
+  \[ p(\boldx | \boldy)  = \prod_{i=1}^n p(\boldx_i | \boldy_i )  \]
+
+
+  \[ p(\boldx_i | \boldy_i )\] 
+
+  Assume we have many examples of language. 
+  
+  Why estimate separate LM and TM?
+\end{frame}
+
+\begin{frame}{Conditional Random Field}
+  \[ \argmax_{w^t_{1:n}} f(\boldx, w^t_{1:n}) = \ \] 
+\end{frame}
+
+
+\section{True Translation}
+
+\begin{frame}{Thought Experiment 2: Out-of-Order}
+  Assume 1-to-1 still but allow any order. 
+\end{frame}
+
+
+
+% \begin{frame}
+%   Scores 
+%   $p(\boldy) p(\boldx | \boldy)  $ 
+% \end{frame}
+
+\begin{frame}{Latent Variable}
+  $\bolda$ maps each source word to a target word
+\end{frame}
+
+\begin{frame}{}
+  \[ p(\boldy | \boldx) = \sum_{\bolda} p(\boldy) p(\boldx, \bolda | \boldy)  \]  
+
+  For efficiency, max-over-alignment,
+
+  \[ \argmax_{\bolda, w^t_{1:n}} f(\boldx, w^t_{1:n}, \bolda)\]
+
+\end{frame}
+
+\begin{frame}{Example: Possible Alignment}
+\begin{center}  
+  \begin{tikzpicture}
+    \node (Ea) [obs] {$\boldx_1$}; 
+    \node (Xa) [latent,above =of Ea] {$\boldy_1$}; 
+
+    \node (Eb) [obs, right = of Ea ] {$\boldx_2$}; 
+    \node (Xb) [latent,above =of Eb] {$\boldy_2$}; 
+
+    \node (Ec) [obs, right = of Eb] {$\boldx_3$}; 
+    \node (Xc) [latent,above =of Ec] {$\boldy_3$}; 
+    \node (Xd) [right =of Xc] {$\ldots$}; 
+    \node (Xe) [latent,right =of Xd] {$\boldy_n$}; 
+    \node (Ee) [obs,below =of Xe] {$\boldx_n$}; 
+
+    \edge {Xa} {Xb} ; %
+    \edge {Xb} {Xc} ; %
+    \edge {Xa} {Eb} ; %
+    \edge {Xb} {Ec} ; %
+    \edge {Xc} {Ea} ; %
+    \edge {Xc} {Xd} ; %
+    \edge {Xd} {Xe} ; %
+    \edge {Xe} {Ee} ; %
+  \end{tikzpicture}
+\end{center}  
+\end{frame}
+
+
+
+\begin{frame}{Decoding Quiz}
+  \begin{itemize}
+  \item In monotonic case $O(|\mcC|^2)$, what is complexity?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Answer ()}
+  \begin{itemize}
+  \item Finding optimal translation is NP-Hard!
+    \air 
+  \item Reduction from TSP:
+    \begin{enumerate}
+    \item Each city becomes a source word with a single translation word.
+    \item Distance between cities is a bigram LM score $p(w^t_i | w^t_{i-1})$ between words.
+    \item A tour is a complete translation (each word used = each city visited)
+    \end{enumerate}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{How do you find answer?}
+  \[ f(\boldx, w^t_{1:n}, \bolda) = \sum_{i=1}^n \log \hat{y}(w_{i-1})_{w_i, a_i} \]  
+  with constraint that $a_i$ uses each word once.  
+
+  \begin{itemize}
+  \item 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bit-Set Beam Search}
+  [Describe on board] 
+\end{frame}
+
+
+\section{}
+
+\begin{frame}
+  \[ p(w^t | w^s) \] 
+  How do you estimate this score? 
+\end{frame}
+
+\begin{frame}{Compute Alignments}
+  
+\end{frame}
+
+\begin{frame}{GIZA++}
+  
+\end{frame}
+
+\begin{frame}{More Statistical Machine Translation}
+  \begin{itemize}
+  \item Handling Length Issues
+  \item Producing and Symmetrizing Alignments
+  \item Tuning Systems and MERT 
+  \item Rare and Unseen Words
+  \item Syntactic Translation
+  \end{itemize}
+\end{frame}
+
+\end{document}
