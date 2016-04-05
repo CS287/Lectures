@@ -49,7 +49,7 @@
    \item $\displaystyle \prod_{i=1}^n \hat{\boldy}(c_{i-1})_{c_i}$; easy to compute
      \air 
    \item $\displaystyle \sum_{c'_{1:n}} \prod_{i=1}^n \hat{\boldy}(c'_{i-1})_{c'_i}$; can use forward algorithm.
-   \end{itemize}j
+   \end{itemize}
 
    Softmax goes from $O(|\mcC|^n)$ to $O(|\mcC|^2)$.  
  \end{frame}
@@ -195,7 +195,7 @@ Membres de la Chambre des communes:
 \end{frame}
 
 \begin{frame}{Hansard's Corpus}
-  
+  \includegraphics{hansards}
 \end{frame}
 
 \begin{frame}{Statistical Machine Translation}
@@ -612,9 +612,9 @@ Membres de la Chambre des communes:
 
   With constraint that $c_i$ uses each word once.  
 
-  \begin{itemize}
-  \item 
-  \end{itemize}
+  % \begin{itemize}
+  % \item 
+  % \end{itemize}
 \end{frame}
 
 \begin{frame}{Bit-Set Beam Search}
@@ -624,11 +624,12 @@ Membres de la Chambre des communes:
 
 \section{Other Details}
 
-\begin{frame}{Training the Translation Model}
-  \[ p(w^t | w^s) \] 
-  How do you estimate this score? 
-\end{frame}
 
+\begin{frame}{Alignments}
+  \begin{center}
+    \includegraphics[width=6cm]{Alignment}
+  \end{center}
+\end{frame}
 
 \begin{frame}{MOSES}
   [Show Intro]
@@ -636,10 +637,16 @@ Membres de la Chambre des communes:
 
 \begin{frame}{More Statistical Machine Translation}
   \begin{itemize}
+    \item Training the models 
+      \pause
   \item Handling Length Issues
+      \pause
   \item Producing and Symmetrizing Alignments
+      \pause
   \item Tuning Systems and MERT 
+      \pause
   \item Rare and Unseen Words
+      \pause
   \item Syntactic Translation
   \end{itemize}
 \end{frame}
