@@ -141,76 +141,76 @@
 \end{frame}
 
 
-% \begin{frame}{Acceptor}
-%   \begin{center}
-%     \begin{tikzpicture}
-%       \matrix (network) [matrix of nodes, ampersand replacement=\&,
-%       column sep={1cm},
-%       row sep={1cm}] {
-%         \& \&   \\
-%         \& \&  \node{$\hat{\boldy}$}; \\
-%         \node[hid]{$\bolds^s_1$}; \& \node[hid]{$\bolds^s_2$}; \& \node[hid]{$\bolds^s_3$}; \\
-%         \node[obs]{$\boldx_1$}; \& \node[obs]{$\boldx_2$}; \& \node[obs]{$\boldx_3$};  \\
-%           \node[obs]{the}; \& \node[obs]{red}; \& \node[obs]{dog};  \\
-%       }; 
+\begin{frame}{Acceptor}
+  \begin{center}
+    \begin{tikzpicture}
+      \matrix (network) [matrix of nodes, ampersand replacement=\&,
+      column sep={1cm},
+      row sep={1cm}] {
+        \& \&   \\
+        \& \&  \node{$\hat{\boldy}$}; \\
+        \node[hid]{$\bolds^s_1$}; \& \node[hid]{$\bolds^s_2$}; \& \node[hid]{$\bolds^s_3$}; \\
+        \node[obs]{$\boldx_1$}; \& \node[obs]{$\boldx_2$}; \& \node[obs]{$\boldx_3$};  \\
+          \node[obs]{the}; \& \node[obs]{red}; \& \node[obs]{dog};  \\
+      }; 
 
 
-%       \draw[->] (network-5-1) -- (network-4-1); 
-%       \draw[->] (network-5-2) -- (network-4-2); 
-%       \draw[->] (network-5-3) -- (network-4-3);
+      \draw[->] (network-5-1) -- (network-4-1); 
+      \draw[->] (network-5-2) -- (network-4-2); 
+      \draw[->] (network-5-3) -- (network-4-3);
 
 
-%       \draw[->] (network-4-1) -- (network-3-1); 
-%       \draw[->] (network-4-2) -- (network-3-2); 
-%       \draw[->] (network-4-3) -- (network-3-3);
+      \draw[->] (network-4-1) -- (network-3-1); 
+      \draw[->] (network-4-2) -- (network-3-2); 
+      \draw[->] (network-4-3) -- (network-3-3);
 
 
-%       \draw[->] (network-3-1.east) -- (network-3-2.west); 
-%       \draw[->] (network-3-2.east) -- (network-3-3.west); 
-%       \draw[->] (network-3-3) -- (network-2-3); 
-%     \end{tikzpicture}
-%   \end{center}  
-% \end{frame}
-
-
-
-% \begin{frame}{Babbler}
-%   \begin{center}
-%     \begin{tikzpicture}
-%       \matrix (network) [matrix of nodes, ampersand replacement=\&,
-%       column sep={1cm},
-%       row sep={1cm}] {
-%         \& \& \& \node{the}; \& \node{red}; \& \node{dog}; \\
-%         \& \& \& \node[obs]{$\hat{\boldy}_1$}; \& \node[obs]{$\hat{\boldy}_2$}; \& \node[obs]{$\hat{\boldy}_3$}; \\
-%         \&  \&  \& \node[hid]{$\bolds^t_1$}; \& \node[hid]{$\bolds^t_2$}; \& \node[hid]{$\bolds^t_3$}; \\
-%          \&  \&   \&   \node[obs]{$\hat{\boldx}_1$}; \& \node[obs]{$\hat{\boldx}_2$}; \& \node[obs]{$\hat{\boldx}_3$}; \\
-%            \&  \&   \&  \node[obs]{$<$s$>$}; \&  \&  \\
-%       }; 
+      \draw[->] (network-3-1.east) -- (network-3-2.west); 
+      \draw[->] (network-3-2.east) -- (network-3-3.west); 
+      \draw[->] (network-3-3) -- (network-2-3); 
+    \end{tikzpicture}
+  \end{center}  
+\end{frame}
 
 
 
-%       \draw[->] (network-5-4) -- (network-4-4);
-%       \draw[->] (network-1-4) -- (network-4-5.west); 
-%       \draw[->] (network-1-5) -- (network-4-6.west); 
+\begin{frame}{Babbler}
+  \begin{center}
+    \begin{tikzpicture}
+      \matrix (network) [matrix of nodes, ampersand replacement=\&,
+      column sep={1cm},
+      row sep={1cm}] {
+        \& \& \& \node{the}; \& \node{red}; \& \node{dog}; \\
+        \& \& \& \node[obs]{$\hat{\boldy}_1$}; \& \node[obs]{$\hat{\boldy}_2$}; \& \node[obs]{$\hat{\boldy}_3$}; \\
+        \&  \&  \& \node[hid]{$\bolds^t_1$}; \& \node[hid]{$\bolds^t_2$}; \& \node[hid]{$\bolds^t_3$}; \\
+         \&  \&   \&   \node[obs]{$\hat{\boldx}_1$}; \& \node[obs]{$\hat{\boldx}_2$}; \& \node[obs]{$\hat{\boldx}_3$}; \\
+           \&  \&   \&  \node[obs]{$<$s$>$}; \&  \&  \\
+      }; 
 
-%       \draw[->] (network-3-4.east) -- (network-3-5.west); 
-%       \draw[->] (network-3-5.east) -- (network-3-6.west); 
 
-%       \draw[->] (network-2-4) -- (network-1-4); 
-%       \draw[->] (network-2-5) -- (network-1-5); 
-%       \draw[->] (network-2-6) -- (network-1-6);
 
-%       \draw[->] (network-4-4) -- (network-3-4); 
-%       \draw[->] (network-4-5) -- (network-3-5); 
-%       \draw[->] (network-4-6) -- (network-3-6);
+      \draw[->] (network-5-4) -- (network-4-4);
+      \draw[->] (network-1-4) -- (network-4-5.west); 
+      \draw[->] (network-1-5) -- (network-4-6.west); 
 
-%       \draw[->] (network-3-4) -- (network-2-4); 
-%       \draw[->] (network-3-5) -- (network-2-5); 
-%       \draw[->] (network-3-6) -- (network-2-6);
+      \draw[->] (network-3-4.east) -- (network-3-5.west); 
+      \draw[->] (network-3-5.east) -- (network-3-6.west); 
 
-%     \end{tikzpicture}
-%   \end{center}  
-% \end{frame}
+      \draw[->] (network-2-4) -- (network-1-4); 
+      \draw[->] (network-2-5) -- (network-1-5); 
+      \draw[->] (network-2-6) -- (network-1-6);
+
+      \draw[->] (network-4-4) -- (network-3-4); 
+      \draw[->] (network-4-5) -- (network-3-5); 
+      \draw[->] (network-4-6) -- (network-3-6);
+
+      \draw[->] (network-3-4) -- (network-2-4); 
+      \draw[->] (network-3-5) -- (network-2-5); 
+      \draw[->] (network-3-6) -- (network-2-6);
+
+    \end{tikzpicture}
+  \end{center}  
+\end{frame}
 
 
 \begin{frame}
@@ -223,7 +223,7 @@
         \& \& \& \node[obs]{$\hat{\boldy}_1$}; \& \node[obs]{$\hat{\boldy}_2$}; \& \node[obs]{$\hat{\boldy}_3$}; \\
         \node[hid]{$\bolds^s_1$}; \& \node[hid]{$\bolds^s_2$}; \& \node[hid]{$\bolds^s_3$}; \& \node[hid]{$\bolds^t_1$}; \& \node[hid]{$\bolds^t_2$}; \& \node[hid]{$\bolds^t_3$}; \\
         \node[obs]{$\boldx_1$}; \& \node[obs]{$\boldx_2$}; \& \node[obs]{$\boldx_3$};  \&   \node[obs]{$\hat{\boldx}_1$}; \& \node[obs]{$\hat{\boldx}_2$}; \& \node[obs]{$\hat{\boldx}_3$}; \\
-          \node[obs]{the}; \& \node[obs]{red}; \& \node[obs]{dog};  \&  \node[obs]{$<$s$>$}; \&  \&  \\
+        \node[obs]{the}; \& \node[obs]{red}; \& \node[obs]{dog};  \&  \node[obs]{$<$s$>$}; \&  \&  \\
       }; 
 
 
