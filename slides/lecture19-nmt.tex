@@ -17,8 +17,97 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Quiz: }
-  
+
+\begin{frame}{Review: Simple One-to-One Model}
+  \begin{enumerate}
+  \item Language Model; words depend on previous word
+    \[ p(\boldy) = \prod_{i=1}^n p(\boldy_i | \boldy_{i-1})  \] 
+    \air 
+
+  \item Translation Model; source word depends on current position
+    \[ p(\boldx | \boldy) = \prod_{i=1}^n p(\boldx_i | \boldx_{i-1})  \] 
+  \end{enumerate}
+
+  What model is this?
+\end{frame}
+
+\begin{frame}{Review: Alignment}
+  \begin{itemize}
+  \item $\bolda$; alignment mapping each target word to a source word
+  \item Assuming one-to-one
+  \end{itemize}
+
+
+  \begin{center}
+    \begin{tikzpicture}
+    \matrix(dict)[matrix of nodes, ampersand replacement=\&]{
+      Mary \& golpeo \& la \& bruja \& verde \\
+      ~\\
+      ~\\
+      Mary \& slapped \& the \& green \& witch  \\ };
+    \path[draw, <-] (dict-1-1) -> (dict-4-1);
+    \path[draw, <-] (dict-1-2) -> (dict-4-2);
+    \path[draw, <-] (dict-1-3) -> (dict-4-3);
+    \path[draw, <-] (dict-1-4) -> (dict-4-5);
+    \path[draw, <-] (dict-1-5) -> (dict-4-4);
+  \end{tikzpicture}
+  \end{center}
+  \begin{center}
+  \begin{tikzpicture}
+    \matrix(dict)[matrix of nodes, ampersand replacement=\&]{
+      \ \& Mary \& golpeo \& la \& bruja \& verde \\
+      Mary \& X \&  \&  \&  \&  \\
+      slapped \&  \& X \&  \&  \&  \\
+      the \&  \&  \&  X\&  \&  \\
+      green \&  \&  \&  \&  \& X \\
+      witch \&  \&  \&  \& X  \&  \\
+    };
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}{Review: Using Alignments}
+  \[ p(\boldy | \boldx) \propto \sum_{\bolda} p(\boldy) p(\bolda | \boldy) p(\boldx |  \bolda, \boldy)  \]  
+
+  With alignment,
+  \[ p(\boldx |  \bolda, \boldy)  = \prod_{i=1}^n p(\boldx_{a_i} | \boldy_i) \] 
+
+  \air 
+
+  Sum-over-alignment approximated with a max-over-alignment,
+
+  \[ \argmax_{j, w^t_{1:n}} \prod_{i=1}^n p(\boldx_{a_i} | \boldy_i=w^t_i) p(\boldy_i=w^t_i | \boldy_{i-1}=w^t_{i-1}) p(a_i = c_i | a_{i-1}=c_{i-1}, i)   \]  
+\end{frame}
+
+\begin{frame}{Quiz: CRF}
+  Note: Nothing in our definition of CRFs relied on $\boldy_i$ to align
+  with $\boldx_i$ (conditioned on full sequence). 
+
+  For this quiz, imagine we have an input sequence $\boldx$, and we want to 
+  find the optimal output sequence $\boldy$ but we do not fix $n < N$. For instance 
+  finding the best word segmentation of an unsegmented input $\boldx$. 
+
+  \begin{itemize}
+  \item How would you find \[ \argmax_{n, c_{1:n}} f(\boldx, c_{1,n}) ?\]
+
+  \item How would you train \[ f(\boldx, c_{1,n}; \theta) ?\] 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bit-Set Beam Search}
+  [Describe on board] 
+\end{frame}
+
+
+\begin{frame}{Today's Lecture}
+  \begin{itemize}
+  \item Sequence-to-Sequence Model
+    \air
+  \item Attention-Based Model
+    \air
+  \item Other Uses of Attention
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Neural Machine Translation}
@@ -35,7 +124,6 @@
 \begin{frame}{True Encoder-Decoder}
   Compute a single vector $\boldx$ representing 
   the source. 
-
   
   \begin{itemize}
   \item \[ p(w_i | w_1, \ldots, w_{i-1}, \boldx) = \hat{y}_{w_i}   \] 
