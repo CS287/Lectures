@@ -13,12 +13,22 @@
 
 \title{Question Answering/Semantic Parsing}
 \date{}
-\author{CS 287 \\ (Slides from Yoav Artzi)}
+\author{CS 287 \\ (Slides from Yoav Artzi, Cornell NY)}
 
 \begin{document}
 \begin{frame}
   \titlepage
 \end{frame}
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=19]{lecture19-nmt.pdf}
+}
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=32]{lecture19-nmt.pdf}
+}
 
 % \begin{frame}{Review:}
 %   \begin{center}
@@ -82,26 +92,62 @@
   sequential prediction problems using a seq2seq setup
   such as attention-based translation. How might you 
   handle the following problems: 
+  \air 
 
   \begin{enumerate}
   \item Segmentation (HW4)
+    \air 
+
   \item Rare Word Replacement (HW3)
+    \air 
+
   \item Part-of-Speech Tagging (HW2-HW5)
   \end{enumerate}
 \end{frame}
 
-\begin{frame}{Today's Lecture}
-  Question Answering 
+\begin{frame}{Semantics}
+  Branch of linguistic focused on meaning
+  \air 
+
   \begin{itemize}
-  \item Semantic Parsing: linguistic-model of questions and answers
+  \item Lexical Semantics
+    \begin{itemize}
+    \item Meaning of individual words
+    \item e.g. BoW models, word2vec
+    \end{itemize}
+    \air 
+
+  \item Compositional Semantics
+    \begin{itemize}
+    \item Meaning of utterances
+    \item Concerned with the relations of meaning   
+    \item Often expressed with logical relations
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Today's Lecture}
+  Survey of Question Answering 
+  \begin{itemize}
+  \item Semantic Parsing: Linguistic model of questions and answers
     \air
-  \item Knowledge Base and Dataset
+  \item Knowledge Bases and Datasets
     \air 
     
-  \item Watson and Jeopardy!
-  \end{itemize}
-  
+  \item IR-style approaches: Watson and Jeopardy!
+  \end{itemize}  
 \end{frame}
+
+
+\section{Lambda Calculus}
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=23-41]{artzitut.pdf}
+}
+
 
 {
 \setbeamercolor{background canvas}{bg=}
@@ -114,62 +160,56 @@
 }
 
 
-\section{Freebase/Wikidata}
+\section{Data and Problems}
 
-\begin{frame}
-  \begin{center}
-    \includegraphics[width=5cm]{freebase}
-  \end{center}
+
+
+\begin{frame}{Dataset: Geoquery}
+  \begin{itemize}
+  \item Maps natural language questions to lambda calculus.
+    \air 
+  \item Assume a database with numerical values as well (\texttt{population(TEXAS)})
+
+    \air
+  \item Queries contain rich nesting
+  \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \begin{center}
-    \includegraphics[width=\textwidth]{freebaseabe}
-  \end{center}
+\begin{frame}[fragile]
+\begin{verbatim}
+size(stateid(X), S) :-
+area(stateid(X), S).
+size(cityid(X,St), S) :-
+population(cityid(X,St), S).
+size(riverid(X), S) :-
+len(riverid(X),S).
+size(placeid(X), S) :-
+elevation(placeid(X),S).
+size(X,X) :-
+number(X).
+
+next_to(stateid(X),stateid(Y)) :-
+border(X,_,Ys),
+member(Y,Ys).
+\end{verbatim}
+
 \end{frame}
 
-\begin{frame}
-  \begin{center}
-    \includegraphics[width=\textwidth]{wikiabe}
-  \end{center}
+\begin{frame}{Quiz: Geoquery}
+  \begin{itemize}
+  \item What states border Texas?
+    \air 
+  \item What is the largest state?
+    \air 
+  \item What states border the state that borders  the most state?
+  \end{itemize}
+
+  (Syntactic Sugar: $\argmax(f, g)$ returns max of element of $g$ that satisfies 
+    predicate $f$.)
 \end{frame}
 
 
-\section{Semantic Parsing}
 
-\begin{frame}
-  
-\end{frame}
-
-{
-\setbeamercolor{background canvas}{bg=}
-\includepdf[pages=5-6]{artzitut.pdf}
-}
-
-
-{
-\setbeamercolor{background canvas}{bg=}
-\includepdf[pages=8-11]{artzitut.pdf}
-}
-
-
-{
-\setbeamercolor{background canvas}{bg=}
-\includepdf[pages=23-41]{artzitut.pdf}
-}
-
-{
-\setbeamercolor{background canvas}{bg=}
-\includepdf[pages=97-99]{artzitut.pdf}
-}
-
-{
-\setbeamercolor{background canvas}{bg=}
-\includepdf[pages=100-104]{artzitut.pdf}
-}
-
-
-\section{Data Sets}
 
 \begin{frame}{Geoquery (Zelle and Mooney, 1996)}
   \begin{center}
@@ -193,6 +233,25 @@
 
 
 \end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=5cm]{freebase}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=\textwidth]{freebaseabe}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=\textwidth]{wikiabe}
+  \end{center}
+\end{frame}
+
 
 \begin{frame}{WebQuestions}
   \begin{quote}
@@ -227,6 +286,42 @@
     \includegraphics[width=10cm]{webquestions}
   \end{center}
 \end{frame}
+
+
+\section{Semantic Parsing}
+
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=5-6]{artzitut.pdf}
+}
+
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=8-11]{artzitut.pdf}
+}
+
+
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=97-99]{artzitut.pdf}
+}
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=100-104]{artzitut.pdf}
+}
+
+
+
+{
+\setbeamercolor{background canvas}{bg=}
+\includepdf[pages=100-113]{artzitut.pdf}
+}
+
+
 
 \section{Jeopardy!}
 
